@@ -1,0 +1,111 @@
+Maré de Peruíbe é um sandbox marítimo brasileiro multiplayer onde pesca, exploração, sobrevivência, comércio, cooperação, pirataria, combate e mistério acontecem em um mundo persistente inspirado no litoral de São Paulo.
+
+A ideia central do jogo é simples: o mar é o verdadeiro protagonista. O oceano não é apenas um cenário. As ondas, o vento, as correntes, a maré, a profundidade, a chuva, a neblina e as tempestades influenciam diretamente tudo o que o jogador faz.
+
+O jogador começa no porto e precisa preparar seu barco, escolher equipamentos, combustível, comida e rota. Depois sai para o mar em busca de peixe, naufrágios, contratos, tesouros, informações ou lugares desconhecidos. Quanto mais longe ele vai, maiores são as recompensas, mas também maiores são os riscos.
+
+O jogo valoriza conhecimento mais do que simplesmente equipamentos caros. Um jogador que conhece uma determinada corrente, sabe interpretar o clima, conhece o horário de uma espécie ou sabe quando uma passagem fica aberta pela maré pode superar alguém com um barco muito melhor.
+
+A pesca é um dos principais sistemas. Os peixes possuem comportamento, habitat, horário, profundidade, alimentação, sazonalidade e população própria. A pesca excessiva pode diminuir os cardumes de uma região, alterar os preços e aumentar a fiscalização. Assim, as ações dos jogadores podem modificar o ecossistema do servidor.
+
+O mundo também possui uma economia dinâmica. Cada porto possui preços diferentes, e os valores mudam conforme oferta, demanda, eventos, clima e comportamento dos jogadores. O jogador pode trabalhar legalmente, transportar mercadorias, negociar, pescar, fazer contratos ou entrar no mundo do contrabando e da pirataria.
+
+O barco é muito mais do que um veículo. Ele é a casa e o legado do jogador. Pode ser personalizado, melhorado e equipado com motor, sonar, rádio, freezer, redes, cozinha e equipamentos de mergulho. Cada barco possui um histórico próprio, registrando viagens, tempestades, peixes capturados, naufrágios e acontecimentos importantes.
+
+E existe uma ideia fundamental: quando um barco afunda, sua história não desaparece. O naufrágio pode permanecer no mundo. Outro jogador pode encontrá-lo, mergulhar, recuperar sua carga e descobrir quem era o antigo dono. Dessa forma, até a derrota pode gerar conteúdo para outra pessoa.
+
+A exploração também não funciona como um jogo tradicional. Não existe um mapa cheio de marcadores dizendo exatamente para onde ir. O jogador recebe pistas, rumores, fotografias, relatos e informações. Ele precisa interpretar o mundo para descobrir lugares secretos, naufrágios, cavernas e fenômenos estranhos.
+
+O rádio VHF é um dos sistemas mais importantes do jogo. Ele conecta jogadores, pescadores, NPCs, missões, clima, emergências, operações navais e mistérios. Existem canais para emergência, pescadores, comunicação livre e operações militares. Porém, existe também o Canal 03.
+
+Entre duas e quatro da manhã, o Canal 03 pode transmitir uma voz feminina dizendo números, coordenadas, nomes ou palavras estranhas. O jogador pode gravar essas transmissões, comparar informações e tentar descobrir o significado delas.
+
+É aí que começa o mistério.
+
+Maré de Peruíbe possui elementos do folclore brasileiro, como Iara, Boto, Boitatá e os Encantados, além de histórias relacionadas à Pedra da Serpente, fenômenos estranhos, luzes no céu e acontecimentos na região.
+
+Mas existe uma regra: o jogo nunca explica completamente o sobrenatural.
+
+O jogador encontra evidências, mas nunca recebe uma resposta definitiva. Pode parecer uma entidade, um fenômeno natural, uma operação militar, uma tecnologia desconhecida ou simplesmente uma coincidência. A interpretação pertence ao jogador.
+
+A sanidade representa o quanto o jogador ainda confia naquilo que está vendo. Conforme ela diminui, começam pequenas anomalias, sons estranhos, interferências e acontecimentos que parecem impossíveis. Quando chega a zero, isso não precisa significar game over. O personagem pode se tornar um Encantado e continuar existindo no mundo como uma figura misteriosa que pode aparecer para outros jogadores.
+
+Essa é outra regra importante do jogo: a morte não deve apagar a história.
+
+Se você perder um barco, existe um naufrágio. Se fotografar uma criatura, existe uma prova. Se descobrir uma frequência, outros jogadores podem encontrá-la. Se morrer em uma tempestade, alguém pode ouvir sua história no porto. Suas ações permanecem no mundo.
+
+O multiplayer foi pensado para criar histórias espontâneas. Pequenas tripulações podem dividir funções entre timoneiro, sonarista, pescador, mergulhador, cozinheiro e mecânico. Cada pessoa deve ter algo importante para fazer.
+
+Os jogadores também podem formar alianças, trabalhar para facções, atuar para a Marinha, virar comerciantes, pescadores, exploradores, caçadores de recompensa, contrabandistas ou piratas.
+
+O sistema de reputação muda a maneira como o mundo trata o jogador. Pessoas podem confiar nele, oferecer informações, contratos e descontos. Ou podem fechar as portas, enviar patrulhas e colocar recompensas pela sua cabeça.
+
+O mundo possui regiões diferentes, começando por uma pequena área de Peruíbe e posteriormente expandindo para locais inspirados em Mongaguá, Itanhaém, Juréia, Guarujá, Santos, Queimada Grande e o mar aberto.
+
+Cada região deve ensinar uma nova maneira de jogar.
+
+A grande campanha se chama O Despertar da Serpente.
+
+Existe algo relacionado à Pedra da Serpente. Alguns acreditam que seja apenas uma formação natural. Outros acreditam que seja um antigo selo. Pescadores possuem relatos. O Pajé conhece histórias. Pesquisadores possuem documentos. A Marinha possui arquivos. Ufólogos possuem fotografias.
+
+Aos poucos, essas histórias começam a se conectar.
+
+O jogador precisa encontrar cinco fragmentos relacionados ao mistério. Cada descoberta responde uma pergunta, mas cria outras duas.
+
+No final da campanha, os jogadores podem influenciar o futuro do servidor. Eles podem escolher proteger o selo e criar uma temporada chamada Mar Manso, romper o selo e entrar em uma era de Mar Bravo, ou aceitar o desconhecido e abrir caminho para o Mar Aberto, com novas regiões, criaturas e mistérios.
+
+O objetivo é fazer com que cada servidor desenvolva sua própria história.
+
+Um servidor pode ficar conhecido como o lugar onde encontraram a Pedra. Outro pode ficar conhecido por uma grande batalha naval. Outro pelo primeiro Encantado. Outro pela descoberta de uma ilha desconhecida.
+
+O verdadeiro progresso do jogador não é apenas subir de nível.
+
+É aprender.
+
+Aprender onde pescar.
+
+Aprender quando sair.
+
+Aprender quando voltar.
+
+Aprender a reconhecer uma tempestade.
+
+Aprender uma rota.
+
+Conhecer uma tripulação.
+
+Ter um barco com história.
+
+Ter amigos.
+
+Ter inimigos.
+
+E ter histórias que ninguém acredita.
+
+Por isso, o jogo não deve terminar fazendo o jogador pensar que completou três missões.
+
+Ele deve desligar o jogo e pensar:
+
+"Você não vai acreditar no que aconteceu comigo hoje."
+
+Essa é a verdadeira proposta de Maré de Peruíbe.
+
+Não é um jogo sobre conquistar o mar.
+
+É um jogo sobre aprender a respeitá-lo.
+
+Entre a serra e o mar, o que a gente vê é o que está escondido.
+
+Pesque.
+
+Navegue.
+
+Explore.
+
+Sobreviva.
+
+Descubra.
+
+E se o rádio chamar...
+
+**não responda.**

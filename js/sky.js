@@ -5,7 +5,7 @@ import { CONFIG } from './config.js';
 import { seaUniforms } from './ocean/water-material.js';
 import { initClouds, updateClouds, getCloudCoverage } from './clouds.js';
 
-let sunLight, hemi, moonLight, boatLight;  // 🆕 boatLight adicionado
+let sunLight, hemi, moonLight, boatSpotLight, boatFillLight;
 let sunSprite, moonSprite, starGroup, starMat;
 const sunDir2 = new THREE.Vector3(), moonDir = new THREE.Vector3();
 const bgCol = new THREE.Color(), tmpC = new THREE.Color(), tmpC2 = new THREE.Color();
@@ -53,12 +53,18 @@ export function initSky() {
   moonLight = new THREE.DirectionalLight(0x8fa8ff, 0);
   state.scene.add(moonLight);
 
-  // 🆕 💡 LUZ LOCAL DO BARCO (ilumina APENAS o barco)
-  // PointLight branca sutil posicionada acima do barco
-  boatLight = new THREE.PointLight(0xffffff, 0.8, 12, 1.5);
-  boatLight.position.set(0, 3.5, 0);  // Acima do centro do barco
-  boatLight.castShadow = false;  // Não projeta sombras no mar
-  state.scene.add(boatLight);
+  // 💡 SPOTLIGHT FOCADO APENAS NO BARCO
+  boatSpotLight = new THREE.SpotLight(0xffffff, 3.5, 15, Math.PI / 6, 0.5, 1);
+  boatSpotLight.position.set(0, 8, 0);
+  boatSpotLight.castShadow = false;
+  state.scene.add(boatSpotLight);
+  state.scene.add(boatSpotLight.target);
+  boatSpotLight.target.position.set(0, 0, 0);
+
+  boatFillLight = new THREE.PointLight(0xffffff, 1.8, 6, 2);
+  boatFillLight.position.set(0, 2, 0);
+  boatFillLight.castShadow = false;
+  state.scene.add(boatFillLight);
 
   const glowTex = radialTex([
     [0, 'rgba(255,255,255,1)'], [0.25, 'rgba(255,255,255,.6)'], [1, 'rgba(255,255,255,0)']
@@ -160,7 +166,10 @@ export function updateSky(cbLights) {
   sunLight.color.copy(tmpC2);
   
   const cloudCoverage = getCloudCoverage();
-  const cloudShadowFactor = 1.0 - cloudCoverage * 0.55;
+  
+  // ☁️ OFUSCAMENTO MAIS SUAVE DAS NUVENS (era 0.55, agora 0.35)
+  // As nuvens ainda bloqueiam o sol, mas com menos intensidade
+  const cloudShadowFactor = 1.0 - cloudCoverage * 0.35;
   
   sunLight.intensity = state.dayF * 2.4 * cloudShadowFactor + state.flash * 1.4;
   sunLight.position.copy(state.boatRoot.position).addScaledVector(sunDir2, 140);
@@ -173,20 +182,19 @@ export function updateSky(cbLights) {
   const hemiCloudFactor = 1.0 - cloudCoverage * 0.3;
   hemi.intensity = (0.3 + state.dayF * 0.9 + state.flash * 1.2) * hemiCloudFactor;
 
-  // 🆕 💡 ATUALIZAR LUZ LOCAL DO BARCO
-  // Segue o barco e ajusta intensidade baseado no horário
-  if (boatLight) {
-    boatLight.position.copy(state.boatRoot.position);
-    boatLight.position.y += 3.5;  // Sempre 3.5 unidades acima do barco
-    
-    // Intensidade varia: mais forte de dia (1.0), mais fraca à noite (0.3)
-    // para não parecer artificial
-    const boatLightIntensity = THREE.MathUtils.lerp(0.3, 1.0, state.dayF);
-    boatLight.intensity = boatLightIntensity * 0.9;  // 0.9 é o brilho base
-    
-    // Cor levemente quente durante o dia, mais neutra à noite
-    const boatLightColor = new THREE.Color(0xfff8f0).lerp(new THREE.Color(0xe8e8ff), state.nightF * 0.3);
-    boatLight.color.copy(boatLightColor);
+  if (boatSpotLight) {
+    boatSpotLight.position.copy(state.boatRoot.position);
+    boatSpotLight.position.y += 8;
+    boatSpotLight.target.position.copy(state.boatRoot.position);
+    boatSpotLight.intensity = 3.5;
+    boatSpotLight.color.setHex(0xffffff);
+  }
+
+  if (boatFillLight) {
+    boatFillLight.position.copy(state.boatRoot.position);
+    boatFillLight.position.y += 2;
+    boatFillLight.intensity = 1.8;
+    boatFillLight.color.setHex(0xffffff);
   }
 
   skyColorAtHour(hour, bgCol);
@@ -208,7 +216,13 @@ export function updateSky(cbLights) {
   const sunSpriteFade = THREE.MathUtils.clamp(
     THREE.MathUtils.smoothstep(trueSunElev, -0.5, 0.15), 0, 1
   );
-  sunSprite.material.opacity = sunSpriteFade * 0.80 * cloudShadowFactor;
+  
+  // ☀️ OPACIDADE DO SOL: ainda é afetada pelas nuvens, mas com limite mínimo
+  // Assim o sol nunca desaparece completamente mesmo com nuvens densas
+  const sunOpacityWithClouds = sunSpriteFade * 1.0 * cloudShadowFactor;
+  const sunMinOpacity = sunSpriteFade * 0.55; // mínimo de 55% visível
+  sunSprite.material.opacity = Math.max(sunOpacityWithClouds, sunMinOpacity);
+  
   if (CONFIG.weather.mode === 'STORM') sunSprite.material.opacity *= 0.35;
   if (CONFIG.weather.mode === 'FOG') sunSprite.material.opacity *= 0.3;
 
@@ -234,6 +248,7 @@ export function updateSky(cbLights) {
   seaUniforms.uScat.value.copy(SCAT_N).lerp(SCAT_D, state.dayF);
   seaUniforms.uSunDir.value.copy(sunDir2);
   
+  // Reflexo do sol no mar também menos afetado pelas nuvens
   seaUniforms.uSunCol.value.copy(tmpC2)
     .multiplyScalar(sunSpriteFade * Math.max(effectiveSunElev, 0) * 0.85 * cloudShadowFactor);
   seaUniforms.uSkyRef.value.copy(bgCol);

@@ -8,23 +8,12 @@ const _motorWorld = new THREE.Vector3();
 export function updateHullPhysics(dt, currentBoat, callbacks = {}) {
   const keys = state.keys;
   
-  // ==========================================================
-  // 🎯 SISTEMA DE ACELERADOR COM INÉRCIA DO MOTOR 🎯
-  // ==========================================================
-  // Similar ao sistema de giro:
-  // - throttleResponseSpeed: quão rápido o acelerador vai de 0 a 100%
-  // - engineInertia: tempo de resposta do motor (turbo lag, inércia)
-  // - throttleDecaySpeed: quão rápido o acelerador volta (pode ser diferente)
-  // ==========================================================
-  
   const throttleInc = (keys.KeyW || keys.ArrowUp) ? 1 : 0;
   const throttleDec = (keys.KeyS || keys.ArrowDown) ? 1 : 0;
   
-  // VELOCIDADE DE RESPOSTA DO ACELERADOR (configurável por barco)
   const throttleResponseSpeed = currentBoat.throttleResponseSpeed || 0.8;
   const throttleDecaySpeed = currentBoat.throttleDecaySpeed || 1.2;
   
-  // Atualiza o target baseado no input
   if (throttleInc) {
     state.throttleTarget = Math.min(1, state.throttleTarget + dt * throttleResponseSpeed);
   }
@@ -32,20 +21,14 @@ export function updateHullPhysics(dt, currentBoat, callbacks = {}) {
     state.throttleTarget = Math.max(0, state.throttleTarget - dt * throttleDecaySpeed);
   }
   
-  // INÉRCIA DO MOTOR (engineInertia controla o tempo de resposta)
-  // Motor diesel grande (Trawler): inércia alta = turbo lag, resposta lenta
-  // Motor pequeno (Pilot): inércia baixa = resposta rápida
-  const engineInertia = currentBoat.engineInertia || 2.0; // segundos
+  const engineInertia = currentBoat.engineInertia || 2.0;
   const engineResponseRate = 1.0 / engineInertia;
-  
-  // Lerp suave baseado na inércia do motor
   const lerpFactor = 1 - Math.exp(-dt * engineResponseRate * 3.0);
   state.throttle += (state.throttleTarget - state.throttle) * lerpFactor;
   
   const throttleUI = document.getElementById('throttle-fill');
   if (throttleUI) throttleUI.style.height = (state.throttle * 100) + '%';
 
-  // --- SUBMERSÃO DO MOTOR ---
   const motorLocal = currentBoat.motorPos || new THREE.Vector3(0, -0.7, -4.2);
   b2lFull(motorLocal.x, motorLocal.y, motorLocal.z, _motorWorld);
   const motorSub = waveHAt(_motorWorld.x, _motorWorld.z) - _motorWorld.y;
@@ -64,9 +47,6 @@ export function updateHullPhysics(dt, currentBoat, callbacks = {}) {
   state.prevMotorSub = motorSub;
   if (state.reentryCooldown > 0) state.reentryCooldown -= dt;
 
-  // ==========================================================
-  // FÍSICA DE TRANSLAÇÃO
-  // ==========================================================
   const boatMass = currentBoat.mass || 2500;
   const gravity = 9.81;
   
@@ -74,9 +54,7 @@ export function updateHullPhysics(dt, currentBoat, callbacks = {}) {
   const bz = state.boatRoot.position.z;
 
   const grad = waveGradient(bx, bz);
-  const forceSlopeX = -gravity * grad.dx * boatMass;
-  const forceSlopeZ = -gravity * grad.dz * boatMass;
-
+  
   const fwdX = Math.sin(state.heading);
   const fwdZ = Math.cos(state.heading);
   const rightX = Math.cos(state.heading);
@@ -106,13 +84,38 @@ export function updateHullPhysics(dt, currentBoat, callbacks = {}) {
   const forceMotorX = motorForce * fwdX;
   const forceMotorZ = motorForce * fwdZ;
 
-  const wVel = waveWaterVelocity(bx, bz, state.wavePhase);
-  const wavePushFactor = 120; 
-  const forceWavePushX = wVel.vx * wavePushFactor;
-  const forceWavePushZ = wVel.vz * wavePushFactor;
+  // ==========================================================
+  // 🎯 SISTEMA DE DOMINÂNCIA DO MOTOR SOBRE AS ONDAS 🎯
+  // ==========================================================
+  // Quando o motor está forte, ele "vence" a gravidade da onda
+  // evitando que o barco deslize para trás ao subir ondas
+  
+  // Quanto o motor domina (0 = fraco, 1 = potência total)
+  const motorDominance = effectiveThrottle * effectiveThrottle;
+  
+  // Reduz o efeito da inclinação da onda quando motor forte
+  // Com throttle=0: 100% do efeito | throttle=1: apenas 25% do efeito
+  const slopeEffectiveness = 1.0 - motorDominance * 0.75;
+  
+  const forceSlopeX = -gravity * grad.dx * boatMass * slopeEffectiveness;
+  const forceSlopeZ = -gravity * grad.dz * boatMass * slopeEffectiveness;
+  
+  // 🎯 CLIMBING BOOST: força extra ao subir ondas com motor
+  // Detecta se o barco está "subindo" a onda (gradiente contra direção)
+  const climbDot = -(grad.dx * fwdX + grad.dz * fwdZ); // positivo = subindo
+  const climbBoostStrength = Math.max(0, climbDot) * motorDominance * maxThrust * 0.6;
+  const forceClimbX = climbBoostStrength * fwdX;
+  const forceClimbZ = climbBoostStrength * fwdZ;
 
-  const totalFx = forceSlopeX + forceDragX + forceMotorX + forceWavePushX;
-  const totalFz = forceSlopeZ + forceDragZ + forceMotorZ + forceWavePushZ;
+  // 🎯 WAVE PUSH REDUZIDO (era 120, agora 40)
+  // Onda empurra menos o barco - motor domina
+  const wVel = waveWaterVelocity(bx, bz, state.wavePhase);
+  const wavePushFactor = 40;
+  const forceWavePushX = wVel.vx * wavePushFactor * (1.0 - motorDominance * 0.7);
+  const forceWavePushZ = wVel.vz * wavePushFactor * (1.0 - motorDominance * 0.7);
+
+  const totalFx = forceSlopeX + forceDragX + forceMotorX + forceClimbX + forceWavePushX;
+  const totalFz = forceSlopeZ + forceDragZ + forceMotorZ + forceClimbZ + forceWavePushZ;
 
   const ax = totalFx / boatMass;
   const az = totalFz / boatMass;
@@ -130,9 +133,6 @@ export function updateHullPhysics(dt, currentBoat, callbacks = {}) {
   state.speed = THREE.MathUtils.clamp(state.speed, -maxSpd * 0.3, maxSpd);
   state.sideSpeed = THREE.MathUtils.clamp(state.sideSpeed, -2, 2);
 
-  // ==========================================================
-  // CONTROLE DO LEME
-  // ==========================================================
   const rudIn = (keys.KeyA || keys.ArrowLeft) ? 1 : (keys.KeyD || keys.ArrowRight) ? -1 : 0;
   
   if (canTurn && rudIn !== 0) {
@@ -141,9 +141,6 @@ export function updateHullPhysics(dt, currentBoat, callbacks = {}) {
     state.rudder = THREE.MathUtils.clamp(state.rudder, -1, 1);
   }
 
-  // ==========================================================
-  // 🎯 SISTEMA DE RAIO DE GIRO
-  // ==========================================================
   const yawMOI = currentBoat.yawMOI || 18000;
   const minTurnRadius = currentBoat.minTurnRadius || 12;
   const spdN = Math.min(1, Math.abs(state.speed) / 8);
@@ -177,14 +174,12 @@ export function updateHullPhysics(dt, currentBoat, callbacks = {}) {
 
   state.heading += state.physics.yawVel * dt;
 
-  // --- MOVIMENTO GLOBAL ---
   const moveX = (Math.sin(state.heading) * state.speed + Math.cos(state.heading) * state.sideSpeed) * dt;
   const moveZ = (Math.cos(state.heading) * state.speed - Math.sin(state.heading) * state.sideSpeed) * dt;
   
   state.boatRoot.position.x += moveX;
   state.boatRoot.position.z += moveZ;
 
-  // --- DERIVA DO VENTO ---
   const wp = state.windMul * 0.14 * dt;
   state.boatRoot.position.x += Math.cos(CONFIG.wind.direction) * wp;
   state.boatRoot.position.z += Math.sin(CONFIG.wind.direction) * wp;

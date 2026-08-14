@@ -20,7 +20,6 @@ const BOW_V_PTS = 25;
 export let bowWaveGeo, bowWaveMat, bowWaveMesh;
 
 export function initWake() {
-  // Trail wake
   wakeGeo = new THREE.BufferGeometry();
   {
     const pos = new Float32Array(MAX_TRAIL * 2 * 3);
@@ -52,7 +51,6 @@ export function initWake() {
   wakeMesh.frustumCulled = false; wakeMesh.renderOrder = 2;
   state.scene.add(wakeMesh);
 
-  // Main wake
   mainWakeGeo = new THREE.BufferGeometry();
   {
     const pos = new Float32Array(MAIN_WAKE_MAX * 2 * 3);
@@ -84,7 +82,6 @@ export function initWake() {
   mainWakeMesh.frustumCulled = false; mainWakeMesh.renderOrder = 2;
   state.scene.add(mainWakeMesh);
 
-  // Hull wakes
   function createHullWakeGeometry(geo) {
     const pos = new Float32Array(HULL_WAKE_MAX * 2 * 3);
     const aU = new Float32Array(HULL_WAKE_MAX * 2);
@@ -120,7 +117,6 @@ export function initWake() {
   state.scene.add(hullWakeMeshL);
   state.scene.add(hullWakeMeshR);
 
-  // Bow wave
   bowWaveGeo = new THREE.BufferGeometry();
   {
     const pos = new Float32Array(BOW_V_PTS * 2 * 3);
@@ -183,7 +179,12 @@ export function updateMainWake() {
     const p = wakeHistory[i];
     const age = state.simTime - p.t;
     const lifeRatio = age / HISTORY_LIFE;
-    const w = 0.3 + age * 0.22 + p.speed * 0.12;
+    
+    // ✅ VELOCIDADE SÓ AFETA A TAXA DE ABERTURA (age * speed), NÃO A LARGURA FIXA
+    // Largura começa em 0.05 (colada) e cresce, nunca passa de 2.5 (metade do barco)
+    const speedInfluence = age * p.speed * 0.04; // só soma quando age > 0
+    const w = Math.min(2.5, 0.05 + age * 0.20 + age * age * 0.03 + speedInfluence);
+    
     const perpX = Math.cos(p.heading);
     const perpZ = -Math.sin(p.heading);
     const y = waveHAt(p.x, p.z) + 0.05;
@@ -215,14 +216,25 @@ export function updateHullWake() {
   const aVL = hullWakeGeoL.attributes.aV.array;
   const aVR = hullWakeGeoR.attributes.aV.array;
   const n = Math.min(wakeHistory.length, HULL_WAKE_MAX);
-  const hullOffsetBase = 1.3;
+  
+  // ✅ OFFSET BASE: dentro do casco (o casco tem ~1.3 de cada lado do centro)
+  // 0.60 = começa bem dentro, nunca ultrapassa o casco
+  const hullOffsetBase = 0.9;
+  
   for (let i = 0; i < n; i++) {
     const p = wakeHistory[i];
     const age = state.simTime - p.t;
     const lifeRatio = age / HISTORY_LIFE;
-    const lateralSpread = age * 0.35 + p.speed * 0.18;
-    const currentOffset = hullOffsetBase + lateralSpread;
-    const w = 0.15 + age * 0.18 + p.speed * 0.06;
+    
+    // ✅ VELOCIDADE SÓ MULTIPLICA O AGE (só acelera abertura com o tempo)
+    // Nunca adiciona largura fixa! Offset máximo 6.0 unidades do centro
+    const speedInfluence = age * p.speed * 0.03;
+    const lateralSpread = Math.min(5.5, age * 0.22 + age * age * 0.04 + speedInfluence);
+    const currentOffset = Math.min(6.0, hullOffsetBase + lateralSpread);
+    
+    // Faixa começa fininha (0.08) e cresce, máximo 5.5
+    const w = Math.min(5.5, 0.08 + age * 0.15 + age * age * 0.2 + age * p.speed * 0.01);
+    
     const fwdX = Math.sin(p.heading), fwdZ = Math.cos(p.heading);
     const rightX = fwdZ, rightZ = -fwdX;
     const y = waveHAt(p.x, p.z) + 0.04;
@@ -294,7 +306,10 @@ export function updateTrailWake() {
     const len = Math.hypot(tx, tz) || 1; tx /= len; tz /= len;
     const nx = -tz, nz = tx;
     const age = state.simTime - p.t;
-    const w = 0.45 + age * 0.42 + spdN * 0.5;
+    
+    // ✅ Começa em 0.03 e cresce, máximo 3.0 (não exagera)
+    const w = Math.min(3.0, 0.03 + age * 0.22 + age * age * 0.04 + age * spdN * 0.3);
+    
     const y = waveHAt(p.x, p.z) + 0.03;
     pos[i * 6]     = p.x + nx * w; pos[i * 6 + 1] = y; pos[i * 6 + 2] = p.z + nz * w;
     pos[i * 6 + 3] = p.x - nx * w; pos[i * 6 + 4] = y; pos[i * 6 + 5] = p.z - nz * w;
@@ -316,7 +331,6 @@ export function updateParticleBuffers(dt) {
   const bright = THREE.MathUtils.clamp(
     0.35 + 0.65 * state.dayF + (state.deckOn ? 0.3 : 0), 0, 1.3
   );
-  // foam
   {
     let wI = 0;
     const fp = foam.geo.attributes.position.array;
@@ -341,7 +355,6 @@ export function updateParticleBuffers(dt) {
     foam.geo.attributes.aSize.needsUpdate = true;
     foam.geo.attributes.aAlpha.needsUpdate = true;
   }
-  // spray
   {
     let sI = 0;
     const sp = spray.geo.attributes.position.array;
@@ -369,6 +382,5 @@ export function updateParticleBuffers(dt) {
   wakeMat2.uniforms.uBright.value = bright;
 }
 
-// Import local
 import { foam } from './foam.js';
 import { spray } from './spray.js';

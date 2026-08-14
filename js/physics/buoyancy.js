@@ -10,7 +10,12 @@ export function applyBuoyancy(dt, currentBoat, emitSprayFn, playSplashFn) {
   const P = (lx, lz) => waveHAt(bx + lx * c2 + lz * s2, bz - lx * s2 + lz * c2);
 
   const waterAccel = waveAccelVertical(bx, bz, state.wavePhase);
-  const weightMod = 1.0 - state.waveNormalBoost * (waterAccel / 9.81);
+  
+  // 🎯 weightMod mais suave (evita oscilações bruscas)
+  // Antes: 1.0 - waveNormalBoost * (waterAccel / 9.81)
+  // Agora: clampado entre 0.6 e 1.2 para evitar efeitos extremos
+  const rawWeightMod = 1.0 - state.waveNormalBoost * (waterAccel / 9.81);
+  const weightMod = THREE.MathUtils.clamp(rawWeightMod, 0.6, 1.2);
 
   const boatMass = currentBoat.mass || 2500;
   const massFactor = boatMass / 2500;
@@ -27,15 +32,12 @@ export function applyBuoyancy(dt, currentBoat, emitSprayFn, playSplashFn) {
   const targetY = hPivot + Math.sin(targetPitch) * (-zPivot) + 0.06 - draftOffset;
   const targetRoll = Math.atan2(hStbd - hPort, 2.4) - state.rudder * (Math.min(1, Math.abs(state.speed) / 6)) * 0.13;
 
-  // ==========================================================
-  // 1. HEAVE - Rigidez Adaptativa (Sem Quicadinhas)
-  // ==========================================================
-  // Rigidez MENOR, mas com amortecimento crítico.
-  // Isso evita micro-vibrações mantendo o barco colado na água.
-  const baseK = 45000 * weightMod; // Rigidez base reduzida
-  const springK = baseK * massFactor; // Barcos pesados têm mola mais forte
-  const criticalDamping = 2 * Math.sqrt(springK * boatMass); // Amortecimento crítico
-  const dampingC = criticalDamping * 0.85; // Levemente sub-amortecido para fluidez
+  // 🎯 HEAVE: Rigidez e amortecimento mais suaves (menos "mola")
+  // Rigidez base reduzida para evitar micro-quicadinhas
+  const baseK = 35000 * weightMod;
+  const springK = baseK * massFactor;
+  const criticalDamping = 2 * Math.sqrt(springK * boatMass);
+  const dampingC = criticalDamping * 0.92; // Amortecimento mais próximo do crítico
   
   const yError = targetY - state.physics.y;
   const yForce = yError * springK - state.physics.vy * dampingC;
@@ -73,27 +75,22 @@ export function applyBuoyancy(dt, currentBoat, emitSprayFn, playSplashFn) {
     if (impact > 2.5 && playSplashFn) playSplashFn(impact * 0.35 * sprayScale);
   }
 
-  // ==========================================================
-  // 2. PITCH - Suave e Pesado
-  // ==========================================================
-  const pitchK = 60000 * massFactor;
-  const pitchD = 2 * Math.sqrt(pitchK * pitchMOI) * 0.8; // Amortecimento crítico
+  // 🎯 PITCH: Amortecimento mais forte (menos oscilação)
+  const pitchK = 55000 * massFactor;
+  const pitchD = 2 * Math.sqrt(pitchK * pitchMOI) * 0.9;
   const pitchError = targetPitch - state.physics.pitch;
   const pitchTorque = pitchError * pitchK - state.physics.pitchVel * pitchD;
   state.physics.pitchVel += (pitchTorque / pitchMOI) * dt;
   state.physics.pitch += state.physics.pitchVel * dt;
 
-  // ==========================================================
-  // 3. ROLL - Suave e Pesado
-  // ==========================================================
-  const rollK = 60000 * massFactor;
-  const rollD = 2 * Math.sqrt(rollK * rollMOI) * 0.8;
+  // 🎯 ROLL: Amortecimento mais forte (menos oscilação)
+  const rollK = 55000 * massFactor;
+  const rollD = 2 * Math.sqrt(rollK * rollMOI) * 0.9;
   const rollError = targetRoll - state.physics.roll;
   const rollTorque = rollError * rollK - state.physics.rollVel * rollD;
   state.physics.rollVel += (rollTorque / rollMOI) * dt;
   state.physics.roll += state.physics.rollVel * dt;
 
-  // ROTAÇÃO VISUAL
   state.tilt.rotation.x = -state.physics.pitch;
   state.tilt.rotation.z = state.physics.roll;
 
