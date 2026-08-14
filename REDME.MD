@@ -4,6 +4,8 @@ ocean-simulator/
 │   └── styles.css
 ├── js/
 │   ├── main.js                 # Entry point, loop principal
+│   ├── camera-helper.js             
+│   ├── clouds.js             
 │   ├── config.js               # Constantes globais e estado
 │   ├── state.js                # Estado compartilhado da simulação
 │   ├── scene.js                # Scene, renderer, câmera, composer

@@ -11,6 +11,7 @@ export const WAVES = [
   { deg:  25, len:  7.0, a: 0.08 },
   { deg: -60, len:  4.5, a: 0.05 }
 ];
+
 WAVES.forEach(v => {
   const r = v.deg * Math.PI / 180;
   v.dx = Math.cos(r); v.dz = Math.sin(r);
@@ -18,6 +19,7 @@ WAVES.forEach(v => {
   v.w = Math.sqrt(9.81 * v.k) * 0.85;
   v.Q = Math.min(1.1, 0.8 / (v.k * v.a * WAVES.length));
 });
+
 export const AMP_SUM = WAVES.reduce((s, v) => s + v.a, 0);
 
 export function waveHAt(x, z) {
@@ -44,17 +46,13 @@ export function waveNormalAt(x, z) {
   return new THREE.Vector3(h0 - waveHAt(x + e, z), e, h0 - waveHAt(x, z + e)).normalize();
 }
 
-// ========== NOVAS FUNÇÕES PARA FÍSICA ==========
-
-// Gradiente da superfície (inclinação) no ponto (x,z)
 export function waveGradient(x, z) {
-  const delta = 0.5;
+  const delta = 0.5; // Distância para calcular a inclinação da ladeira
   const hx = waveHAt(x + delta, z) - waveHAt(x - delta, z);
   const hz = waveHAt(x, z + delta) - waveHAt(x, z - delta);
   return { dx: hx / (2 * delta), dz: hz / (2 * delta) };
 }
 
-// Velocidade horizontal da água (corrente) na superfície
 export function waveWaterVelocity(x, z, phase) {
   let vx = 0, vz = 0;
   for (const v of WAVES) {
@@ -68,20 +66,18 @@ export function waveWaterVelocity(x, z, phase) {
   return { vx, vz };
 }
 
-// GLSL builders (já existentes)
-export function glslLOD() {
-  return WAVES.map((v, i) =>
-    `m${i}=1.0-smoothstep(${(v.len * 12).toFixed(1)},${(v.len * 24).toFixed(1)},dL);`
-  ).join('\n');
+export function waveAccelVertical(x, z, phase) {
+  let acc = 0;
+  for (const v of WAVES) {
+    const theta = v.k * (v.dx * x + v.dz * z) - v.w * phase;
+    const sinT = Math.sin(theta);
+    const amp = v.a * state.waveHMul;
+    acc += -amp * v.w * v.w * sinT;
+  }
+  return acc;
 }
+
+export function glslLOD() { return WAVES.map((v, i) => `m${i}=1.0-smoothstep(${(v.len * 12).toFixed(1)},${(v.len * 24).toFixed(1)},dL);`).join('\n'); }
 export const M_DECL = 'float ' + WAVES.map((_, i) => 'm' + i).join(',') + ';';
-export function glslH() {
-  return WAVES.map((v, i) =>
-    `ph=${v.k.toFixed(4)}*dot(vec2(${v.dx.toFixed(4)},${v.dz.toFixed(4)}),p)-${v.w.toFixed(4)}*uPhase;h+=${v.a.toFixed(4)}*m${i}*sin(ph);`
-  ).join('\n');
-}
-export function glslC() {
-  return WAVES.map((v, i) =>
-    `ph=${v.k.toFixed(4)}*dot(vec2(${v.dx.toFixed(4)},${v.dz.toFixed(4)}),p)-${v.w.toFixed(4)}*uPhase;c+=vec2(${v.dx.toFixed(4)},${v.dz.toFixed(4)})*${(v.a * v.Q).toFixed(4)}*m${i}*cos(ph);`
-  ).join('\n');
-}
+export function glslH() { return WAVES.map((v, i) => `ph=${v.k.toFixed(4)}*dot(vec2(${v.dx.toFixed(4)},${v.dz.toFixed(4)}),p)-${v.w.toFixed(4)}*uPhase;h+=${v.a.toFixed(4)}*m${i}*sin(ph);`).join('\n'); }
+export function glslC() { return WAVES.map((v, i) => `ph=${v.k.toFixed(4)}*dot(vec2(${v.dx.toFixed(4)},${v.dz.toFixed(4)}),p)-${v.w.toFixed(4)}*uPhase;c+=vec2(${v.dx.toFixed(4)},${v.dz.toFixed(4)})*${(v.a * v.Q).toFixed(4)}*m${i}*cos(ph);`).join('\n'); }

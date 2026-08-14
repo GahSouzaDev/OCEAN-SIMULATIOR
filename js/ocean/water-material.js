@@ -9,14 +9,14 @@ export const seaUniforms = {
   uBoatLocal: { value: new THREE.Vector2() },
   uSunDir: { value: new THREE.Vector3(0, 1, 0) },
   uSunCol: { value: new THREE.Color(0xffffff) },
-  uDeep: { value: new THREE.Color(0x00183a) },
-  uScat: { value: new THREE.Color(0x0a52a8) },
-  uSkyRef: { value: new THREE.Color(0x8fc3ea) },
+  uDeep: { value: new THREE.Color(0x002850) },
+  uScat: { value: new THREE.Color(0x1870c8) },
+  uSkyRef: { value: new THREE.Color(0xb0d8f0) },
   uFoamAmt: { value: 1 }, uTime2: { value: 0 },
   uDeck: { value: new THREE.Vector3() }, uDeckI: { value: 0 },
   uFogColor: { value: new THREE.Color() },
   uFogNear: { value: 120 }, uFogFar: { value: 1600 },
-  uSpecularPower: { value: 256 }, uSpecularIntensity: { value: 0.025 },
+  uSpecularPower: { value: 200 }, uSpecularIntensity: { value: 0.035 },
   uBoatPos: { value: new THREE.Vector3() },
   uBoatHeading: { value: 0 }, uBoatSpeedN: { value: 0 }
 };
@@ -64,15 +64,28 @@ ${glslLOD()}
         n=normalize(n+vec3((dn-0.5)*0.32,0.0,(dn-0.5)*0.32));
         vec3 V=normalize(cameraPosition-vW);
         float fres=pow(1.0-max(dot(n,V),0.0),3.0);
-        float shadowFactor = smoothstep(-0.4, 0.6, vCrest);
-        float ao = mix(0.55, 1.05, shadowFactor);
-        vec3 col = mix(uDeep * 0.95, uScat * 1.15, clamp(fres * 0.85 + 0.12, 0., 1.));
-        col = mix(col, uSkyRef, fres * 0.45);
+        
+        float shadowFactor = smoothstep(-0.2, 0.7, vCrest);
+        float ao = mix(0.82, 1.1, shadowFactor);
+        
+        vec3 col = mix(uDeep, uScat * 1.15, clamp(fres * 0.85 + 0.18, 0., 1.));
+        col = mix(col, uSkyRef, fres * 0.5);
+        
         vec3 R = reflect(-uSunDir, n);
         float diff = max(dot(n, uSunDir), 0.0);
-        col += uSunCol * diff * 0.55;
+        
+        // 🔆 DIFFUSE DO SOL REDUZIDO (1.15 → 0.85)
+        col += uSunCol * diff * 0.85;
+        
         col += uSunCol * pow(max(dot(R, V), 0.0), uSpecularPower) * uSpecularIntensity;
-        col += uSunCol * pow(max(dot(R, V), 0.0), 18.0) * 0.006;
+        
+        // 🔆 SPECULAR BROAD REDUZIDO (0.022 → 0.014)
+        col += uSunCol * pow(max(dot(R, V), 0.0), 14.0) * 0.014;
+        
+        // 🔆 SUBSURFACE SCATTERING REDUZIDO (0.3 → 0.2)
+        float subsurface = pow(max(dot(V, -uSunDir), 0.0), 3.0) * max(diff, 0.0);
+        col += vec3(0.2, 0.7, 0.9) * subsurface * 0.2;
+        
         col *= ao;
         float f = smoothstep(0.55, 0.98, vCrest) * uFoamAmt;
         f *= 0.55 + 0.45 * vnoise(vW.xz * 0.9 + uTime2 * 0.25);
@@ -82,7 +95,7 @@ ${glslLOD()}
         float lateral = abs(-toBoat.x * boatFwdZ + toBoat.z * boatFwdX);
         float hullProx = (1.0 - smoothstep(1.0, 3.8, lateral)) * (1.0 - smoothstep(1.5, 4.5, abs(along)));
         f = clamp(f + hullProx * 0.35, 0., 1.);
-        col = mix(col, vec3(0.93, 0.97, 1.0), clamp(f, 0., 1.));
+        col = mix(col, vec3(0.92, 0.95, 0.98), clamp(f, 0., 1.));
         if(uDeckI > 0.001){
           vec3 Ld = uDeck - vW; float d2 = dot(Ld, Ld); vec3 Ln = normalize(Ld);
           float att = uDeckI * 8.0 / (1.0 + 0.35 * d2);

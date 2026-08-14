@@ -9,10 +9,9 @@ export const state = {
   windMul: 1,
   foamMul: 1,
 
-  // Física do barco
   heading: 0,
   speed: 0,
-  sideSpeed: 0,          // ← NOVO: deriva lateral
+  sideSpeed: 0,
   rudder: 0,
   throttle: 0,
   throttleTarget: 0,
@@ -20,24 +19,24 @@ export const state = {
   prevAirborne: false,
   prevMotorSub: 1.0,
   motorInWater: true,
-  physics: { y: 0, vy: 0, pitch: 0, pitchVel: 0, roll: 0, rollVel: 0 },
+  
+  // Adicionamos yawVel para a inércia de curva!
+  physics: { 
+    y: 0, vy: 0, 
+    pitch: 0, pitchVel: 0, 
+    roll: 0, rollVel: 0,
+    yawVel: 0 
+  },
 
-  // Dia/noite
-  dayF: 1,
-  nightF: 0,
-  flash: 0,
-
-  // UI
+  dayF: 1, nightF: 0, flash: 0,
   deckOn: false,
 
-  // Câmera
   camMode: 1,
   orbitYaw: Math.PI,
   orbitPitch: 0.38,
   orbitDist: 13,
   chaseDist: 10,
 
-  // Input
   keys: {},
   dragging: false,
   lastMX: 0,
@@ -45,30 +44,20 @@ export const state = {
   mouseDown2: false,
   rudderDragging: false,
 
-  // Audio
   audioOn: true,
   reentryCooldown: 0,
 
-  // ========== NOVAS CONSTANTES DE FÍSICA ==========
-  waveDragCoeff: 0.08,    // intensidade do arrasto da corrente
-  slopeGravity: 9.8,      // aceleração da gravidade (padrão 9.8)
-  slopeFactor: 0.6,       // quanto da gravidade é transferida para inclinação
+  waveDragCoeff: 25.0,          
+  waveDragQuadratic: 8.0,       
+  slopeGravity: 9.81,
+  slopeFactor: 1.0,             
+  waveNormalBoost: 0.3,
 
-  // Referências Three.js
-  scene: null,
-  camera: null,
-  renderer: null,
-  composer: null,
-  bloomPass: null,
-  fxaaPass: null,
-  boatRoot: null,
-  tilt: null,
-  sea: null,
-  sky: null,
-  clock: null
+  scene: null, camera: null, renderer: null, composer: null,
+  bloomPass: null, fxaaPass: null, boatRoot: null, tilt: null,
+  sea: null, sky: null, clock: null
 };
 
-// Helpers de conversão barco->mundo
 export function b2l(lx, ly, lz, out) {
   const c = Math.cos(state.heading), s = Math.sin(state.heading);
   out.set(

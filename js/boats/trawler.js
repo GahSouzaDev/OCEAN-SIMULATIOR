@@ -2,25 +2,18 @@ import * as THREE from 'three';
 import { MATS, makeHelpers, hullShape, ringGeo, applySheer, sheer, jit } from './boat-base.js';
 
 export function buildTrawler() {
+  // ... (Todo o seu código de modelagem 3D permanece EXATAMENTE IGUAL)
+  // ... (Copie desde 'const T = new THREE.Group();' até 'T.traverse(...)')
   const T = new THREE.Group();
   const { add, box, cyl, rope } = makeHelpers(T, MATS.mRope);
   const DECK_Y = 0.60;
   let g;
 
-  g = new THREE.ExtrudeGeometry(hullShape(0.99), {
-    depth: 0.55, bevelEnabled: true, bevelThickness: 0.06,
-    bevelSize: 0.06, bevelSegments: 2, curveSegments: 14
-  });
+  g = new THREE.ExtrudeGeometry(hullShape(0.99), { depth: 0.55, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06, bevelSegments: 2, curveSegments: 14 });
   g.rotateX(Math.PI / 2); add(g, MATS.mHull, 0, 0.16, 0);
-
-  g = new THREE.ExtrudeGeometry(hullShape(1.015), {
-    depth: 0.34, bevelEnabled: false, curveSegments: 14
-  });
+  g = new THREE.ExtrudeGeometry(hullShape(1.015), { depth: 0.34, bevelEnabled: false, curveSegments: 14 });
   g.rotateX(Math.PI / 2); add(g, MATS.mHull2, jit(0.02), 0.24, jit(0.05), 0, jit(0.004));
-
-  g = new THREE.ExtrudeGeometry(hullShape(1.03), {
-    depth: 0.40, bevelEnabled: false, curveSegments: 14
-  });
+  g = new THREE.ExtrudeGeometry(hullShape(1.03), { depth: 0.40, bevelEnabled: false, curveSegments: 14 });
   g.rotateX(Math.PI / 2); add(g, MATS.mHull, 0, DECK_Y + 0.02, 0, 0, jit(0.004));
 
   box(0.16, 0.22, 7.4, MATS.mDark, 0, -0.42, -0.1);
@@ -28,9 +21,7 @@ export function buildTrawler() {
   box(0.05, 0.20, 0.70, MATS.mWood, 1.30, 0.35, -1.1, 0, jit(0.1), jit(0.06));
   box(0.05, 0.16, 0.55, MATS.mDark, -1.28, 0.28, 0.7, 0, jit(0.1), jit(0.08));
   box(0.05, 0.18, 0.60, MATS.mWood, -1.24, 0.42, -2.4, 0, jit(0.1), jit(0.05));
-  g = new THREE.ExtrudeGeometry(hullShape(0.93), {
-    depth: 0.07, bevelEnabled: false, curveSegments: 12
-  });
+  g = new THREE.ExtrudeGeometry(hullShape(0.93), { depth: 0.07, bevelEnabled: false, curveSegments: 12 });
   g.rotateX(Math.PI / 2); add(g, MATS.mDeck, 0, DECK_Y, 0);
   for (let i = 0; i < 7; i++)
     box(0.025, 0.02, 5.0, MATS.mDark,
@@ -58,12 +49,10 @@ export function buildTrawler() {
   cyl(0.03, 0.03, 0.42, MATS.mMetal, 0, DECK_Y + 1.22, 1.55);
   const bulbMat = new THREE.MeshBasicMaterial({ color: 0x3a3a32 });
   add(new THREE.SphereGeometry(0.11, 12, 10), bulbMat, 0, DECK_Y + 1.47, 1.55);
-
   const deckLight = new THREE.PointLight(0xffc382, 0, 30, 1.5);
   deckLight.position.set(0, DECK_Y + 2.4, 1.55); deckLight.visible = false; T.add(deckLight);
   const boatLight = new THREE.PointLight(0xffd4a0, 0, 15, 2);
   boatLight.position.set(0, DECK_Y + 1.2, 0); boatLight.visible = false; T.add(boatLight);
-
   cyl(0.05, 0.07, 2.4, MATS.mDark, 0, DECK_Y + 1.15, 2.35, 8, 0.06);
   cyl(0.035, 0.035, 1.5, MATS.mDark, 0, DECK_Y + 1.95, 2.35, 6, 0, 0, Math.PI / 2);
   cyl(0.04, 0.05, 2.6, MATS.mWood, 0, DECK_Y + 1.85, 1.3, 6, 1.15);
@@ -73,9 +62,7 @@ export function buildTrawler() {
   rope(new THREE.Vector3(0, DECK_Y + 1.32, 0.12), new THREE.Vector3(0, DECK_Y + 0.92, 0.10));
   add(new THREE.TorusGeometry(0.06, 0.018, 6, 10), MATS.mMetal, 0, DECK_Y + 0.85, 0.10, Math.PI / 2);
 
-  function sideX(z) {
-    return 1.30 - Math.max(0, z - 1.0) * 0.14 - Math.max(0, -z - 2.0) * 0.05;
-  }
+  function sideX(z) { return 1.30 - Math.max(0, z - 1.0) * 0.14 - Math.max(0, -z - 2.0) * 0.05; }
   for (const s of [-1, 1]) {
     let prev = null;
     for (let i = 0; i < 6; i++) {
@@ -111,7 +98,6 @@ export function buildTrawler() {
   cyl(0.025, 0.025, 3.1, MATS.mWood, 0.88, DECK_Y + 0.12, -0.5, 6, Math.PI / 2 + jit(0.04), 0, jit(0.08));
   cyl(0.012, 0.012, 0.16, MATS.mMetal, 0.86, DECK_Y + 0.62, 0.35, 5, Math.PI / 2);
   add(new THREE.TorusGeometry(0.05, 0.014, 5, 8), MATS.mMetal, 0.88, DECK_Y + 0.55, 0.35);
-
   function buoy(x, z, mat) {
     const y = DECK_Y + 0.32 + jit(0.05);
     add(new THREE.SphereGeometry(0.15, 8, 6), mat, x, y, z);
@@ -124,7 +110,6 @@ export function buildTrawler() {
   add(new THREE.TorusGeometry(0.28, 0.09, 8, 12), MATS.mMetal, 1.34, DECK_Y + 0.20, 0.9, 0, Math.PI / 2);
   rope(new THREE.Vector3(1.34, DECK_Y + 0.48, 0.9),
        new THREE.Vector3(1.28, DECK_Y + 0.62 + sheer(0.9), 0.9), MATS.mRope, 0.012);
-
   function navPost(x, z, mat, lightCol) {
     cyl(0.022, 0.022, 0.5, MATS.mDark, x, DECK_Y + 0.28, z, 6);
     add(new THREE.SphereGeometry(0.075, 10, 8), mat, x, DECK_Y + 0.56, z);
@@ -137,7 +122,6 @@ export function buildTrawler() {
   add(new THREE.SphereGeometry(0.06, 10, 8), MATS.navWhtMat, 0, DECK_Y + 0.5, -3.9);
   const navStern = new THREE.PointLight(0xfff2cc, 0, 4, 2);
   navStern.position.set(0, DECK_Y + 0.52, -3.9); T.add(navStern);
-
   const keel = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.8, 6.5), MATS.mKeel);
   keel.position.set(0, -0.6, -0.3); T.add(keel);
   const motorBlock = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.5, 0.8), MATS.mDark);
@@ -148,12 +132,38 @@ export function buildTrawler() {
 
   T.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
 
+  // ===== O GIGANTE DOS MARES =====
   return {
+    name: 'trawler',
+    mass: 7500,
+    pitchMOI: 45000,
+    rollMOI: 12000,
+    yawMOI: 80000,
+    
+    // 🎯 SISTEMA DE RAIO DE GIRO
+    minTurnRadius: 15,
+    radiusGrowth: 2.0,
+    turnResponse: 2.5,
+    waterDragRot: 0.25,
+    
+    // BARRA DO LEME
+    rudderSpeed: 1.2,
+    
+    // 🎯 SISTEMA DE ACELERADOR (Motor Diesel Pesado)
+    throttleResponseSpeed: 0.6,    // LENTO pra acelerar (motor diesel grande)
+    throttleDecaySpeed: 0.9,       // Um pouco mais rápido pra desacelerar
+    engineInertia: 3.5,            // Turbo lag alto, motor demora pra responder
+    
+    maxThrust: 12000,
+    dragLinear: 35,
+    dragQuad: 10,
+    frictionLat: 5.5,
+    
     group: T, deckLight, boatLight, bulbMat,
     navPort, navStbd, navStern,
     deckPos: new THREE.Vector3(0, DECK_Y + 2.4, 1.55),
     propeller: propTrawler,
     motorPos: new THREE.Vector3(0, -0.7, -4.2),
-    maxSpeed: 8
+    maxSpeed: 15
   };
 }

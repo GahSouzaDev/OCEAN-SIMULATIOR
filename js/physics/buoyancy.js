@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { state, b2l } from '../state.js';
-import { waveHAt, waveHeightEnvelope, waveSprayFactor } from '../ocean/waves.js';
+import { waveHAt, waveHeightEnvelope, waveSprayFactor, waveAccelVertical } from '../ocean/waves.js';
 
 const _bowL = new THREE.Vector3();
 
@@ -8,6 +8,15 @@ export function applyBuoyancy(dt, currentBoat, emitSprayFn, playSplashFn) {
   const bx = state.boatRoot.position.x, bz = state.boatRoot.position.z;
   const c2 = Math.cos(state.heading), s2 = Math.sin(state.heading);
   const P = (lx, lz) => waveHAt(bx + lx * c2 + lz * s2, bz - lx * s2 + lz * c2);
+
+  const waterAccel = waveAccelVertical(bx, bz, state.wavePhase);
+  const weightMod = 1.0 - state.waveNormalBoost * (waterAccel / 9.81);
+
+  const boatMass = currentBoat.mass || 2500;
+  const massFactor = boatMass / 2500;
+  
+  const pitchMOI = currentBoat.pitchMOI || (4000 * massFactor);
+  const rollMOI  = currentBoat.rollMOI  || (1200 * massFactor);
 
   const zPivot = -0.88;
   const hPivot = P(0, zPivot), hBow = P(0, 3.2), hStern = P(0, -3.6);
@@ -18,10 +27,21 @@ export function applyBuoyancy(dt, currentBoat, emitSprayFn, playSplashFn) {
   const targetY = hPivot + Math.sin(targetPitch) * (-zPivot) + 0.06 - draftOffset;
   const targetRoll = Math.atan2(hStbd - hPort, 2.4) - state.rudder * (Math.min(1, Math.abs(state.speed) / 6)) * 0.13;
 
-  const springK = 12, dampingC = 4.5;
+  // ==========================================================
+  // 1. HEAVE - Rigidez Adaptativa (Sem Quicadinhas)
+  // ==========================================================
+  // Rigidez MENOR, mas com amortecimento crítico.
+  // Isso evita micro-vibrações mantendo o barco colado na água.
+  const baseK = 45000 * weightMod; // Rigidez base reduzida
+  const springK = baseK * massFactor; // Barcos pesados têm mola mais forte
+  const criticalDamping = 2 * Math.sqrt(springK * boatMass); // Amortecimento crítico
+  const dampingC = criticalDamping * 0.85; // Levemente sub-amortecido para fluidez
+  
   const yError = targetY - state.physics.y;
   const yForce = yError * springK - state.physics.vy * dampingC;
-  state.physics.vy += yForce * dt;
+  const yAccel = yForce / boatMass;
+  
+  state.physics.vy += yAccel * dt;
   state.physics.y += state.physics.vy * dt;
 
   const sternSub = waveHAt(bx - s2 * (-3.6), bz - c2 * (-3.6)) - (state.physics.y - 0.5);
@@ -33,7 +53,9 @@ export function applyBuoyancy(dt, currentBoat, emitSprayFn, playSplashFn) {
 
   if (state.physics.y < targetY - 0.3 && state.physics.vy < -2) {
     const impact = Math.abs(state.physics.vy);
-    state.physics.vy += impact * 0.4;
+    const slammingForce = impact * 3500;
+    state.physics.vy -= (slammingForce / boatMass) * dt * 2;
+    
     b2l(0, 0.5, 3.9, _bowL);
     const waveLocalH = waveHeightEnvelope(_bowL.x, _bowL.z);
     const sprayScale = waveSprayFactor(waveLocalH);
@@ -51,19 +73,31 @@ export function applyBuoyancy(dt, currentBoat, emitSprayFn, playSplashFn) {
     if (impact > 2.5 && playSplashFn) playSplashFn(impact * 0.35 * sprayScale);
   }
 
-  const pitchK = 8, pitchD = 3.2;
+  // ==========================================================
+  // 2. PITCH - Suave e Pesado
+  // ==========================================================
+  const pitchK = 60000 * massFactor;
+  const pitchD = 2 * Math.sqrt(pitchK * pitchMOI) * 0.8; // Amortecimento crítico
   const pitchError = targetPitch - state.physics.pitch;
-  state.physics.pitchVel += (pitchError * pitchK - state.physics.pitchVel * pitchD) * dt;
+  const pitchTorque = pitchError * pitchK - state.physics.pitchVel * pitchD;
+  state.physics.pitchVel += (pitchTorque / pitchMOI) * dt;
   state.physics.pitch += state.physics.pitchVel * dt;
 
-  const rollK = 8, rollD = 3.2;
+  // ==========================================================
+  // 3. ROLL - Suave e Pesado
+  // ==========================================================
+  const rollK = 60000 * massFactor;
+  const rollD = 2 * Math.sqrt(rollK * rollMOI) * 0.8;
   const rollError = targetRoll - state.physics.roll;
-  state.physics.rollVel += (rollError * rollK - state.physics.rollVel * rollD) * dt;
+  const rollTorque = rollError * rollK - state.physics.rollVel * rollD;
+  state.physics.rollVel += (rollTorque / rollMOI) * dt;
   state.physics.roll += state.physics.rollVel * dt;
+
+  // ROTAÇÃO VISUAL
+  state.tilt.rotation.x = -state.physics.pitch;
+  state.tilt.rotation.z = state.physics.roll;
 
   state.boatRoot.position.y = state.physics.y;
   state.boatRoot.rotation.y = state.heading;
-  state.tilt.rotation.x = -state.physics.pitch;
-  state.tilt.rotation.z = state.physics.roll;
   state.boatRoot.updateMatrixWorld(true);
 }

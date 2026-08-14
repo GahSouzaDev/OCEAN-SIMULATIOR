@@ -16,18 +16,22 @@ export function initScene() {
   state.renderer.shadowMap.enabled = true;
   state.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   state.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  state.renderer.toneMappingExposure = 1.05;
+  
+  // 🔆 EXPOSIÇÃO REDUZIDA (1.45 → 1.15) - Evita estouro geral
+  state.renderer.toneMappingExposure = 1.15;
 
   state.scene = new THREE.Scene();
-  state.scene.fog = new THREE.Fog(0x1a1210, 120, 1600);
+  state.scene.fog = new THREE.Fog(0x7a9bb8, 120, 1600);
 
   state.camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 15000);
   state.camera.position.set(-14, 5, 10);
 
   state.composer = new EffectComposer(state.renderer);
   state.composer.addPass(new RenderPass(state.scene, state.camera));
+  
+  // 💡 BLOOM MAIS SUAVE - Evita glow excessivo
   state.bloomPass = new UnrealBloomPass(
-    new THREE.Vector2(innerWidth, innerHeight), 0.12, 0.4, 0.88
+    new THREE.Vector2(innerWidth, innerHeight), 0.25, 0.4, 0.88
   );
   state.composer.addPass(state.bloomPass);
   state.fxaaPass = new ShaderPass(FXAAShader);

@@ -3,20 +3,21 @@ import { Sky } from 'three/addons/objects/Sky.js';
 import { state } from './state.js';
 import { CONFIG } from './config.js';
 import { seaUniforms } from './ocean/water-material.js';
+import { initClouds, updateClouds, getCloudCoverage } from './clouds.js';
 
-let sunLight, hemi, moonLight;
+let sunLight, hemi, moonLight, boatLight;  // 🆕 boatLight adicionado
 let sunSprite, moonSprite, starGroup, starMat;
 const sunDir2 = new THREE.Vector3(), moonDir = new THREE.Vector3();
 const bgCol = new THREE.Color(), tmpC = new THREE.Color(), tmpC2 = new THREE.Color();
 
 const NIGHT_C = new THREE.Color(0x0a0618);
-const DAWN_C  = new THREE.Color(0xffc896);
-const NOON_C  = new THREE.Color(0x8ec5e8);
-const DUSK_C  = new THREE.Color(0xff6a28);
+const DAWN_C  = new THREE.Color(0xffd8a0);
+const NOON_C  = new THREE.Color(0xa0d0e8);
+const DUSK_C  = new THREE.Color(0xff8040);
 const DEEP_N  = new THREE.Color(0x000820);
-const DEEP_D  = new THREE.Color(0x001a40);
+const DEEP_D  = new THREE.Color(0x002850);
 const SCAT_N  = new THREE.Color(0x03205a);
-const SCAT_D  = new THREE.Color(0x0a52a8);
+const SCAT_D  = new THREE.Color(0x1870c8);
 
 function radialTex(stops) {
   const c = document.createElement('canvas'); c.width = c.height = 128;
@@ -32,10 +33,12 @@ export function initSky() {
   state.scene.add(sky);
   state.sky = sky;
   const su = sky.material.uniforms;
-  su['turbidity'].value = 6; su['rayleigh'].value = 2.0;
-  su['mieCoefficient'].value = 0.006; su['mieDirectionalG'].value = 0.85;
+  su['turbidity'].value = 4;
+  su['rayleigh'].value = 2.0;
+  su['mieCoefficient'].value = 0.006; 
+  su['mieDirectionalG'].value = 0.85;
 
-  sunLight = new THREE.DirectionalLight(0xfff0d0, 2.6);
+  sunLight = new THREE.DirectionalLight(0xfff0d0, 2.4);
   sunLight.castShadow = true;
   sunLight.shadow.mapSize.set(2048, 2048);
   sunLight.shadow.camera.left = -30; sunLight.shadow.camera.right = 30;
@@ -44,11 +47,18 @@ export function initSky() {
   sunLight.shadow.bias = -0.0005;
   state.scene.add(sunLight); state.scene.add(sunLight.target);
 
-  hemi = new THREE.HemisphereLight(0xbfd9ff, 0x1a1812, 0.95);
+  hemi = new THREE.HemisphereLight(0xe0f0ff, 0x4a4838, 0.9);
   state.scene.add(hemi);
 
   moonLight = new THREE.DirectionalLight(0x8fa8ff, 0);
   state.scene.add(moonLight);
+
+  // 🆕 💡 LUZ LOCAL DO BARCO (ilumina APENAS o barco)
+  // PointLight branca sutil posicionada acima do barco
+  boatLight = new THREE.PointLight(0xffffff, 0.8, 12, 1.5);
+  boatLight.position.set(0, 3.5, 0);  // Acima do centro do barco
+  boatLight.castShadow = false;  // Não projeta sombras no mar
+  state.scene.add(boatLight);
 
   const glowTex = radialTex([
     [0, 'rgba(255,255,255,1)'], [0.25, 'rgba(255,255,255,.6)'], [1, 'rgba(255,255,255,0)']
@@ -83,6 +93,7 @@ export function initSky() {
   }
   state.scene.add(starGroup);
 
+  initClouds();
   return { sunLight, hemi, moonLight };
 }
 
@@ -98,6 +109,7 @@ function skyColorAtHour(hour, out) {
     else out.copy(DUSK_C).lerp(NIGHT_C, (t - 0.5) * 2);
   } else out.copy(NIGHT_C);
 }
+
 function sunColorAtHour(hour, out) {
   hour = ((hour % 24) + 24) % 24;
   const noonWhite = new THREE.Color(0xfff8e8);
@@ -111,6 +123,7 @@ function sunColorAtHour(hour, out) {
     out.copy(warmAmber).multiplyScalar(1.0 - t);
   }
 }
+
 function warmthAtHour(hour) {
   hour = ((hour % 24) + 24) % 24;
   if (hour < 5 || hour > 20) return 0.0;
@@ -135,24 +148,51 @@ export function updateSky(cbLights) {
   const hz = Math.cos(elev);
   sunDir2.set(Math.cos(az) * hz, Math.sin(elev), -0.4 * hz).normalize();
   const trueSunElev = Math.sin((hour - 6) / 12 * Math.PI);
-  state.dayF = THREE.MathUtils.clamp((trueSunElev + 0.06) / 0.28, 0, 1);
+  
+  const PLATEAU_ELEV = 0.608;
+  const effectiveSunElev = trueSunElev >= 0 ? Math.min(trueSunElev, PLATEAU_ELEV) : trueSunElev;
+  
+  state.dayF = THREE.MathUtils.clamp((effectiveSunElev + 0.12) / 0.35, 0, 1);
   state.nightF = 1 - state.dayF;
   const warmth = warmthAtHour(hour);
 
   sunColorAtHour(hour, tmpC2);
   sunLight.color.copy(tmpC2);
-  sunLight.intensity = state.dayF * 2.6 + state.flash * 1.4;
+  
+  const cloudCoverage = getCloudCoverage();
+  const cloudShadowFactor = 1.0 - cloudCoverage * 0.55;
+  
+  sunLight.intensity = state.dayF * 2.4 * cloudShadowFactor + state.flash * 1.4;
   sunLight.position.copy(state.boatRoot.position).addScaledVector(sunDir2, 140);
   sunLight.target.position.copy(state.boatRoot.position);
+  
   moonDir.set(-sunDir2.x, Math.max(0.35, -sunDir2.y * 0.7 + 0.3), -sunDir2.z).normalize();
   moonLight.position.copy(state.boatRoot.position).addScaledVector(moonDir, 100);
-  moonLight.intensity = state.nightF * 0.28;
-  hemi.intensity = 0.35 + state.dayF * 0.85 + state.flash * 1.2;
+  moonLight.intensity = state.nightF * 0.55;
+  
+  const hemiCloudFactor = 1.0 - cloudCoverage * 0.3;
+  hemi.intensity = (0.3 + state.dayF * 0.9 + state.flash * 1.2) * hemiCloudFactor;
+
+  // 🆕 💡 ATUALIZAR LUZ LOCAL DO BARCO
+  // Segue o barco e ajusta intensidade baseado no horário
+  if (boatLight) {
+    boatLight.position.copy(state.boatRoot.position);
+    boatLight.position.y += 3.5;  // Sempre 3.5 unidades acima do barco
+    
+    // Intensidade varia: mais forte de dia (1.0), mais fraca à noite (0.3)
+    // para não parecer artificial
+    const boatLightIntensity = THREE.MathUtils.lerp(0.3, 1.0, state.dayF);
+    boatLight.intensity = boatLightIntensity * 0.9;  // 0.9 é o brilho base
+    
+    // Cor levemente quente durante o dia, mais neutra à noite
+    const boatLightColor = new THREE.Color(0xfff8f0).lerp(new THREE.Color(0xe8e8ff), state.nightF * 0.3);
+    boatLight.color.copy(boatLightColor);
+  }
 
   skyColorAtHour(hour, bgCol);
-  if (CONFIG.weather.mode === 'STORM') bgCol.multiplyScalar(0.55);
-  if (CONFIG.weather.mode === 'FOG') bgCol.lerp(tmpC.setHex(0x9aa8b0), 0.7);
-  if (CONFIG.weather.mode === 'RAIN') bgCol.multiplyScalar(0.75);
+  if (CONFIG.weather.mode === 'STORM') bgCol.multiplyScalar(0.6);
+  if (CONFIG.weather.mode === 'FOG') bgCol.lerp(tmpC.setHex(0xc8d8e0), 0.7);
+  if (CONFIG.weather.mode === 'RAIN') bgCol.multiplyScalar(0.8);
   if (state.flash > 0.02) bgCol.lerp(tmpC.setHex(0xffd4a0), state.flash * 0.6);
 
   state.scene.background = bgCol;
@@ -168,7 +208,7 @@ export function updateSky(cbLights) {
   const sunSpriteFade = THREE.MathUtils.clamp(
     THREE.MathUtils.smoothstep(trueSunElev, -0.5, 0.15), 0, 1
   );
-  sunSprite.material.opacity = sunSpriteFade * 0.75;
+  sunSprite.material.opacity = sunSpriteFade * 0.80 * cloudShadowFactor;
   if (CONFIG.weather.mode === 'STORM') sunSprite.material.opacity *= 0.35;
   if (CONFIG.weather.mode === 'FOG') sunSprite.material.opacity *= 0.3;
 
@@ -193,14 +233,17 @@ export function updateSky(cbLights) {
   seaUniforms.uDeep.value.copy(DEEP_N).lerp(DEEP_D, state.dayF);
   seaUniforms.uScat.value.copy(SCAT_N).lerp(SCAT_D, state.dayF);
   seaUniforms.uSunDir.value.copy(sunDir2);
+  
   seaUniforms.uSunCol.value.copy(tmpC2)
-    .multiplyScalar(sunSpriteFade * Math.max(trueSunElev, 0) * 0.9);
+    .multiplyScalar(sunSpriteFade * Math.max(effectiveSunElev, 0) * 0.85 * cloudShadowFactor);
   seaUniforms.uSkyRef.value.copy(bgCol);
   seaUniforms.uFogColor.value.copy(bgCol);
   seaUniforms.uFogNear.value = state.scene.fog.near;
   seaUniforms.uFogFar.value = state.scene.fog.far;
-  seaUniforms.uSpecularPower.value = 256;
-  seaUniforms.uSpecularIntensity.value = 0.02 + warmth * 0.02;
+  seaUniforms.uSpecularPower.value = 200;
+  seaUniforms.uSpecularIntensity.value = 0.03 + warmth * 0.02;
+
+  updateClouds(0.016, sunDir2, tmpC2, bgCol);
 
   if (cbLights) {
     const navI = state.nightF > 0.35 ? 1 : 0;
