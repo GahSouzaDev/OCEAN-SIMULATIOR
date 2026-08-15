@@ -6,14 +6,15 @@ let cloudPlane, cloudMaterial;
 const cloudOffset = new THREE.Vector2(0, 0);
 
 // ==========================================================
-// 🌥️ SISTEMA DE NUVENS PROCEDURAIS MELHORADO (2D)
+// 🌥️ SISTEMA DE NUVENS PROCEDURAIS MELHORADO (2D) - VERSÃO BAIXA
 // ==========================================================
-// - 3 camadas de ruído FBM para detalhe
-// - Iluminação solar realista
-// - Gradiente vertical simulado
-// - Cobertura controlada pelo clima
-// - Mantém a API original (initClouds, updateClouds, getCloudCoverage)
+// - Altura reduzida para sobrevoar por baixo (sensação de volume)
+// - Escala de ruído aumentada para nuvens maiores e mais imponentes
+// - Gradiente de espessura escurecendo as partes mais densas (base)
+// - Plano maior para evitar que as bordas apareçam no horizonte
 // ==========================================================
+
+const CLOUD_HEIGHT = 120; // Altura bem mais baixa (antes 220)
 
 function cloudNoise(x, z) {
   let v = 0;
@@ -41,7 +42,9 @@ export function getCloudCoverage() {
 }
 
 export function initClouds() {
-  const cloudGeo = new THREE.PlaneGeometry(4000, 4000, 1, 1);
+  // Aumentamos o tamanho do plano para 8000x8000. Como as nuvens estão mais baixas,
+  // elas precisam cobrir mais área para não vermos o "fim" do plano no horizonte.
+  const cloudGeo = new THREE.PlaneGeometry(8000, 8000, 1, 1);
   cloudGeo.rotateX(-Math.PI / 2);
   
   cloudMaterial = new THREE.ShaderMaterial({
@@ -106,34 +109,34 @@ export function initClouds() {
       }
 
       void main() {
-        // Coordenadas do mundo + offset do vento
-        vec2 p = (vWorldPos.xz + uOffset) * 0.0015;
-        p += uTime * 0.015;
+        // Escala aumentada para que as nuvens pareçam maiores e mais imponentes vistas de perto
+        vec2 p = (vWorldPos.xz + uOffset) * 0.0025;
+        p += uTime * 0.012;
 
         // Três camadas de FBM com velocidades diferentes
         float n1 = fbm(p);
-        float n2 = fbm(p * 1.7 + vec2(1.5, 3.2) + uTime * 0.008);
-        float n3 = fbm(p * 3.0 + vec2(2.1, 1.3) + uTime * 0.005);
+        float n2 = fbm(p * 1.5 + vec2(1.5, 3.2) + uTime * 0.006);
+        float n3 = fbm(p * 2.5 + vec2(2.1, 1.3) + uTime * 0.004);
 
         // Combinação ponderada
-        float combined = n1 * 0.55 + n2 * 0.30 + n3 * 0.15;
+        float combined = n1 * 0.50 + n2 * 0.35 + n3 * 0.15;
 
-        // Threshold baseado na cobertura do clima
-        float threshold = 0.48 - uCoverage * 0.38;
-        float cloud = smoothstep(threshold, threshold + 0.22, combined);
+        // Threshold baseado na cobertura do clima (ajustado para nuvens mais densas)
+        float threshold = 0.40 - uCoverage * 0.45;
+        float cloud = smoothstep(threshold, threshold + 0.25, combined);
 
         // ---------- ILUMINAÇÃO SOLAR ----------
         vec3 sunDir = normalize(uSunDir);
         float sunFactor = max(dot(vec3(0.0, 1.0, 0.0), sunDir), 0.0);
 
-        // Cores das nuvens
-        vec3 brightCloud = vec3(1.0, 0.98, 0.96);
-        vec3 darkCloud = vec3(0.42, 0.45, 0.52);
+        // Cores das nuvens (ajustadas para ficarem mais escuras e pesadas)
+        vec3 brightCloud = vec3(0.95, 0.93, 0.90);
+        vec3 darkCloud = vec3(0.30, 0.32, 0.40);
 
-        // Gradiente vertical simulado (base mais escura)
-        float verticalGrad = smoothstep(0.0, 0.5, vWorldPos.y * 0.005);
-        brightCloud *= mix(0.8, 1.0, verticalGrad);
-        darkCloud *= mix(1.0, 0.8, verticalGrad);
+        // Simulação de gradiente vertical: escurece as partes mais densas da nuvem,
+        // simulando a base escura e volumosa de nuvens baixas.
+        float thicknessGrad = smoothstep(0.2, 0.8, combined);
+        brightCloud = mix(brightCloud, darkCloud, thicknessGrad * 0.4);
 
         vec3 cloudColor = mix(darkCloud, brightCloud, sunFactor * 0.65 + 0.35);
 
@@ -142,7 +145,8 @@ export function initClouds() {
 
         // ---------- BORDAS SUAVES ----------
         float dist = length(vUv - 0.5) * 2.0;
-        float edgeFade = 1.0 - smoothstep(0.55, 0.95, dist);
+        // Fade mais longo pois o plano agora é maior (8000)
+        float edgeFade = 1.0 - smoothstep(0.65, 1.0, dist);
 
         // ---------- OPACIDADE ----------
         float nightFade = mix(0.15, 1.0, uDayF);
@@ -150,7 +154,7 @@ export function initClouds() {
 
         vec3 finalColor = mix(uSkyColor, cloudColor, cloud);
 
-        gl_FragColor = vec4(finalColor, alpha * 0.88);
+        gl_FragColor = vec4(finalColor, alpha * 0.90); // opacidade levemente aumentada para parecer mais denso
       }
     `,
     transparent: true,
@@ -159,7 +163,7 @@ export function initClouds() {
   });
   
   cloudPlane = new THREE.Mesh(cloudGeo, cloudMaterial);
-  cloudPlane.position.y = 280;
+  cloudPlane.position.y = CLOUD_HEIGHT; // Altura das nuvens reduzida
   cloudPlane.renderOrder = 999;
   state.scene.add(cloudPlane);
   
@@ -169,7 +173,7 @@ export function initClouds() {
 export function updateClouds(dt, sunDir, sunColor, skyColor) {
   if (!cloudPlane) return;
   
-  // Move com o vento (mantido do original)
+  // Move com o vento
   const windSpeed = state.windMul * 6.0;
   const windDir = CONFIG.wind.direction;
   cloudOffset.x += Math.cos(windDir) * windSpeed * dt;

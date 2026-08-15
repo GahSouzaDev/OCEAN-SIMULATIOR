@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { state } from '../state.js';
 import { waveHAt } from './waves.js';
 
-export const spray = { geo: null, list: [], max: 2400 };
+export const spray = { geo: null, list: [], max: 6000 };
 
 export function initSpray() {
   const g = new THREE.BufferGeometry();
@@ -13,15 +13,15 @@ export function initSpray() {
   g.setAttribute('aAlpha', new THREE.BufferAttribute(
     new Float32Array(spray.max), 1).setUsage(THREE.DynamicDrawUsage));
   const m = new THREE.ShaderMaterial({
-    uniforms: { uBright: { value: 1.6 } },
-    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uBright: { value: 1.0 } },
+    transparent: true, depthWrite: false, blending: THREE.NormalBlending,
     vertexShader: `attribute float aSize,aAlpha; varying float vA;
       void main(){vA=aAlpha; vec4 mv=modelViewMatrix*vec4(position,1.0);
-        gl_PointSize=aSize*(380.0/max(1.0,-mv.z)); gl_Position=projectionMatrix*mv;}`,
+        gl_PointSize=aSize*(300.0/max(1.0,-mv.z)); gl_Position=projectionMatrix*mv;}`,
     fragmentShader: `uniform float uBright; varying float vA;
       void main(){float d=length(gl_PointCoord-0.5); float core=smoothstep(0.5,0.0,d);
-        float a=smoothstep(0.5,0.1,d)*vA; if(a<0.01) discard;
-        vec3 col=mix(vec3(0.8,0.92,1.0),vec3(1.0,1.0,1.0),core)*uBright;
+        float a=smoothstep(0.5,0.12,d)*vA; if(a<0.01) discard;
+        vec3 col=mix(vec3(0.78,0.90,0.98),vec3(1.0),core)*uBright;
         gl_FragColor=vec4(col,a);}`
   });
   const p = new THREE.Points(g, m);

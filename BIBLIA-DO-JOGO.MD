@@ -1,45 +1,121 @@
-🌊 MARÉ DE PERUÍBE
-BÍBLIA DEFINITIVA DO JOGO — GDD v3.0
+# 🌊 MARÉ DE PERUÍBE
 
-"O mar não quer te matar. Ele só não se importa se você volta."
+## BÍBLIA DEFINITIVA DO JOGO — GDD v4.0
 
-0. IDENTIDADE DO JOGO
-0.1 O que é Maré de Peruíbe?
+> **"O mar não quer te matar. Ele só não se importa se você volta."**
 
-Maré de Peruíbe é um sandbox marítimo brasileiro de exploração, pesca, sobrevivência, comércio, cooperação, conflito e mistério.
+---
 
-O jogador vive em um litoral inspirado no estado de São Paulo, onde o mar, a serra, os manguezais, os rios, as cidades costeiras e as comunidades caiçaras formam um mundo persistente.
+# 0. IDENTIDADE DO JOGO
 
-Aqui, o jogador pode:
+## 0.1 O que é Maré de Peruíbe?
 
-pescar;
-pilotar barcos;
-mergulhar;
-explorar naufrágios;
-transportar mercadorias;
-trabalhar legalmente;
-contrabandear;
-participar de operações navais;
-caçar recompensas;
-formar tripulações;
-enfrentar tempestades;
-descobrir lugares secretos;
-registrar fenômenos inexplicáveis;
-encontrar criaturas do folclore;
-investigar histórias antigas;
-lutar contra outros jogadores;
-perder barcos;
-construir reputação;
-criar histórias que permanecem no mundo.
+**Maré de Peruíbe** é um sandbox marítimo brasileiro multiplayer de:
 
-Mas existe uma regra acima de todas:
+* exploração;
+* pesca;
+* sobrevivência;
+* comércio;
+* cooperação;
+* conflito;
+* pirataria;
+* investigação;
+* mergulho;
+* mistério.
 
-O MAR É O VERDADEIRO PERSONAGEM PRINCIPAL.
-1. OS CINCO MANDAMENTOS
+O jogo acontece em um mundo persistente inspirado no litoral de São Paulo.
 
-Toda decisão de design deve passar por estas cinco perguntas.
+O jogador vive entre:
 
-I — O MAR É O CHEFE
+* o oceano;
+* a Serra do Mar;
+* praias;
+* rios;
+* manguezais;
+* portos;
+* cidades costeiras;
+* ilhas;
+* lajes;
+* áreas de pesca;
+* áreas protegidas;
+* regiões perigosas;
+* regiões sobrenaturais.
+
+O mar é o verdadeiro protagonista.
+
+Ondas, vento, corrente, maré, profundidade, clima, chuva, neblina e tempestades não são apenas elementos visuais.
+
+Eles influenciam diretamente a jogabilidade. 
+
+---
+
+# 0.2 A REGRA FUNDAMENTAL
+
+## UM JOGADOR = UM BARCO
+
+Cada jogador controla **uma embarcação por vez**.
+
+Não existe a necessidade de colocar vários jogadores dentro do mesmo barco.
+
+O barco representa o jogador no mundo.
+
+Ele é:
+
+* seu veículo;
+* sua casa;
+* seu equipamento;
+* seu investimento;
+* sua identidade;
+* seu patrimônio;
+* sua história.
+
+Outro jogador possui outro barco.
+
+Os jogadores podem navegar juntos, mas continuam sendo **embarcações independentes**.
+
+---
+
+# 0.3 O MULTIPLAYER
+
+O objetivo não é colocar jogadores dentro de uma mesma embarcação.
+
+O objetivo é fazer jogadores **viverem histórias juntos no mar**.
+
+Exemplo:
+
+> Dois jogadores saem de Peruíbe para pescar.
+
+Um encontra um cardume.
+
+O outro possui equipamento melhor de navegação.
+
+Eles se comunicam pelo rádio.
+
+Pescam juntos.
+
+Uma tempestade aparece.
+
+Um barco sofre uma pane.
+
+O outro retorna para ajudá-lo.
+
+Durante o resgate, encontram um naufrágio.
+
+No naufrágio existe uma gravação.
+
+A gravação possui uma coordenada.
+
+A coordenada aponta para uma região desconhecida.
+
+Agora os dois possuem uma história.
+
+---
+
+# 1. OS CINCO MANDAMENTOS
+
+Toda decisão de design deve respeitar estes princípios.
+
+## I — O MAR É O CHEFE
 
 O oceano não existe para decorar.
 
@@ -47,61 +123,70 @@ Ondas afetam barcos.
 
 Vento altera rotas.
 
-Maré abre caminhos.
-
-Tempestades interrompem planos.
-
-Névoa muda a percepção.
+Maré abre e fecha possibilidades.
 
 Correntes deslocam embarcações.
 
-O clima pode transformar uma viagem de dez minutos em uma história que o jogador contará por semanas.
+Tempestades interrompem planos.
 
-II — CONHECIMENTO VALE MAIS QUE EQUIPAMENTO
+Névoa reduz visibilidade.
 
-Um barco maior não deve automaticamente vencer.
+Profundidade determina onde certos barcos podem navegar.
+
+O clima muda o comportamento do jogador.
+
+
+
+---
+
+## II — CONHECIMENTO VALE MAIS QUE EQUIPAMENTO
+
+Um barco caro não deve automaticamente vencer um barco simples.
 
 O jogador que conhece:
 
-uma corrente;
-um horário;
-uma espécie;
-uma pedra;
-uma maré;
-uma rota;
-uma frequência de rádio;
-uma formação de nuvens;
-uma região perigosa;
+* uma corrente;
+* uma rota;
+* uma espécie;
+* uma profundidade;
+* uma maré;
+* uma formação de nuvens;
+* uma área perigosa;
+* uma frequência de rádio;
+* um horário;
+* uma passagem;
 
-pode superar alguém com equipamento muito melhor.
+pode superar alguém com equipamentos melhores.
 
-O jogador experiente possui conhecimento, não apenas números maiores.
 
-III — TODA SAÍDA É UMA APOSTA
 
-Sair do porto significa escolher um risco.
+---
+
+## III — TODA SAÍDA É UMA APOSTA
+
+Sair do porto significa assumir risco.
 
 Quanto mais longe:
 
-mais peixe → mais dinheiro → mais perigo → mais distância → maior dificuldade de voltar.
+**mais recompensa → mais perigo → maior distância → maior dificuldade de retornar.**
 
-O jogo deve constantemente criar situações como:
+A pergunta central do jogo é:
 
-"Eu consigo pegar mais um pouco antes da tempestade?"
+> **"Eu consigo pegar mais um pouco antes da tempestade?"**
 
-Essa pergunta é o coração do jogo.
 
-IV — O BRASIL NÃO É SKIN
 
-O litoral brasileiro precisa ser reconhecível.
+---
+
+## IV — O BRASIL NÃO É SKIN
 
 Não queremos:
 
-"um jogo de piratas que parece brasileiro."
+> "um jogo de piratas que parece brasileiro."
 
 Queremos:
 
-um jogo marítimo brasileiro que só poderia existir aqui.
+> **um jogo marítimo brasileiro que só poderia existir aqui.**
 
 Barcos de pesca.
 
@@ -129,8 +214,6 @@ Procissões.
 
 Gírias.
 
-Música distante.
-
 Chuva de verão.
 
 Serra do Mar.
@@ -143,53 +226,64 @@ Histórias de pescador.
 
 Superstição.
 
-E silêncio.
+Silêncio.
 
-V — O MISTÉRIO NUNCA DEVE SER COMPLETAMENTE EXPLICADO
 
-O jogo pode mostrar evidências.
+
+---
+
+## V — O MISTÉRIO NUNCA É COMPLETAMENTE EXPLICADO
+
+O jogo fornece evidências.
 
 Nunca respostas definitivas.
 
-O jogador deve poder terminar a campanha acreditando que:
+Uma ocorrência pode ser:
 
-era sobrenatural;
-era fenômeno natural;
-era tecnologia;
-era uma entidade;
-era coincidência.
+* sobrenatural;
+* fenômeno natural;
+* operação militar;
+* tecnologia;
+* entidade;
+* coincidência.
 
-E talvez todas essas interpretações estejam erradas.
+O jogador deve construir sua própria interpretação.
 
-2. A FANTASIA DO JOGADOR
+
+
+---
+
+# 2. A FANTASIA DO JOGADOR
 
 O jogador não deve pensar:
 
-"Preciso completar a missão."
+> "Preciso completar a missão."
 
 Ele deve pensar:
 
-"Será que consigo voltar para casa?"
+> "Será que consigo voltar para casa?"
 
-Ou:
+> "Onde está aquele cardume?"
 
-"Onde está aquele cardume?"
+> "Por que o rádio está transmitindo isso?"
 
-"Por que o rádio está transmitindo isso?"
+> "Será que essa maré abre aquela passagem?"
 
-"Será que essa maré abre aquela passagem?"
+> "Quem afundou aquele barco?"
 
-"Quem afundou aquele barco?"
+> "Vale a pena atravessar a tempestade?"
 
-"Vale a pena atravessar a tempestade?"
+> "Por que tem uma luz seguindo meu barco?"
 
-"Por que tem uma luz seguindo meu barco?"
+> "Quem é aquela pessoa no costão?"
 
-"Quem é aquela pessoa no costão?"
+O jogo transforma **curiosidade em gameplay**. 
 
-O jogo transforma curiosidade em gameplay.
+---
 
-3. O GRANDE LOOP
+# 3. O GRANDE LOOP
+
+```text
 PORTO
  ↓
 PREPARAÇÃO
@@ -219,932 +313,1120 @@ NOVO CONHECIMENTO
 REGIÕES MAIS DISTANTES
  ↓
 MISTÉRIOS MAIS PROFUNDOS
+```
 
 O loop não termina no dinheiro.
 
-Ele termina em:
+Termina em:
 
-HISTÓRIA.
-4. UMA SESSÃO PERFEITA
+# HISTÓRIA.
 
-23:17.
+---
 
-Você sai de Peruíbe.
+# 4. O MUNDO
 
-O mar está relativamente calmo.
+O mundo é contínuo.
 
-O rádio informa:
+As regiões não devem parecer fases separadas.
 
-"Frente fria avançando pelo sul."
+A costa deve formar um grande ambiente marítimo conectado.
 
-Você consulta o fax meteorológico.
+## ORDEM PRINCIPAL DO LITORAL
 
-Tem aproximadamente quarenta minutos.
+### Sul → Norte
 
-Seu sonar encontra um cardume grande.
+**Barra do Una / Juréia**
 
-Você poderia voltar agora.
+↓
 
-Mas o peixe está valendo três vezes mais esta noite.
+**Peruíbe**
 
-Você lança a rede.
+↓
 
-23:31.
+**Itanhaém**
 
-O vento muda.
+↓
 
-23:37.
+**Mongaguá**
 
-A onda aumenta.
+↓
 
-23:41.
+**Praia Grande**
 
-O rádio começa a apresentar interferência.
+↓
 
-Você muda para o canal 03.
+**Santos**
 
-Silêncio.
+↓
 
-Depois:
+**Guarujá**
 
-"quatro..."
+Além da costa existem:
 
-Pausa.
+* ilhas;
+* ilhotas;
+* lajes;
+* áreas protegidas;
+* naufrágios;
+* pontos de pesca;
+* regiões de risco;
+* mar aberto.
 
-"nove..."
+---
 
-Pausa.
+# 5. MAPA E ORGANIZAÇÃO TERRITORIAL
 
-"pedra..."
+O mapa deve ser baseado na organização geográfica definida para o projeto.
 
-Você volta para o 68.
+## SERRA DO MAR
 
-Ninguém responde.
+A Serra do Mar permanece como grande elemento visual do continente.
 
-23:48.
+Ela funciona como:
 
-A névoa chega.
+* referência de navegação;
+* elemento climático;
+* limite visual;
+* parte da identidade brasileira;
+* fonte de neblina;
+* cenário de fenômenos.
 
-O sonar mostra algo abaixo do barco.
+---
 
-Não é peixe.
+# 6. REGIÕES DO MAR
 
-É grande demais.
+As regiões não são simplesmente níveis.
 
-24:02.
+Cada uma possui:
 
-Você precisa escolher.
+* clima;
+* fauna;
+* profundidade;
+* economia;
+* cultura;
+* rotas;
+* perigos;
+* rumores;
+* eventos;
+* personagens;
+* mistérios.
 
-Continuar.
+## BARRA DO UNA / JURÉIA
 
-Ou voltar.
+Identidade:
 
-Se continuar:
+**natureza selvagem, rios, manguezais e áreas protegidas.**
 
-pode ganhar uma fortuna.
+Características:
 
-Pode encontrar alguma coisa que ninguém encontrou.
+* pesca;
+* rios;
+* manguezais;
+* canais;
+* áreas ambientais;
+* exploração;
+* natureza;
+* fenômenos isolados.
 
-Pode perder o barco.
+Perigo:
 
-Pode descobrir algo que altera sua campanha.
+★★★
 
-Se voltar:
+---
 
-leva o peixe.
+# PERUÍBE
 
-Sobrevive.
+## Região central da primeira fase do jogo.
 
-Mas talvez nunca descubra o que estava abaixo.
+Identidade:
 
-5. O MUNDO
+**pesca, porto, névoa, mistério e rádio.**
 
-O mundo é dividido em regiões que ensinam novas formas de jogar.
+Perigo:
 
-Região	Identidade	Perigo
-Mongaguá	Aprendizado e pesca artesanal	★
-Itanhaém	Rios, canais e naufrágios	★★
-Peruíbe	Névoa, pesca e mistério	★★★
-Juréia	Mangue e natureza selvagem	★★★
-Guarujá	Comércio, tráfego e crime	★★★★
-Santos	Porto, Marinha e economia	★★★★
-Queimada Grande	Exploração extrema	★★★★★
-Mar Aberto	Grandes expedições	★★★★★★
+★★★
 
-Essas regiões não são simplesmente níveis.
+Peruíbe deve ser o primeiro grande território do jogador.
 
-Elas possuem:
+É aqui que ele aprende:
 
-clima próprio;
-fauna;
-economia;
-cultura;
-rotas;
-perigos;
-rumores;
-eventos;
-personagens;
-mistérios.
-6. O MAPA NÃO ENTREGA TUDO
+* navegar;
+* pescar;
+* abastecer;
+* reparar;
+* usar rádio;
+* interpretar clima;
+* explorar;
+* reconhecer maré;
+* conhecer o litoral.
 
-O jogador não recebe um mapa perfeito.
+É também uma das principais portas de entrada para o mistério.
 
-No início:
+---
 
-MAR
-?
-?
-?
-PORTO
-?
+# ITANHAÉM
 
-Conforme navega:
+Identidade:
 
-PORTO
-   \
-    recife
-       \
-        naufrágio
-          \
-           pedra
+**rios, canais, pesca e naufrágios.**
 
-O Atlas do Litoral é preenchido pelo jogador.
+Características:
 
-Informação encontrada pode ser:
+* canais;
+* desembocaduras;
+* águas costeiras;
+* naufrágios;
+* pesca;
+* áreas de exploração.
 
-anotada;
-fotografada;
-desenhada;
-compartilhada;
-vendida;
-escondida.
+Perigo:
 
-Um jogador pode descobrir algo que outro ainda desconhece.
+★★★
 
-7. O SISTEMA DE CONHECIMENTO
+---
+
+# MONGAGUÁ
+
+Identidade:
+
+**porto pesqueiro e entrada para jogadores iniciantes.**
+
+Características:
+
+* pesca;
+* comércio;
+* barcos menores;
+* comunidade;
+* atividade costeira.
+
+Perigo:
+
+★★
+
+---
+
+# PRAIA GRANDE
+
+Identidade:
+
+**tráfego costeiro e turismo.**
+
+Características:
+
+* grande movimento;
+* barcos;
+* turismo;
+* tráfego;
+* áreas urbanas;
+* rotas marítimas.
+
+Perigo:
+
+★★★
+
+---
+
+# SANTOS
+
+Identidade:
+
+# GRANDE PORTO
+
+Características:
+
+* porto;
+* comércio;
+* grandes embarcações;
+* Marinha;
+* fiscalização;
+* operações;
+* economia;
+* tráfego intenso.
+
+Perigo:
+
+★★★★
+
+---
+
+# GUARUJÁ
+
+Identidade:
+
+**comércio, turismo, crime e contrabando.**
+
+Características:
+
+* comércio;
+* marinas;
+* mergulho;
+* turismo;
+* contrabando;
+* operações criminosas;
+* áreas urbanas.
+
+Perigo:
+
+★★★★
+
+---
+
+# ILHA DA QUEIMADA GRANDE
+
+A Ilha da Queimada Grande funciona como uma das principais regiões de exploração extrema.
+
+Ela deve ficar posicionada como grande ponto de referência no oceano, na região definida pelo mapa do projeto.
+
+Características:
+
+* exploração;
+* mergulho;
+* mistério;
+* natureza;
+* fenômenos;
+* áreas perigosas;
+* naufrágios;
+* histórias.
+
+Perigo:
+
+★★★★★
+
+Ela representa uma transição entre:
+
+**litoral conhecido**
+
+e
+
+**oceano desconhecido.**
+
+---
+
+# LAJE DE SANTOS
+
+A Laje de Santos deve funcionar como um ponto marítimo associado à região de Santos.
+
+Não é uma cidade.
+
+É um ponto de interesse marítimo.
+
+Pode possuir:
+
+* mergulho;
+* pesca;
+* fauna marinha;
+* naufrágios;
+* exploração;
+* eventos;
+* encontros entre jogadores.
+
+---
+
+# MAR ABERTO
+
+O mar aberto representa o verdadeiro limite da exploração.
+
+Aqui:
+
+* as distâncias aumentam;
+* o clima pode mudar rapidamente;
+* os barcos precisam estar preparados;
+* o socorro fica mais difícil;
+* os riscos aumentam;
+* as recompensas aumentam.
+
+Perigo:
+
+★★★★★★
+
+---
+
+# 7. O MAPA NÃO ENTREGA TUDO
+
+O jogador não começa com um mapa perfeito.
+
+Ele começa conhecendo apenas:
+
+* seu porto;
+* algumas rotas;
+* pontos conhecidos;
+* informações básicas.
+
+Conforme explora, o **Atlas do Litoral** é preenchido.
+
+Informações podem ser:
+
+* anotadas;
+* fotografadas;
+* desenhadas;
+* compartilhadas;
+* vendidas;
+* escondidas.
+
+
+
+---
+
+# 8. ZONAS DO MAR
+
+O mapa possui diferentes tipos de território marítimo.
+
+## 🟢 PESCA LIVRE
+
+Regiões onde a pesca é permitida.
+
+## 🔵 PROTEÇÃO AMBIENTAL
+
+Regiões com restrições.
+
+A pesca ilegal pode gerar:
+
+* multas;
+* fiscalização;
+* perda de reputação;
+* perseguição.
+
+## 🟡 ROTAS MARÍTIMAS
+
+Áreas de tráfego.
+
+## 🟠 ZONAS DE EVENTO
+
+Regiões onde podem ocorrer eventos especiais.
+
+## 🔴 ZONAS DE PERIGO
+
+Áreas com maior risco.
+
+## 🟣 ZONAS DE MISTÉRIO
+
+Regiões associadas à investigação sobrenatural.
+
+---
+
+# 9. SISTEMA DE CONHECIMENTO
 
 Conhecimento é uma forma de progressão.
 
-O jogador pode aprender:
+O jogador aprende:
 
-Navegação
-correntes;
-profundidades;
-canais;
-pontos de referência.
-Pesca
-espécie;
-horário;
-profundidade;
-isca;
-maré;
-temperatura;
-localização.
-Clima
-nuvens;
-vento;
-pressão;
-frente fria;
-tempestade.
-Mistério
-símbolos;
-frequências;
-relatos;
-locais;
-horários.
-Cultura
-histórias;
-crenças;
-lendas;
-personagens.
+### NAVEGAÇÃO
 
-O jogador pode possuir equipamento básico e ser extremamente eficiente simplesmente porque aprendeu o mundo.
+* correntes;
+* profundidades;
+* canais;
+* pontos de referência;
+* rotas.
 
-8. TEMPO
+### PESCA
+
+* espécies;
+* horários;
+* profundidades;
+* iscas;
+* marés;
+* temperatura;
+* localização.
+
+### CLIMA
+
+* nuvens;
+* vento;
+* pressão;
+* frentes frias;
+* tempestades.
+
+### MISTÉRIO
+
+* símbolos;
+* frequências;
+* relatos;
+* locais;
+* horários.
+
+### CULTURA
+
+* histórias;
+* crenças;
+* lendas;
+* personagens.
+
+
+
+---
+
+# 10. TEMPO
 
 O mundo possui um relógio próprio.
 
-Dia e noite não são apenas visuais.
+Dia e noite alteram:
 
-Eles mudam:
+* espécies;
+* preços;
+* clima;
+* NPCs;
+* rotas;
+* perigos;
+* visibilidade;
+* criaturas;
+* eventos.
 
-espécies;
-preços;
-clima;
-NPCs;
-rotas;
-perigos;
-visibilidade;
-atividade de criaturas;
-eventos sobrenaturais.
-Exemplo
+O horário também influencia o mistério.
 
-06:00
+---
 
-Pesca costeira.
+# 11. MARÉ
 
-12:00
+A maré é uma mecânica física.
 
-Tráfego intenso.
+## MARÉ BAIXA
 
-18:00
+Pode revelar:
 
-Mudança de vento.
+* bancos de areia;
+* partes de naufrágios;
+* manguezais;
+* pequenas rotas;
+* criaturas.
 
-22:00
+## MARÉ ALTA
 
-Névoa.
+Pode:
 
-02:00
+* abrir canais;
+* permitir entrada de barcos;
+* esconder cavernas;
+* submergir recifes;
+* alterar áreas de exploração.
 
-Canal 03.
 
-04:00
 
-O mar volta ao normal.
+---
 
-9. MARÉ
+# 12. CLIMA
 
-A maré é uma das principais mecânicas do mundo.
+O clima é um sistema.
 
-Ela não é apenas uma animação.
+Frentes possuem:
 
-Ela altera fisicamente o mapa.
+* origem;
+* direção;
+* velocidade;
+* intensidade;
+* duração.
 
-MARÉ BAIXA
-bancos de areia aparecem;
-partes de naufrágios ficam acessíveis;
-manguezais podem ser explorados;
-pequenas embarcações encontram rotas;
-determinadas criaturas aparecem.
-MARÉ ALTA
-canais ficam navegáveis;
-determinadas cavernas desaparecem;
-barcos grandes conseguem entrar;
-recifes ficam submersos;
-determinadas criaturas surgem.
+O jogador pode interpretar:
 
-O jogador aprende:
+* rádio;
+* fax;
+* nuvens;
+* vento;
+* ondas;
+* comportamento do mar.
 
-"Quando a maré estiver assim, vá para aquele lugar."
+Um jogador experiente consegue olhar para o horizonte e pensar:
 
-10. CLIMA DINÂMICO
+> **"Essa viagem vai ficar ruim."** 
 
-O clima não é uma seleção aleatória de efeitos.
+---
 
-Ele é um sistema.
-
-Frentes atmosféricas possuem:
-
-origem;
-direção;
-velocidade;
-intensidade;
-duração.
-
-O jogador pode acompanhar:
-
-rádio;
-fax;
-nuvens;
-vento;
-ondas;
-comportamento do mar.
-
-Um jogador experiente consegue olhar para o horizonte e perceber:
-
-"Essa viagem vai ficar ruim."
-
-11. OCEANO SIMULADO
+# 13. OCEANO SIMULADO
 
 O oceano possui:
 
-ondas;
-swell;
-vento;
-espuma;
-correntes;
-maré;
-profundidade;
-turbulência;
-interação com embarcações.
+* ondas;
+* swell;
+* vento;
+* espuma;
+* correntes;
+* maré;
+* profundidade;
+* turbulência;
+* interação com barcos.
 
-A onda visual e a onda física devem trabalhar juntas.
+A onda visual e a física devem representar o mesmo oceano.
 
-O barco não deve simplesmente:
+O barco não deve parecer estar andando sobre uma textura.
 
-"andar sobre uma textura."
+Ele deve parecer **flutuar na água**. 
 
-Ele deve parecer flutuar em um oceano.
+---
 
-12. BARCOS
+# 14. ESPUMA DO MAR
 
-O barco é mais que um veículo.
+A espuma faz parte do comportamento visual do oceano.
 
-É A CASA DO JOGADOR.
+Ela deve aparecer naturalmente:
 
-Cada barco possui identidade.
+* nas cristas das ondas;
+* em regiões de quebra;
+* atrás de embarcações;
+* ao redor do casco;
+* durante impactos;
+* em águas agitadas;
+* em regiões rasas;
+* durante tempestades.
 
-PERSONALIZAÇÃO
-nome;
-pintura;
-bandeira;
-adesivos;
-mascote;
-iluminação;
-decoração;
-equipamentos.
-SISTEMAS
-motor;
-combustível;
-casco;
-leme;
-hélice;
-sonar;
-rádio;
-porão;
-freezer;
-rede;
-cozinha;
-equipamento de mergulho.
-13. BARCO COM MEMÓRIA
+A espuma não deve ser apenas uma textura branca.
 
-Cada barco possui um histórico.
+Ela deve responder à intensidade do mar.
+
+---
+
+# 15. BARCO
+
+# O BARCO É A CASA DO JOGADOR.
+
+Cada jogador possui uma embarcação.
+
+Ela possui:
+
+* nome;
+* aparência;
+* histórico;
+* equipamentos;
+* reputação;
+* carga;
+* danos;
+* combustível.
+
+## PERSONALIZAÇÃO
+
+* pintura;
+* nome;
+* bandeira;
+* adesivos;
+* mascote;
+* iluminação;
+* decoração;
+* equipamentos.
+
+## SISTEMAS
+
+* motor;
+* combustível;
+* casco;
+* leme;
+* hélice;
+* sonar;
+* rádio;
+* porão;
+* freezer;
+* redes;
+* cozinha;
+* equipamentos de mergulho.
+
+
+
+---
+
+# 16. UM BARCO, UM JOGADOR
+
+Não existe função de:
+
+* timoneiro;
+* sonarista;
+* pescador;
+* cozinheiro;
+* mecânico;
+
+como cargos separados entre jogadores.
+
+**O jogador é responsável pelo próprio barco.**
+
+Ele pode precisar executar todas essas tarefas.
+
+Embarcações maiores podem possuir sistemas automatizados ou NPCs auxiliares futuramente, mas o controle principal continua sendo de **um jogador**.
+
+---
+
+# 17. COOPERAÇÃO ENTRE BARCOS
+
+Cooperação acontece entre embarcações.
+
+Jogadores podem:
+
+* pescar juntos;
+* compartilhar informações;
+* compartilhar coordenadas;
+* escoltar;
+* rebocar;
+* resgatar;
+* negociar;
+* dividir descobertas;
+* explorar naufrágios;
+* combater juntos;
+* formar comboios;
+* transportar mercadorias;
+* proteger outro barco.
+
+O objetivo é:
+
+> **"Eu preciso dos meus amigos."**
+
+Mas cada amigo continua em seu próprio barco.
+
+---
+
+# 18. BARCO COM MEMÓRIA
+
+Cada barco possui histórico.
 
 Exemplo:
 
+```text
 MARIA DO MAR
 
 183 viagens
-17 tempestades enfrentadas
+17 tempestades
 4 naufrágios descobertos
 Maior peixe: 84 kg
-2 abordagens piratas
-1 tripulante perdido
+2 ataques piratas
 7 anos de serviço
+```
 
-Esse histórico cria valor emocional.
+O histórico cria valor emocional.
 
 Um barco antigo pode valer mais para o jogador do que um barco novo.
 
-14. NAUFRÁGIO PERMANENTE
+
+
+---
+
+# 19. NAUFRÁGIO PERMANENTE
 
 Quando um barco afunda:
 
-ele não simplesmente desaparece.
+**ele não simplesmente desaparece.**
 
 O servidor registra:
 
-localização;
-carga;
-nome;
-proprietário;
-causa;
-data.
+* localização;
+* carga;
+* nome;
+* proprietário;
+* causa;
+* data.
 
-O naufrágio pode permanecer.
+O naufrágio pode permanecer no mundo.
 
 Outro jogador pode encontrá-lo.
 
-Pode mergulhar.
+Pode:
 
-Pode recuperar sua carga.
+* mergulhar;
+* recuperar carga;
+* encontrar documentos;
+* encontrar equipamentos;
+* descobrir o que aconteceu.
 
-Pode encontrar o diário.
+O fracasso de um jogador vira conteúdo para outro. 
 
-Pode descobrir como você morreu.
+---
 
-Seu fracasso vira conteúdo para outra pessoa.
+# 20. PESCA
 
-15. PESCA
-
-A pesca é um sistema de conhecimento.
-
-Não basta apertar um botão.
+Pescar não é apertar um botão.
 
 O jogador precisa entender:
 
-espécie;
-equipamento;
-profundidade;
-temperatura;
-horário;
-maré;
-região;
-isca.
-EQUIPAMENTOS
-vara;
-tarrafa;
-espinhel;
-covo;
-rede;
-equipamentos de pesca grande.
+* espécie;
+* equipamento;
+* profundidade;
+* temperatura;
+* horário;
+* maré;
+* região;
+* isca.
 
-Cada um possui vantagens e consequências.
+Equipamentos:
 
-16. O PEIXE TEM COMPORTAMENTO
+* vara;
+* tarrafa;
+* espinhel;
+* covo;
+* redes;
+* equipamentos de pesca maior.
 
-Peixes não são simplesmente itens.
 
-Eles possuem:
 
-habitat;
-horário;
-profundidade;
-população;
-sazonalidade;
-comportamento;
-preferência alimentar.
+---
 
-O servidor acompanha a população.
+# 21. PEIXES
 
-Pesca excessiva gera consequências.
+Peixes possuem:
 
-17. ECOLOGIA
+* habitat;
+* horário;
+* profundidade;
+* população;
+* sazonalidade;
+* comportamento;
+* alimentação.
 
-O mundo reage ao jogador.
+O servidor acompanha populações.
 
-Se uma região sofre sobrepesca:
+A pesca excessiva gera consequências.
 
-cardumes diminuem;
-preços aumentam;
-espécies migram;
-pescadores reclamam;
-fiscalização aumenta.
 
-Se o jogador ajuda a preservar:
 
-população se recupera;
-espécies retornam;
-determinadas regiões prosperam.
+---
 
-O servidor cria sua própria história ambiental.
+# 22. ECOLOGIA
 
-18. ECONOMIA
+O mundo reage às ações dos jogadores.
+
+Sobrepesca pode causar:
+
+* redução de cardumes;
+* aumento de preços;
+* migração de espécies;
+* reclamações;
+* fiscalização.
+
+Preservação pode causar:
+
+* recuperação da população;
+* retorno de espécies;
+* prosperidade regional.
+
+O servidor desenvolve sua própria história ambiental. 
+
+---
+
+# 23. ECONOMIA
 
 Cada porto possui mercado próprio.
 
-Preço depende de:
+Os preços dependem de:
 
-oferta;
-demanda;
-eventos;
-clima;
-estação;
-quantidade pescada;
-atividade dos jogadores.
+* oferta;
+* demanda;
+* eventos;
+* clima;
+* estação;
+* quantidade pescada;
+* atividade dos jogadores.
 
-O mesmo peixe pode valer:
+O mesmo peixe pode possuir preços completamente diferentes em dois portos. 
 
-R$ 500 em um porto.
+---
 
-R$ 900 em outro.
+# 24. COMÉRCIO ENTRE JOGADORES
 
-R$ 1.400 durante um evento.
+Jogadores podem:
 
-19. COMIDA
+* vender peixe;
+* vender equipamentos;
+* transportar mercadorias;
+* negociar combustível;
+* vender informações;
+* vender coordenadas;
+* contratar outros jogadores;
+* comprar cargas;
+* negociar descobertas.
 
-Comida não é apenas recuperação de vida.
+Informação também é mercadoria.
 
-É preparação.
+---
 
-O jogador pode cozinhar:
-
-moqueca;
-peixe assado;
-caldo;
-pastel;
-arroz;
-comida de bordo.
-
-Uma boa refeição pode fornecer:
-
-resistência;
-foco;
-recuperação;
-redução de estresse;
-bônus temporário.
-20. TRIPULAÇÃO
-
-Em barcos maiores, o jogador pode formar uma tripulação.
-
-Cada função deve ter gameplay real.
-
-TIMONEIRO
-
-Controla:
-
-direção;
-velocidade;
-rota.
-SONARISTA
-
-Analisa:
-
-cardumes;
-profundidade;
-naufrágios;
-anomalias.
-PESCADOR
-
-Opera:
-
-redes;
-arpões;
-equipamentos.
-MERGULHADOR
-
-Explora:
-
-naufrágios;
-cavernas;
-estruturas submersas.
-COZINHEIRO
-
-Mantém:
-
-alimentação;
-buffs;
-moral.
-MECÂNICO
-
-Gerencia:
-
-motor;
-combustível;
-reparos;
-danos.
-
-Em barcos grandes:
-
-NINGUÉM FICA SEM TER O QUE FAZER.
-21. SOLO
-
-O jogador solo não deve ser punido.
-
-NPCs podem ocupar funções.
-
-Mas cada NPC possui:
-
-personalidade;
-salário;
-confiança;
-habilidade;
-medo;
-lealdade.
-
-Um tripulante pode dizer:
-
-"Capitão, eu não vou entrar nessa neblina."
-
-Outro pode responder:
-
-"Já passei por coisa pior."
-
-O jogador começa a conhecer sua própria tripulação.
-
-22. FACÇÕES
+# 25. FACÇÕES E CAMINHOS
 
 Não existem classes rígidas.
 
 Existem caminhos.
 
-CAIÇARA
+### CAIÇARA
 
 Conhecimento tradicional.
 
-MODERNO
+### MODERNO
 
 Tecnologia e equipamentos.
 
-ANCESTRAL
+### ANCESTRAL
 
 Conhecimento espiritual.
 
-NAVAL
+### NAVAL
 
 Lei, disciplina e operações.
 
-PIRATA
+### PIRATA
 
 Crime, contrabando e mercado negro.
 
-O jogador pode desenvolver reputação em vários caminhos.
+O jogador pode desenvolver reputação em diferentes caminhos. 
 
-23. MENTORES
+---
 
-Os mentores são personagens centrais.
+# 26. REPUTAÇÃO
 
-Eles não entregam simplesmente habilidades.
+Reputação não é simplesmente um número.
 
-Eles ensinam o mundo.
-
-Luiz ensina:
-
-"Não olha só pro peixe. Olha pro mar."
-
-Carlos ensina:
-
-"O sonar não diz o que existe. Só diz o que conseguiu encontrar."
-
-O Pajé ensina:
-
-"Tem coisa que não gosta de ser encontrada."
-
-André ensina:
-
-"No mar, ordem não é luxo."
-
-O pirata não ensina nada.
-
-Você aprende sozinho.
-
-24. REPUTAÇÃO
-
-Reputação não é apenas um número.
-
-Ela muda como o mundo trata você.
+Ela altera como o mundo trata o jogador.
 
 Um pescador conhecido pode receber:
 
-informação;
-desconto;
-ajuda;
-convites.
+* informações;
+* descontos;
+* ajuda;
+* convites.
 
 Um pirata procurado pode encontrar:
 
-portas fechadas;
-patrulhas;
-caçadores;
-mercados clandestinos.
-25. LEI E CRIME
+* portas fechadas;
+* patrulhas;
+* caçadores;
+* mercados clandestinos.
 
-O jogador pode cometer crimes.
 
-Exemplos:
 
-pesca ilegal;
-contrabando;
-invasão;
-roubo;
-pirataria;
-ataque a embarcações.
+---
 
-O sistema de procurado vai de:
+# 27. CRIME
 
-0 → 5
+O jogador pode:
+
+* pescar ilegalmente;
+* contrabandear;
+* invadir;
+* roubar;
+* atacar embarcações;
+* praticar pirataria.
+
+O nível de procurado pode variar:
+
+**0 → 5**
 
 Quanto maior:
 
-maior a recompensa;
-maior a fiscalização;
-mais perigosas as patrulhas;
-menos portos seguros.
-26. RECOMPENSAS
+* maior recompensa;
+* maior fiscalização;
+* patrulhas mais perigosas;
+* menos portos seguros.
 
-Jogadores podem colocar recompensas.
 
-Uma vítima pode ir à taverna e registrar:
 
+---
+
+# 28. RECOMPENSAS
+
+Jogadores podem colocar recompensas sobre outros jogadores.
+
+Exemplo:
+
+```text
 PROCURADO
 
 Nome: desconhecido
-Barco: Maré Negra
+Barco: MARÉ NEGRA
 Crime: afundou minha embarcação
 Recompensa: R$ 25.000
+```
 
 Agora outros jogadores podem caçá-lo.
 
-27. PIRATARIA
+---
 
-Piratas não precisam ser simplesmente "vilões".
+# 29. PIRATARIA
 
-Podem:
+Piratas podem:
 
-roubar;
-negociar;
-transportar;
-espionar;
-escoltar;
-contrabandear;
-formar alianças.
+* roubar;
+* negociar;
+* transportar;
+* espionar;
+* escoltar;
+* contrabandear;
+* formar alianças.
 
-Em guerras entre facções:
+Um criminoso pode até se tornar temporariamente útil para uma facção.
 
-PIRATAS PODEM RECEBER CARTAS DE CORSO.
+---
 
-Por um período:
+# 30. RÁDIO VHF
 
-um criminoso pode se tornar oficialmente útil para uma facção.
-
-28. RÁDIO VHF
-
-O rádio é um dos sistemas centrais do jogo.
+O rádio é um dos sistemas centrais.
 
 Ele conecta:
 
-jogadores;
-NPCs;
-missões;
-clima;
-emergência;
-comércio;
-crime;
-mistério.
-CANAL 16
+* jogadores;
+* NPCs;
+* missões;
+* clima;
+* emergência;
+* comércio;
+* crime;
+* mistério.
+
+### CANAL 16
 
 Emergência.
 
-CANAL 68
+### CANAL 68
 
 Pescadores.
 
-CANAL 72
+### CANAL 72
 
 Comunicação livre.
 
-CANAL 07
+### CANAL 07
 
 Operações navais.
 
-CANAL 03
+### CANAL 03
 
-Não deveria existir.
+> **Não deveria existir.**
 
-29. VOZ NO RÁDIO
+---
 
-O rádio nunca deve ficar silencioso.
+# 31. CANAL 03
 
-NPCs conversam.
+Entre aproximadamente **02:00 e 04:00**, o Canal 03 pode transmitir uma voz feminina.
 
-Pescadores relatam:
+A transmissão pode conter:
 
-"Tem peixe bom perto da pedra."
+* números;
+* coordenadas;
+* nomes;
+* datas;
+* palavras;
+* frases;
+* ruídos.
 
-Outro responde:
+O jogador pode:
 
-"Não vai pra lá hoje."
+* gravar;
+* comparar;
+* mapear;
+* compartilhar;
+* investigar.
 
-Você pode ignorar.
 
-Ou investigar.
 
-30. ESTAÇÃO DE NÚMEROS
+---
 
-Entre 02:00 e 04:00:
-
-Canal 03.
-
-Uma transmissão.
-
-Uma voz feminina.
-
-Sempre diferente.
-
-Às vezes:
-
-"quatro..."
-
-"nove..."
-
-"vinte e três..."
-
-"pedra..."
-
-Outras vezes:
-
-coordenadas.
-
-Datas.
-
-Nomes.
-
-Números.
-
-O jogador pode gravar.
-
-Comparar.
-
-Mapear.
-
-Compartilhar.
-
-31. O SISTEMA DE INVESTIGAÇÃO
+# 32. INVESTIGAÇÃO
 
 O mistério possui evidências.
 
 O jogador pode encontrar:
 
-gravações;
-fotografias;
-documentos;
-símbolos;
-coordenadas;
-relatos;
-ruínas;
-objetos;
-transmissões.
+* gravações;
+* fotografias;
+* documentos;
+* símbolos;
+* coordenadas;
+* relatos;
+* ruínas;
+* objetos;
+* transmissões.
 
-O jogo nunca diz:
+O jogo fornece peças.
 
-"A resposta é X."
+O jogador monta a teoria.
 
-Ele fornece peças.
 
-O jogador monta a própria teoria.
 
-32. FOTOGRAFIA
+---
+
+# 33. FOTOGRAFIA
 
 A câmera é uma ferramenta de investigação.
 
 Possui:
 
-zoom;
-foco;
-balanço;
-filme limitado;
-baixa luminosidade.
+* zoom;
+* foco;
+* controle de exposição;
+* baixa luminosidade;
+* limitações reais.
 
-Fotografias podem servir como:
+Fotografias podem ser:
 
-prova;
-missão;
-venda;
-descoberta;
-documentação.
+* provas;
+* missões;
+* vendidas;
+* descobertas;
+* documentação.
 
-E existe uma regra:
+Regra:
 
-A MELHOR FOTO SEMPRE ACONTECE QUANDO VOCÊ NÃO ESTÁ PREPARADO.
-33. SOBRENATURAL
+> **A melhor foto sempre acontece quando você não está preparado.** 
 
-O mundo possui lendas.
+---
 
-Entre elas:
+# 34. SOBRENATURAL
 
-Iara;
-Boto;
-Boitatá;
-Encantados;
-histórias da Pedra;
-fenômenos na Queimada Grande;
-luzes no céu;
-vozes no rádio.
+O mundo possui elementos do folclore brasileiro:
 
-Mas o jogo nunca confirma completamente a natureza dessas coisas.
+* Iara;
+* Boto;
+* Boitatá;
+* Encantados;
+* histórias da Pedra da Serpente;
+* fenômenos na Queimada Grande;
+* luzes no céu;
+* vozes no rádio.
 
-34. SANIDADE
+Mas o jogo nunca confirma completamente o que está acontecendo. 
 
-Sanidade não é simplesmente uma barra de vida mental.
+---
 
-Ela representa:
+# 35. SANIDADE
 
-O QUANTO O JOGADOR AINDA CONFIA NO QUE ESTÁ VENDO.
-100–80%
+Sanidade representa:
+
+> **o quanto o jogador ainda confia naquilo que está vendo.**
+
+### 100–80%
 
 Normal.
 
-80–60%
+### 80–60%
 
 Pequenas anomalias.
 
-60–40%
+### 60–40%
 
 Sons estranhos.
 
-Objetos distantes.
-
 Interferências.
 
-40–20%
+Coisas distantes.
+
+### 40–20%
 
 O mundo começa a parecer errado.
 
-20–0%
+### 20–0%
 
 A realidade deixa de ser confiável.
 
-35. ENCANTADO
+---
 
-Chegar a zero não significa:
+# 36. ENCANTADO
 
-GAME OVER.
+Chegar a zero não significa necessariamente:
 
-O jogador pode tornar-se um Encantado.
+> GAME OVER.
+
+O jogador pode se tornar um **Encantado**.
 
 Seu personagem anterior desaparece.
 
 Mas sua história permanece.
 
-O antigo personagem pode aparecer:
+Ele pode aparecer:
 
-em neblina;
-em praias;
-em naufrágios;
-no rádio;
-em sonhos;
-para outros jogadores.
+* na neblina;
+* em praias;
+* em naufrágios;
+* no rádio;
+* em sonhos;
+* para outros jogadores.
 
 Pode ajudar.
 
@@ -1152,236 +1434,544 @@ Pode enganar.
 
 Pode apontar para lugares reais.
 
-Pode apontar para lugares que não existem.
+Ou para lugares que não existem.
 
-36. MORTE COMO CONTEÚDO
 
-Uma das filosofias centrais do jogo:
 
-A DERROTA NÃO DEVE APAGAR A HISTÓRIA.
+---
 
-Você perdeu um barco?
+# 37. MORTE COMO CONTEÚDO
 
-Agora existe um naufrágio.
+Essa é uma das filosofias centrais.
 
-Você encontrou uma criatura?
+# A DERROTA NÃO DEVE APAGAR A HISTÓRIA.
+
+Perdeu o barco?
+
+Existe um naufrágio.
+
+Encontrou uma criatura?
 
 Existe uma fotografia.
 
-Você morreu em uma tempestade?
+Morreu em uma tempestade?
 
 Existe um relato.
 
-Você descobriu uma frequência?
+Descobriu uma frequência?
 
 Outros jogadores podem encontrá-la.
 
-Você virou Encantado?
+Virou Encantado?
 
 Sua história continua.
 
-37. EVENTOS DO MUNDO
 
-O servidor possui eventos espontâneos.
 
-Exemplos:
+---
 
-tempestade;
-migração de peixes;
-procissão;
-acidente marítimo;
-naufrágio;
-operação naval;
-pirataria;
-festival;
-desaparecimento;
-avistamento;
-transmissão misteriosa.
+# 38. EVENTOS DO MUNDO
+
+O servidor possui eventos espontâneos:
+
+* tempestades;
+* migração de peixes;
+* procissões;
+* acidentes;
+* naufrágios;
+* operações navais;
+* pirataria;
+* festivais;
+* desaparecimentos;
+* avistamentos;
+* transmissões misteriosas.
 
 O jogador não precisa participar.
 
 O mundo continua acontecendo.
 
-38. EVENTOS RAROS
 
-Alguns eventos podem ocorrer somente em condições específicas.
+
+---
+
+# 39. EVENTOS RAROS
+
+Eventos podem depender de combinações específicas.
 
 Exemplo:
 
-Lua nova
+```text
+LUA NOVA
 +
 03:13
 +
-névoa
+NEBLINA
 +
-maré alta
+MARÉ ALTA
 +
-local específico
+LOCAL ESPECÍFICO
 =
-evento secreto
+EVENTO SECRETO
+```
 
-O jogo nunca explica isso.
+O jogo não explica.
 
 Os jogadores descobrem.
 
-39. O MUNDO TEM MEMÓRIA
+
+
+---
+
+# 40. O MUNDO TEM MEMÓRIA
 
 O servidor registra acontecimentos importantes.
 
 Exemplo:
 
-"Na madrugada de 14 de agosto, três barcos desapareceram na região da Pedra."
+> "Na madrugada de 14 de agosto, três barcos desapareceram na região da Pedra."
 
-Sem missão.
+Depois:
 
-Sem marcador.
+* o rádio comenta;
+* pescadores comentam;
+* alguém encontra um pedaço do casco;
+* outro jogador encontra o naufrágio.
 
-A notícia aparece no rádio.
+O mundo cria sua própria história. 
 
-Um pescador comenta.
+---
 
-Depois alguém encontra um pedaço de casco.
-
-O mundo cria sua própria história.
-
-40. EXPLORAÇÃO
+# 41. EXPLORAÇÃO
 
 Explorar significa encontrar.
 
-Não seguir GPS.
+Não significa seguir GPS.
 
-Missões entregam:
+Missões devem entregar:
 
-informação.
+**informação.**
 
 Não:
 
-localização exata.
+**localização exata.**
 
 Exemplo:
 
-"Quando a água ficar preta e a serra desaparecer na névoa, procure uma pedra que parece partida ao meio."
+> "Quando a água ficar preta e a serra desaparecer na névoa, procure uma pedra que parece partida ao meio."
 
-Agora o jogador precisa interpretar.
+Agora o jogador precisa interpretar. 
 
-41. NAUFRÁGIOS
+---
+
+# 42. NAUFRÁGIOS
 
 Naufrágios funcionam como pequenas dungeons.
 
-CAMADA 1
+### CAMADA 1
 
 Exterior.
 
-CAMADA 2
+### CAMADA 2
 
 Casco.
 
-CAMADA 3
+### CAMADA 3
 
 Porão.
 
-CAMADA 4
+### CAMADA 4
 
 Área bloqueada.
 
-CAMADA 5
+### CAMADA 5
 
 Compartimento secreto.
 
-A maré determina quais áreas estão acessíveis.
+A maré determina quais partes estão acessíveis. 
 
-42. MERGULHO
+---
+
+# 43. MERGULHO
 
 Mergulhar deve ser silencioso.
 
 O jogador escuta:
 
-respiração;
-bolhas;
-casco;
-corrente;
-metal;
-água.
+* respiração;
+* bolhas;
+* casco;
+* corrente;
+* metal;
+* água.
 
 A visibilidade pode cair.
 
-O equipamento pode limitar profundidade.
+O equipamento limita profundidade.
 
-O mergulhador pode encontrar coisas que não existem na superfície.
+O mergulhador pode encontrar coisas que não existem na superfície. 
 
-43. PvP
+---
 
-PvP não deve estar em todos os lugares.
+# 44. PvP
 
-🟢 PORTO
+O PvP não precisa existir em todos os lugares.
+
+### 🟢 PORTOS
 
 Seguro.
 
-🔵 COSTA
+### 🔵 COSTA
 
 PvP limitado.
 
-🟡 MAR ABERTO
+### 🟡 MAR ABERTO
 
 PvP aberto.
 
-🔴 ZONAS ESTRANHAS
+### 🔴 ZONAS ESTRANHAS
 
 Regras especiais.
 
-A intenção é criar:
+O objetivo é criar:
 
-risco com significado.
+> **risco com significado.** 
 
-44. COOPERAÇÃO
+---
 
-Cooperar deve ser mais eficiente do que simplesmente estar no mesmo servidor.
+# 45. RESGATE ENTRE JOGADORES
 
-Uma tripulação pode:
+Se um barco sofrer uma emergência:
 
-dividir funções;
-compartilhar combustível;
-pescar espécies maiores;
-explorar naufrágios;
-proteger embarcações;
-operar equipamentos simultaneamente.
+O jogador pode transmitir um pedido de socorro.
 
-O objetivo é:
+Outro jogador pode responder.
 
-"Eu preciso dos meus amigos."
-45. TEMPORADAS
+Ele pode:
 
-O mundo pode mudar.
+* encontrar o barco;
+* fornecer combustível;
+* rebocar;
+* escoltar;
+* proteger;
+* transportar o jogador;
+* recuperar carga;
+* chamar ajuda.
 
-Temporadas não são apenas cosméticas.
+Mas existe uma possibilidade:
 
-Elas podem alterar:
+> **ser uma emboscada.**
 
-clima;
-espécies;
-preços;
-rotas;
-eventos;
-mistérios;
-regiões.
+Você nunca sabe quem realmente está pedindo ajuda.
 
-E determinadas temporadas podem ser causadas pelas próprias ações dos jogadores.
+---
 
-46. O DESPERTAR DA SERPENTE
+# 46. O MAR COMO SISTEMA SOCIAL
+
+O oceano cria encontros naturalmente.
+
+Você pode encontrar:
+
+* pescadores;
+* comerciantes;
+* piratas;
+* patrulhas;
+* náufragos;
+* exploradores;
+* amigos;
+* inimigos.
+
+Não precisamos criar arenas artificiais para gerar encontros.
+
+**O oceano cria os encontros.** 
+
+---
+
+# 47. ÁUDIO
+
+O som é fundamental.
+
+O jogador deve ouvir:
+
+* motor;
+* hélice;
+* casco;
+* água;
+* ondas;
+* espuma;
+* vento;
+* chuva;
+* rádio;
+* gaivotas;
+* tempestade.
+
+E principalmente:
+
+# SILÊNCIO.
+
+Às vezes:
+
+> **O pior som é nenhum som.** 
+
+---
+
+# 48. DIREÇÃO ARTÍSTICA
+
+Realismo estilizado.
+
+Não queremos:
+
+* fantasia exagerada;
+* cores neon;
+* HUD excessivo;
+* criaturas aparecendo constantemente.
+
+Queremos:
+
+* céu enorme;
+* mar profundo;
+* luz natural;
+* neblina;
+* chuva;
+* pôr do sol;
+* noites realmente escuras;
+* cidades costeiras reconhecíveis.
+
+O sobrenatural deve parecer estranho **porque está dentro de um mundo realista**. 
+
+---
+
+# 49. INTERFACE
+
+A interface deve ser discreta.
+
+O jogador deve olhar para:
+
+# O MAR.
+
+Sempre que possível, informações devem existir como objetos físicos:
+
+* mapa de papel;
+* rádio;
+* sonar;
+* bússola;
+* fax;
+* relógio;
+* diário;
+* instrumentos.
+
+
+
+---
+
+# 50. MULTIPLAYER
+
+## REGRA DEFINITIVA
+
+**1 jogador = 1 barco.**
+
+Os jogadores compartilham o mesmo mundo.
+
+Eles podem:
+
+* conversar;
+* navegar juntos;
+* pescar juntos;
+* negociar;
+* cooperar;
+* competir;
+* lutar;
+* resgatar;
+* explorar;
+* formar grupos;
+* formar alianças.
+
+Mas cada jogador continua sendo independente.
+
+O objetivo não é criar um lobby.
+
+É criar:
+
+# UM LUGAR ONDE AS PESSOAS VIVEM HISTÓRIAS.
+
+---
+
+# 51. GRUPOS DE JOGADORES
+
+Jogadores podem formar grupos temporários ou permanentes.
+
+Exemplo:
+
+```text
+FROTA
+
+BARCO 01 — Pesqueiro
+BARCO 02 — Sonar
+BARCO 03 — Mergulho
+BARCO 04 — Transporte
+```
+
+Cada um continua controlando seu próprio barco.
+
+O grupo pode compartilhar:
+
+* mapa;
+* rota;
+* rádio;
+* missão;
+* descoberta;
+* recompensa;
+* localização.
+
+---
+
+# 52. NETCODE
+
+A física crítica deve ser autoritativa.
+
+O servidor controla:
+
+* posição;
+* velocidade;
+* combustível;
+* dano;
+* inventário;
+* pesca;
+* clima;
+* maré;
+* eventos;
+* economia;
+* população de peixes.
+
+O cliente cuida principalmente de:
+
+* renderização;
+* efeitos;
+* animações;
+* áudio;
+* oceano visual.
+
+O oceano pode ser reconstruído localmente usando a mesma função física. 
+
+---
+
+# 53. ANTI-CHEAT
+
+Tudo que possui valor deve ser validado pelo servidor.
+
+O cliente nunca decide:
+
+> "Capturei um peixe de R$ 50.000."
+
+O cliente solicita.
+
+O servidor valida.
+
+O servidor decide.
+
+
+
+---
+
+# 54. PERFORMANCE
+
+O mundo pode ser grande.
+
+Mas nem tudo precisa estar ativo simultaneamente.
+
+Usar:
+
+* LOD;
+* streaming;
+* instancing;
+* culling;
+* neblina;
+* regiões carregadas;
+* simulação simplificada à distância.
+
+
+
+---
+
+# 55. MONETIZAÇÃO
+
+O jogo nunca vende poder.
+
+Somente cosméticos:
+
+* pinturas;
+* bandeiras;
+* mascotes;
+* roupas;
+* decoração;
+* emotes;
+* efeitos;
+* personalização do barco.
+
+Nunca vender:
+
+* velocidade;
+* dano;
+* sonar melhor;
+* pesca melhor;
+* equipamento superior.
+
+
+
+---
+
+# 56. O QUE NÃO FAZER
+
+Nunca transformar o jogo em:
+
+* simulador técnico inacessível;
+* MMO genérico;
+* battle royale de barcos;
+* checklist de missões;
+* mapa cheio de ícones;
+* RPG tradicional de níveis;
+* jogo de grind;
+* caça ao loot infinito;
+* fantasia genérica com skin brasileira.
+
+
+
+---
+
+# 57. A REGRA MAIS IMPORTANTE
+
+Se uma mecânica puder ser resolvida com:
+
+> **"Vá até o marcador vermelho e aperte E."**
+
+Ela deve ser questionada.
+
+O jogo deve preferir:
+
+# "DESCUBRA."
+
+
+
+---
+
+# 58. O DESPERTAR DA SERPENTE
 
 A campanha principal gira em torno de uma pergunta:
 
-O QUE ESTÁ DORMINDO SOB O LITORAL?
+# O QUE ESTÁ DORMINDO SOB O LITORAL?
 
-A Pedra da Serpente é considerada por alguns apenas uma formação natural.
+A Pedra da Serpente pode ser:
 
-Outros acreditam que seja um selo.
+* formação natural;
+* selo;
+* estrutura;
+* fenômeno;
+* algo completamente diferente.
 
-O Pajé conhece histórias antigas.
+O Pajé conhece histórias.
 
 Pesquisadores possuem documentos.
 
-A Marinha possui arquivos classificados.
+A Marinha possui arquivos.
 
 Ufólogos possuem fotografias.
 
@@ -1389,209 +1979,207 @@ Pescadores possuem relatos.
 
 E todos parecem falar de coisas diferentes.
 
-Até que os padrões começam a coincidir.
+Até que os padrões começam a coincidir. 
 
-47. OS CINCO FRAGMENTOS
+---
+
+# 59. OS CINCO FRAGMENTOS
 
 Existem cinco peças relacionadas ao mistério.
 
-I — O NAVIO
+### I — O NAVIO
 
 Um naufrágio antigo.
 
-II — A BASE
+### II — A BASE
 
 Um documento escondido.
 
-III — A GRUTA
+### III — A GRUTA
 
-Uma história sobre a Iara.
+Uma história relacionada à Iara.
 
-IV — O MANGUE
+### IV — O MANGUE
 
 Um encontro que só acontece em determinada noite.
 
-V — O ARQUIVO
+### V — O ARQUIVO
 
 Fotografias e gravações antigas.
 
 Cada fragmento responde uma pergunta.
 
-E cria duas novas.
+E cria duas novas. 
 
-48. A VERDADE
+---
 
-A campanha nunca deve apresentar uma única explicação.
+# 60. A VERDADE
+
+A campanha nunca apresenta uma única explicação.
 
 O jogador encontra evidências de:
 
-fenômenos naturais;
-tradições indígenas;
-atividade militar;
-fenômenos aéreos;
-símbolos antigos;
-eventos sobrenaturais.
+* fenômenos naturais;
+* tradições indígenas;
+* atividade militar;
+* fenômenos aéreos;
+* símbolos antigos;
+* eventos sobrenaturais.
 
 Existe uma conexão.
 
-Mas o jogo nunca entrega a resposta completamente.
+Mas a resposta nunca é entregue completamente. 
 
-49. O FINAL
+---
 
-No fim da campanha, o servidor precisa tomar uma decisão.
+# 61. O FINAL DA CAMPANHA
 
-RESSELAR
+O servidor precisa tomar uma decisão.
 
-O mundo entra em:
+## RESSSELAR
 
-MAR MANSO
+### MAR MANSO
 
-Menos fenômenos.
+* menos fenômenos;
+* mais segurança;
+* menos recompensas.
 
-Mais segurança.
+## ROMPER
 
-Menos recompensas.
+### MAR BRAVO
 
-ROMPER
+* tempestades extremas;
+* criaturas;
+* loot raro;
+* PvP mais perigoso.
 
-O mundo entra em:
+## ACEITAR
 
-MAR BRAVO
+### MAR ABERTO
 
-Tempestades extremas.
-
-Criaturas.
-
-Loot raro.
-
-PvP mais perigoso.
-
-OUVIR
-
-O mundo entra em:
-
-MAR ABERTO
-
-Novas regiões.
-
-Novas ilhas.
-
-Novas criaturas.
-
-Novos mistérios.
+* novas regiões;
+* novas ilhas;
+* novas criaturas;
+* novos mistérios.
 
 A campanha termina.
 
-Mas o mundo continua.
+Mas o mundo continua. 
 
-50. O SERVIDOR COMO HISTÓRIA
+---
 
-A maior ambição do jogo:
+# 62. O SERVIDOR COMO HISTÓRIA
 
-CADA SERVIDOR DEVE TER SUA PRÓPRIA HISTÓRIA.
+Cada servidor deve desenvolver sua própria história.
 
-Um servidor pode ficar famoso porque:
+Um servidor pode ficar conhecido como:
 
-"Foi aqui que descobriram a Pedra."
-
-Outro:
-
-"Foi aqui que uma tripulação afundou um comboio inteiro."
+> "Foi aqui que encontraram a Pedra."
 
 Outro:
 
-"Foi aqui que o primeiro Encantado apareceu."
+> "Foi aqui que aconteceu a maior batalha naval."
 
 Outro:
 
-"Foi aqui que encontraram a ilha."
+> "Foi aqui que apareceu o primeiro Encantado."
 
-O jogo cria memória coletiva.
+Outro:
 
-51. PROGRESSÃO
+> "Foi aqui que encontraram uma ilha que não aparecia no mapa."
 
-Não existe apenas uma barra de nível.
+O jogo cria **memória coletiva**. 
 
-Existem várias formas de crescimento:
+---
 
-HABILIDADE
+# 63. PROGRESSÃO
+
+Não existe apenas nível.
+
+O jogador evolui através de:
+
+### HABILIDADE
 
 Você aprende.
 
-EQUIPAMENTO
+### EQUIPAMENTO
 
 Você melhora.
 
-REPUTAÇÃO
+### REPUTAÇÃO
 
 O mundo passa a conhecê-lo.
 
-CONHECIMENTO
+### CONHECIMENTO
 
-Você descobre lugares e informações.
+Você descobre informações.
 
-HISTÓRIA
+### HISTÓRIA
 
 Suas ações entram no mundo.
 
-RELACIONAMENTOS
+### RELACIONAMENTOS
 
 NPCs passam a confiar em você.
 
-52. O JOGADOR PODE SER QUEM QUISER
 
-Não existe uma profissão obrigatória.
 
-Você pode ser:
+---
 
-Pescador.
+# 64. O JOGADOR PODE SER QUEM QUISER
 
-Comerciante.
+Não existe profissão obrigatória.
 
-Explorador.
+Pode ser:
 
-Mergulhador.
-
-Militar.
-
-Caçador de recompensas.
-
-Pirata.
-
-Contrabandista.
-
-Fotógrafo.
-
-Pesquisador.
-
-Capitão.
+* pescador;
+* comerciante;
+* explorador;
+* mergulhador;
+* militar;
+* caçador de recompensas;
+* pirata;
+* contrabandista;
+* fotógrafo;
+* pesquisador;
+* capitão.
 
 Ou simplesmente:
 
-UM CARA QUE SAI DE BARCO À NOITE PARA VER O QUE ACONTECE.
-53. O PORTO
+# UM CARA QUE SAI DE BARCO À NOITE PARA VER O QUE ACONTECE.
+
+
+
+---
+
+# 65. O PORTO
 
 O porto é o coração social.
 
-Aqui existem:
+Possui:
 
-mercado;
-oficina;
-pescaria;
-taverna;
-cais;
-loja;
-estaleiro;
-mural de recompensas;
-rádio;
-NPCs.
+* mercado;
+* oficina;
+* pescaria;
+* taverna;
+* cais;
+* loja;
+* estaleiro;
+* mural de recompensas;
+* rádio;
+* NPCs.
 
-O jogador volta ao porto não apenas para vender.
+O jogador não volta ao porto apenas para vender.
 
 Ele volta para:
 
-CONTAR O QUE ACONTECEU.
-54. TAVERNA
+# CONTAR O QUE ACONTECEU.
+
+
+
+---
+
+# 66. TAVERNA E RUMORES
 
 A taverna funciona como centro de rumores.
 
@@ -1603,464 +2191,239 @@ Histórias circulam.
 
 Exemplo:
 
-"Meu irmão viu uma luz perto da Pedra."
+> "Meu irmão viu uma luz perto da Pedra."
 
 Outro responde:
 
-"Seu irmão tava bêbado."
+> "Seu irmão tava bêbado."
 
 Talvez estivesse.
 
-Talvez não.
+Talvez não. 
 
-55. MISSÕES
+---
+
+# 67. MISSÕES
 
 Missões tradicionais existem.
 
 Mas são apenas uma camada.
 
-O principal sistema é:
+O sistema principal é:
 
-RUMOR → INVESTIGAÇÃO → DESCOBERTA.
+# RUMOR → INVESTIGAÇÃO → DESCOBERTA
 
 Um NPC pode dizer:
 
-"Tem alguma coisa puxando rede perto da ilha."
+> "Tem alguma coisa puxando rede perto da ilha."
 
-Você decide investigar.
+O jogador decide investigar.
 
-Não existe marcador.
+Não necessariamente existe marcador.
 
-56. CONTRATOS
+---
 
-Jogadores e NPCs podem oferecer trabalhos:
+# 68. CONTRATOS
 
-pesca;
-transporte;
-escolta;
-resgate;
-mergulho;
-patrulha;
-investigação;
-caça;
-contrabando.
+NPCs e jogadores podem oferecer trabalhos:
 
-Contratos podem mudar dinamicamente.
+* pesca;
+* transporte;
+* escolta;
+* resgate;
+* mergulho;
+* patrulha;
+* investigação;
+* caça;
+* contrabando.
 
-57. RESGATE
+Contratos podem mudar dinamicamente. 
+
+---
+
+# 69. RESGATE
 
 Se um jogador naufragar:
 
-ele pode emitir pedido de socorro.
+Ele pode emitir pedido de socorro.
 
 Outro jogador pode responder.
 
-Isso cria:
+Isso pode gerar:
 
-salvamento;
-recompensa;
-amizade;
-emboscada;
-história.
+* salvamento;
+* recompensa;
+* amizade;
+* emboscada;
+* dívida;
+* rivalidade;
+* história.
 
-Você nunca sabe quem está pedindo ajuda.
+---
 
-58. O MAR COMO SISTEMA SOCIAL
+# 70. TEMPORADAS
 
-O mar cria encontros naturalmente.
+Temporadas podem alterar:
 
-Você pode encontrar:
+* clima;
+* espécies;
+* preços;
+* rotas;
+* eventos;
+* mistérios;
+* regiões.
 
-pescador;
-comerciante;
-pirata;
-patrulha;
-náufrago;
-explorador;
-amigo;
-inimigo.
+Algumas temporadas podem ser causadas pelas próprias ações dos jogadores. 
 
-Não existe necessidade de colocar jogadores em arenas artificiais.
+---
 
-O oceano cria encontros.
+# 71. MVP
 
-59. ÁUDIO
+Não construir o litoral inteiro primeiro.
 
-O som é fundamental.
+Construir:
 
-O jogador deve ouvir:
+# PERUÍBE.
 
-motor;
-hélice;
-casco;
-água;
-ondas;
-vento;
-chuva;
-rádio;
-gaivotas;
-tempestade;
-tripulação.
-
-O silêncio também é uma ferramenta.
-
-Às vezes:
-
-O PIOR SOM É NENHUM SOM.
-60. DIREÇÃO ARTÍSTICA
-
-Realismo estilizado.
-
-Não queremos:
-
-fantasia exagerada;
-cores neon;
-HUD excessivo;
-criaturas aparecendo a cada cinco minutos.
-
-Queremos:
-
-céu enorme;
-mar profundo;
-luz natural;
-neblina;
-chuva;
-pôr do sol;
-noites realmente escuras;
-cidades costeiras reconhecíveis.
-
-O sobrenatural deve parecer estranho porque está dentro de um mundo realista.
-
-61. UI
-
-A interface deve ser discreta.
-
-O jogador deve olhar para:
-
-O MAR.
-
-Não para barras.
-
-Informações importantes podem aparecer através de:
-
-rádio;
-instrumentos;
-sonar;
-bússola;
-fax;
-mapas;
-relógio;
-diário.
-62. IMERSÃO
-
-Sempre que possível:
-
-interface vira objeto físico.
-
-Mapa:
-
-→ papel.
-
-Previsão:
-
-→ fax.
-
-Comunicação:
-
-→ rádio.
-
-Pesca:
-
-→ equipamento.
-
-Fotografia:
-
-→ câmera.
-
-Navegação:
-
-→ instrumentos.
-
-63. MULTIPLAYER
-
-O multiplayer suporta:
-
-2–10 jogadores
-
-para pequenas tripulações.
-
-E posteriormente:
-
-servidores maiores
-
-para mundo persistente.
-
-O objetivo não é transformar o jogo em lobby.
-
-É criar:
-
-UM LUGAR ONDE AS PESSOAS VIVEM HISTÓRIAS.
-64. NETCODE
-
-A física crítica deve ser autoritativa.
-
-O servidor controla:
-
-posição;
-velocidade;
-combustível;
-dano;
-inventário;
-pesca;
-clima;
-maré;
-eventos;
-economia;
-população de peixes.
-
-O cliente cuida principalmente de:
-
-renderização;
-efeitos;
-animações;
-áudio;
-oceano visual.
-
-O oceano pode ser reconstruído localmente através da mesma função física.
-
-65. ANTI-CHEAT NATURAL
-
-Tudo que possui valor deve ser validado pelo servidor.
-
-O cliente nunca decide:
-
-"Capturei um peixe de R$ 50.000."
-
-O servidor decide.
-
-O cliente solicita.
-
-O servidor valida.
-
-66. PERFORMANCE
-
-O mundo pode ser grande.
-
-Mas nem tudo precisa estar ativo.
-
-Usar:
-
-LOD;
-streaming;
-instancing;
-culling;
-neblina;
-regiões carregadas;
-simulação simplificada à distância.
-
-A distância ajuda a esconder o que não precisa existir naquele momento.
-
-67. MONETIZAÇÃO
-
-O jogo nunca vende poder.
-
-Monetização exclusivamente cosmética:
-
-pinturas;
-bandeiras;
-mascotes;
-roupas;
-decoração;
-emotes;
-efeitos cosméticos;
-personalização do barco.
-
-Nenhum item pago deve permitir:
-
-pescar melhor.
-
-navegar mais rápido.
-
-possuir sonar melhor.
-
-causar mais dano.
-
-68. O QUE NÃO FAZER
-
-Nunca transformar o jogo em:
-
-simulador técnico inacessível;
-MMO genérico;
-battle royale de barcos;
-checklist de missões;
-mapa cheio de ícones;
-RPG tradicional de níveis;
-jogo de grind;
-caça ao loot infinito;
-fantasia genérica com skin brasileira.
-69. A REGRA MAIS IMPORTANTE
-
-Se uma mecânica puder ser resolvida com:
-
-"vá até o marcador vermelho e aperte E"
-
-ela deve ser questionada.
-
-O jogo deve preferir:
-
-"descubra."
-
-70. MVP
-
-Não construir o litoral inteiro.
-
-Primeiro construir:
-
-PERUÍBE.
-
-Uma fatia pequena.
+Uma pequena parte.
 
 Mas extremamente viva.
 
-MVP 0.1
-1 porto;
-1 barco principal;
-oceano;
-ondas;
-clima;
-ciclo dia/noite;
-maré;
-5 espécies;
-pesca;
-inventário;
-combustível;
-venda;
-oficina;
-rádio;
-1 naufrágio;
-1 região de exploração;
-1 evento noturno;
-multiplayer inicial.
-71. TESTE DO MVP
+## MVP 0.1
+
+* 1 porto;
+* 1 barco inicial;
+* oceano;
+* ondas;
+* espuma;
+* clima;
+* dia/noite;
+* maré;
+* 5 espécies;
+* pesca;
+* inventário;
+* combustível;
+* venda;
+* oficina;
+* rádio;
+* 1 naufrágio;
+* 1 região de exploração;
+* 1 evento noturno;
+* multiplayer.
+
+A Bíblia anterior já definia exatamente essa filosofia de começar pequeno e construir Peruíbe antes de expandir. 
+
+---
+
+# 72. TESTE DO MVP
 
 O MVP precisa responder:
 
-Pergunta 1
+### 1.
 
 Navegar é divertido sem objetivo?
 
-Pergunta 2
+### 2.
 
 Pescar cria decisões?
 
-Pergunta 3
+### 3.
 
 O clima muda o comportamento?
 
-Pergunta 4
+### 4.
 
 O jogador sente vontade de explorar?
 
-Pergunta 5
+### 5.
 
 O rádio gera curiosidade?
 
-Pergunta 6
+### 6.
 
 Jogar com outra pessoa cria histórias diferentes?
 
 Se a resposta for não:
 
-NÃO ADICIONAR MAIS CONTEÚDO.
+# NÃO ADICIONAR MAIS CONTEÚDO.
 
 Corrigir o núcleo.
 
-72. ROADMAP
-0.1 — O MAR
 
-Navegação.
 
-Barco.
+---
 
-Oceano.
+# 73. ROADMAP
 
-Clima.
+## 0.1 — O MAR
 
-0.2 — A SOBREVIVÊNCIA
+* navegação;
+* barco;
+* oceano;
+* ondas;
+* espuma;
+* clima.
 
-Pesca.
+## 0.2 — SOBREVIVÊNCIA
 
-Inventário.
+* pesca;
+* inventário;
+* combustível;
+* venda;
+* reparos.
 
-Combustível.
+## 0.3 — O MUNDO
 
-Venda.
+* maré;
+* clima viajante;
+* rádio;
+* naufrágio.
 
-0.3 — O MUNDO
+## 0.4 — AS PESSOAS
 
-Maré.
+* cooperação;
+* NPCs;
+* comércio;
+* grupos.
 
-Clima viajante.
+## 0.5 — O CONFLITO
 
-Rádio.
+* PvP;
+* piratas;
+* Marinha;
+* recompensas.
 
-Naufrágio.
+## 0.6 — O ESTRANHO
 
-0.4 — AS PESSOAS
+* sanidade;
+* névoa;
+* Canal 03;
+* primeiro fenômeno.
 
-Cooperação.
+## 0.7 — O ABISMO
 
-Tripulação.
+* mergulho;
+* criaturas;
+* naufrágios complexos.
 
-NPCs.
+## 1.0 — A SERPENTE
 
-0.5 — O CONFLITO
+* campanha;
+* cinco fragmentos;
+* escolha global;
+* nova temporada.
 
-PvP.
+---
 
-Piratas.
-
-Marinha.
-
-Recompensas.
-
-0.6 — O ESTRANHO
-
-Sanidade.
-
-Névoa.
-
-Canal 03.
-
-Primeiro fenômeno.
-
-0.7 — O ABISMO
-
-Mergulho.
-
-Criaturas.
-
-Naufrágios complexos.
-
-1.0 — A SERPENTE
-
-Campanha.
-
-Cinco fragmentos.
-
-Escolha global.
-
-Nova temporada.
-
-73. O VERDADEIRO ENDGAME
+# 74. O VERDADEIRO ENDGAME
 
 O endgame não é:
 
-"chegar no nível máximo."
+> "chegar no nível máximo."
 
 É:
 
-conhecer o mar.
+**conhecer o mar.**
 
 Saber onde pescar.
 
@@ -2072,48 +2435,65 @@ Reconhecer uma tempestade.
 
 Conhecer uma rota.
 
-Ter uma tripulação.
-
-Ter um barco com história.
+Conhecer outros jogadores.
 
 Ter amigos.
 
 Ter inimigos.
 
-Ter histórias que ninguém acredita.
+Ter um barco com história.
 
-74. A GRANDE PROMESSA
+Ter um naufrágio que alguém ainda lembra.
+
+Ter uma descoberta que ninguém acredita.
+
+Ter histórias que parecem mentira.
+
+---
+
+# 75. A GRANDE PROMESSA
 
 Quando o jogador desligar o jogo, ele não deveria dizer:
 
-"Completei três missões."
+> "Completei três missões."
 
 Ele deveria dizer:
 
-"Você não vai acreditar no que aconteceu comigo hoje."
+# "Você não vai acreditar no que aconteceu comigo hoje."
 
-Essa é a métrica definitiva de Maré de Peruíbe.
+Essa é a métrica definitiva de **Maré de Peruíbe**. 
 
-75. TAGLINE FINAL
-🌊 MARÉ DE PERUÍBE
-Entre a serra e o mar,
-o que a gente vê...
-é o que está escondido.
+---
 
-Pesque.
+# 76. TAGLINE
 
-Navegue.
+# 🌊 MARÉ DE PERUÍBE
 
-Explore.
+> **Entre a serra e o mar,
+> o que a gente vê...
+> é o que está escondido.**
 
-Sobreviva.
+**Pesque.**
 
-Descubra.
+**Navegue.**
+
+**Explore.**
+
+**Sobreviva.**
+
+**Descubra.**
 
 E, se o rádio chamar...
 
-NÃO RESPONDA.
-76. ORDEM DE CONSTRUÇÃO DEFINITIVA
+# NÃO RESPONDA.
+
+
+
+---
+
+# 77. ORDEM DE CONSTRUÇÃO DEFINITIVA
+
+```text
 OCEANO
    ↓
 FÍSICA DO BARCO
@@ -2122,7 +2502,7 @@ CLIMA
    ↓
 MARÉ
    ↓
-MUNDO
+MAPA
    ↓
 PORTO
    ↓
@@ -2136,13 +2516,17 @@ RÁDIO
    ↓
 EXPLORAÇÃO
    ↓
-NPCs
+MULTIPLAYER
    ↓
 COOPERAÇÃO
    ↓
-MULTIPLAYER
+RESGATE
+   ↓
+COMÉRCIO
    ↓
 PVP
+   ↓
+FACÇÕES
    ↓
 SANIDADE
    ↓
@@ -2151,7 +2535,7 @@ MISTÉRIO
 CAMPANHA
    ↓
 TEMPORADAS
-PRIMEIRO OBJETIVO:
-FAZER O JOGADOR QUERER FICAR NO MAR.
+   ↓
+MUNDO PERSISTENTE
+```
 
-Todo o resto nasce disso.

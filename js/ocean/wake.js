@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { state } from '../state.js';
 import { waveHAt } from './waves.js';
+import { foam } from './foam.js';
+import { spray, emitSpray } from './spray.js';
 
 const MAX_TRAIL = 180, TRAIL_LIFE = 9;
 const trail = []; let lastTrailPt = null;
@@ -19,6 +21,141 @@ export let hullWakeGeoL, hullWakeGeoR, hullWakeMat, hullWakeMeshL, hullWakeMeshR
 const BOW_V_PTS = 25;
 export let bowWaveGeo, bowWaveMat, bowWaveMesh;
 
+// ==========================================================
+// 🌊💦 SPRAY DE CASCO — água cortada em volta de TODO o barco
+// ==========================================================
+let hullSprayAccum = 0;
+let bowSprayAccum = 0;
+let sternWashAccum = 0;
+
+// 💦 PERÍMETRO INTEIRO (proa → laterais → popa), RENTE à linha d'água
+function emitHullSpray() {
+  const absSpeed = Math.abs(state.speed);
+  if (absSpeed < 0.35 || !state.motorInWater) return;
+  const spdN = Math.min(1, absSpeed / 10);
+
+  const bx = state.boatRoot.position.x;
+  const bz = state.boatRoot.position.z;
+  const fwdX = Math.sin(state.heading), fwdZ = Math.cos(state.heading);
+  const rightX = Math.cos(state.heading), rightZ = -Math.sin(state.heading);
+
+  // ~40 part/s devagar → ~260 part/s rápido (MUITO mais denso)
+  hullSprayAccum += (40 + spdN * 220) * 0.016;
+  let count = Math.floor(hullSprayAccum);
+  hullSprayAccum -= count;
+  count = Math.min(count, 22);
+
+  for (let i = 0; i < count; i++) {
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const along = 4.0 - Math.random() * 8.2; // +4.0 proa → -4.2 popa (casco TODO)
+    const taper = 1.0 - Math.max(0, along - 0.5) * 0.18 - Math.max(0, -along - 2.5) * 0.06;
+    const halfW = Math.max(0.28, 1.2 * taper) + (Math.random() - 0.5) * 0.12;
+
+    const px = bx + fwdX * along + rightX * side * halfW;
+    const pz = bz + fwdZ * along + rightZ * side * halfW;
+    const py = waveHAt(px, pz) + 0.04; // 💧 RENTE à água
+
+    const isStern = along < -3.0; // popa borbulha mais (hélice)
+    const out  = (0.5 + Math.random() * 1.2) * (0.4 + spdN * 1.2);
+    const up   = (0.6 + Math.random() * 1.4) * (0.35 + spdN * 1.2) * (isStern ? 1.3 : 1.0);
+    const back = absSpeed * (0.15 + Math.random() * 0.3);
+
+    emitSpray(
+      px, py, pz,
+      rightX * side * out - fwdX * back,
+      up,
+      rightZ * side * out - fwdZ * back,
+      { size: (0.07 + Math.random() * 0.10) * (0.6 + spdN * 0.8) * (isStern ? 1.25 : 1.0),
+        life: 0.3 + Math.random() * 0.5 }
+    );
+  }
+
+  // Aproveita o tick pra soltar também a lavagem da hélice
+  emitSternWash();
+}
+
+// 💦 HÉLICE lavando água atrás da popa (borbulha até devagar)
+function emitSternWash() {
+  const absSpeed = Math.abs(state.speed);
+  if (absSpeed < 0.5 || !state.motorInWater) return;
+  const spdN = Math.min(1, absSpeed / 10);
+  const thr = (state.throttle !== undefined) ? state.throttle : spdN;
+
+  const bx = state.boatRoot.position.x;
+  const bz = state.boatRoot.position.z;
+  const fwdX = Math.sin(state.heading), fwdZ = Math.cos(state.heading);
+  const rightX = Math.cos(state.heading), rightZ = -Math.sin(state.heading);
+
+  sternWashAccum += (10 + (spdN * 0.5 + thr * 0.5) * 160) * 0.016;
+  let count = Math.floor(sternWashAccum);
+  sternWashAccum -= count;
+  count = Math.min(count, 14);
+
+  for (let i = 0; i < count; i++) {
+    const lat = (Math.random() - 0.5) * 1.6;
+    const behind = -4.2 - Math.random() * 1.4;
+    const px = bx + fwdX * behind + rightX * lat;
+    const pz = bz + fwdZ * behind + rightZ * lat;
+    const py = waveHAt(px, pz) + 0.05;
+
+    const back = absSpeed * (0.3 + Math.random() * 0.4) + 0.6;
+    const out  = 0.3 + Math.random() * 0.9;
+    const up   = (0.8 + Math.random() * 1.6) * (0.4 + thr);
+
+    emitSpray(
+      px, py, pz,
+      rightX * lat * out - fwdX * back,
+      up,
+      rightZ * lat * out - fwdZ * back,
+      { size: 0.08 + Math.random() * 0.12, life: 0.35 + Math.random() * 0.5 }
+    );
+  }
+}
+
+// 💦 LEQUE BRANCO na proa (o "V" de água cortada) — reforçado
+function emitBowCutSpray() {
+  const absSpeed = Math.abs(state.speed);
+  if (absSpeed < 1.0 || !state.motorInWater) return;
+  const spdN = Math.min(1, absSpeed / 10);
+
+  const bx = state.boatRoot.position.x;
+  const bz = state.boatRoot.position.z;
+  const fwdX = Math.sin(state.heading), fwdZ = Math.cos(state.heading);
+  const rightX = Math.cos(state.heading), rightZ = -Math.sin(state.heading);
+
+  bowSprayAccum += (15 + spdN * 140) * 0.016;
+  let count = Math.floor(bowSprayAccum);
+  bowSprayAccum -= count;
+  count = Math.min(count, 12);
+
+  for (let i = 0; i < count; i++) {
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const along = 4.2 - Math.random() * 2.2;
+    const taper = 1.0 - Math.max(0, along - 0.5) * 0.18;
+    const halfW = Math.max(0.2, 1.2 * taper) + Math.random() * 0.25;
+
+    const px = bx + fwdX * along + rightX * side * halfW;
+    const pz = bz + fwdZ * along + rightZ * side * halfW;
+    const py = waveHAt(px, pz) + 0.06;
+
+    const out = (1.2 + Math.random() * 2.0) * (0.5 + spdN);
+    const up  = (1.0 + Math.random() * 2.0) * (0.4 + spdN);
+    const fwd = absSpeed * (0.1 + Math.random() * 0.25);
+
+    emitSpray(
+      px, py, pz,
+      rightX * side * out + fwdX * fwd,
+      up,
+      rightZ * side * out + fwdZ * fwd,
+      { size: 0.08 + Math.random() * 0.12 * (0.5 + spdN),
+        life: 0.35 + Math.random() * 0.5 }
+    );
+  }
+}
+
+// ==========================================================
+// INIT
+// ==========================================================
 export function initWake() {
   wakeGeo = new THREE.BufferGeometry();
   {
@@ -179,12 +316,8 @@ export function updateMainWake() {
     const p = wakeHistory[i];
     const age = state.simTime - p.t;
     const lifeRatio = age / HISTORY_LIFE;
-    
-    // ✅ VELOCIDADE SÓ AFETA A TAXA DE ABERTURA (age * speed), NÃO A LARGURA FIXA
-    // Largura começa em 0.05 (colada) e cresce, nunca passa de 2.5 (metade do barco)
-    const speedInfluence = age * p.speed * 0.04; // só soma quando age > 0
+    const speedInfluence = age * p.speed * 0.04;
     const w = Math.min(2.5, 0.05 + age * 0.20 + age * age * 0.03 + speedInfluence);
-    
     const perpX = Math.cos(p.heading);
     const perpZ = -Math.sin(p.heading);
     const y = waveHAt(p.x, p.z) + 0.05;
@@ -216,25 +349,15 @@ export function updateHullWake() {
   const aVL = hullWakeGeoL.attributes.aV.array;
   const aVR = hullWakeGeoR.attributes.aV.array;
   const n = Math.min(wakeHistory.length, HULL_WAKE_MAX);
-  
-  // ✅ OFFSET BASE: dentro do casco (o casco tem ~1.3 de cada lado do centro)
-  // 0.60 = começa bem dentro, nunca ultrapassa o casco
-  const hullOffsetBase = 0.9;
-  
+  const hullOffsetBase = 0.60;
   for (let i = 0; i < n; i++) {
     const p = wakeHistory[i];
     const age = state.simTime - p.t;
     const lifeRatio = age / HISTORY_LIFE;
-    
-    // ✅ VELOCIDADE SÓ MULTIPLICA O AGE (só acelera abertura com o tempo)
-    // Nunca adiciona largura fixa! Offset máximo 6.0 unidades do centro
     const speedInfluence = age * p.speed * 0.03;
     const lateralSpread = Math.min(5.5, age * 0.22 + age * age * 0.04 + speedInfluence);
     const currentOffset = Math.min(6.0, hullOffsetBase + lateralSpread);
-    
-    // Faixa começa fininha (0.08) e cresce, máximo 5.5
-    const w = Math.min(5.5, 0.08 + age * 0.15 + age * age * 0.2 + age * p.speed * 0.01);
-    
+    const w = Math.min(1.5, 0.08 + age * 0.15 + age * age * 0.02 + age * p.speed * 0.01);
     const fwdX = Math.sin(p.heading), fwdZ = Math.cos(p.heading);
     const rightX = fwdZ, rightZ = -fwdX;
     const y = waveHAt(p.x, p.z) + 0.04;
@@ -265,6 +388,9 @@ export function updateHullWake() {
   hullWakeGeoL.attributes.aV.needsUpdate = true;
   hullWakeGeoR.attributes.aV.needsUpdate = true;
   hullWakeMat.uniforms.uT.value = state.simTime;
+
+  // 🌊 SPRAY NAS LATERAIS + POPA (roda todo frame)
+  emitHullSpray();
 }
 
 export function updateBowWave() {
@@ -289,6 +415,9 @@ export function updateBowWave() {
   bowWaveGeo.attributes.aV.needsUpdate = true;
   bowWaveMat.uniforms.uT.value = state.simTime;
   bowWaveMat.uniforms.uSpeed.value = spdN;
+
+  // 🌊 LEQUE DE SPRAY NA PROA (roda todo frame)
+  emitBowCutSpray();
 }
 
 export function updateTrailWake() {
@@ -306,10 +435,7 @@ export function updateTrailWake() {
     const len = Math.hypot(tx, tz) || 1; tx /= len; tz /= len;
     const nx = -tz, nz = tx;
     const age = state.simTime - p.t;
-    
-    // ✅ Começa em 0.03 e cresce, máximo 3.0 (não exagera)
     const w = Math.min(3.0, 0.03 + age * 0.22 + age * age * 0.04 + age * spdN * 0.3);
-    
     const y = waveHAt(p.x, p.z) + 0.03;
     pos[i * 6]     = p.x + nx * w; pos[i * 6 + 1] = y; pos[i * 6 + 2] = p.z + nz * w;
     pos[i * 6 + 3] = p.x - nx * w; pos[i * 6 + 4] = y; pos[i * 6 + 5] = p.z - nz * w;
@@ -331,6 +457,7 @@ export function updateParticleBuffers(dt) {
   const bright = THREE.MathUtils.clamp(
     0.35 + 0.65 * state.dayF + (state.deckOn ? 0.3 : 0), 0, 1.3
   );
+  // foam
   {
     let wI = 0;
     const fp = foam.geo.attributes.position.array;
@@ -355,6 +482,7 @@ export function updateParticleBuffers(dt) {
     foam.geo.attributes.aSize.needsUpdate = true;
     foam.geo.attributes.aAlpha.needsUpdate = true;
   }
+  // spray
   {
     let sI = 0;
     const sp = spray.geo.attributes.position.array;
@@ -381,6 +509,3 @@ export function updateParticleBuffers(dt) {
   }
   wakeMat2.uniforms.uBright.value = bright;
 }
-
-import { foam } from './foam.js';
-import { spray } from './spray.js';

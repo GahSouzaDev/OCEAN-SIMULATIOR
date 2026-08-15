@@ -35,16 +35,21 @@ ocean-simulator/
 │   │   ├── audio-manager.js    # Web Audio context + master
 │   │   ├── engine-sound.js     # Som do motor (por barco)
 │   │   ├── ambient.js          # Oceano, vento
+│   │   ├── region-sting.js
 │   │   └── effects.js          # Splash, buzina, trovão
 │   ├── ui/
 │   │   ├── hud.js              # Atualização do HUD
+│   │   ├── region-banner.js
 │   │   └── loading.js          # Tela de loading
 │   ├── world/
 │   │   ├── world-map.js        # Mapa fixo, regiões, ilhas
 │   │   ├── underwater.js       # Fundo do mar, peixes, ambiente sub
+│   │   ├── regions.js
+│   │   ├── bathymetry.js
 │   │   └── objects.js          # Boias, navios distantes, etc.
 │   └── game/
 │       ├── game-manager.js     # Modos de jogo, state machine
+│       ├── tide.js  
 │       └── damage.js           # Sistema de dano e destruição
 └── assets/
     └── (texturas, modelos futuros)

@@ -1,64 +1,549 @@
+MARÉ DE PERUÍBE
+
 Maré de Peruíbe é um sandbox marítimo brasileiro multiplayer onde pesca, exploração, sobrevivência, comércio, cooperação, pirataria, combate e mistério acontecem em um mundo persistente inspirado no litoral de São Paulo.
 
-A ideia central do jogo é simples: o mar é o verdadeiro protagonista. O oceano não é apenas um cenário. As ondas, o vento, as correntes, a maré, a profundidade, a chuva, a neblina e as tempestades influenciam diretamente tudo o que o jogador faz.
+A ideia central é simples:
 
-O jogador começa no porto e precisa preparar seu barco, escolher equipamentos, combustível, comida e rota. Depois sai para o mar em busca de peixe, naufrágios, contratos, tesouros, informações ou lugares desconhecidos. Quanto mais longe ele vai, maiores são as recompensas, mas também maiores são os riscos.
+o mar é o verdadeiro protagonista.
 
-O jogo valoriza conhecimento mais do que simplesmente equipamentos caros. Um jogador que conhece uma determinada corrente, sabe interpretar o clima, conhece o horário de uma espécie ou sabe quando uma passagem fica aberta pela maré pode superar alguém com um barco muito melhor.
+O oceano não é apenas um cenário. As ondas, o vento, as correntes, a maré, a profundidade, a chuva, a neblina e as tempestades influenciam diretamente tudo o que o jogador faz.
 
-A pesca é um dos principais sistemas. Os peixes possuem comportamento, habitat, horário, profundidade, alimentação, sazonalidade e população própria. A pesca excessiva pode diminuir os cardumes de uma região, alterar os preços e aumentar a fiscalização. Assim, as ações dos jogadores podem modificar o ecossistema do servidor.
+UM JOGADOR. UM BARCO.
 
-O mundo também possui uma economia dinâmica. Cada porto possui preços diferentes, e os valores mudam conforme oferta, demanda, eventos, clima e comportamento dos jogadores. O jogador pode trabalhar legalmente, transportar mercadorias, negociar, pescar, fazer contratos ou entrar no mundo do contrabando e da pirataria.
+Cada barco pertence a um único jogador.
 
-O barco é muito mais do que um veículo. Ele é a casa e o legado do jogador. Pode ser personalizado, melhorado e equipado com motor, sonar, rádio, freezer, redes, cozinha e equipamentos de mergulho. Cada barco possui um histórico próprio, registrando viagens, tempestades, peixes capturados, naufrágios e acontecimentos importantes.
+Não existem vários jogadores dentro do mesmo barco.
 
-E existe uma ideia fundamental: quando um barco afunda, sua história não desaparece. O naufrágio pode permanecer no mundo. Outro jogador pode encontrá-lo, mergulhar, recuperar sua carga e descobrir quem era o antigo dono. Dessa forma, até a derrota pode gerar conteúdo para outra pessoa.
+O jogador é o comandante, pescador, navegador e responsável por sua embarcação.
 
-A exploração também não funciona como um jogo tradicional. Não existe um mapa cheio de marcadores dizendo exatamente para onde ir. O jogador recebe pistas, rumores, fotografias, relatos e informações. Ele precisa interpretar o mundo para descobrir lugares secretos, naufrágios, cavernas e fenômenos estranhos.
+Isso torna cada barco uma extensão do próprio jogador.
 
-O rádio VHF é um dos sistemas mais importantes do jogo. Ele conecta jogadores, pescadores, NPCs, missões, clima, emergências, operações navais e mistérios. Existem canais para emergência, pescadores, comunicação livre e operações militares. Porém, existe também o Canal 03.
+Quando você encontra outro jogador no mar, você não encontra simplesmente "outro personagem".
 
-Entre duas e quatro da manhã, o Canal 03 pode transmitir uma voz feminina dizendo números, coordenadas, nomes ou palavras estranhas. O jogador pode gravar essas transmissões, comparar informações e tentar descobrir o significado delas.
+Você encontra outro barco.
 
-É aí que começa o mistério.
+Pode seguir junto.
 
-Maré de Peruíbe possui elementos do folclore brasileiro, como Iara, Boto, Boitatá e os Encantados, além de histórias relacionadas à Pedra da Serpente, fenômenos estranhos, luzes no céu e acontecimentos na região.
+Pode negociar.
 
-Mas existe uma regra: o jogo nunca explica completamente o sobrenatural.
+Pode ajudar.
 
-O jogador encontra evidências, mas nunca recebe uma resposta definitiva. Pode parecer uma entidade, um fenômeno natural, uma operação militar, uma tecnologia desconhecida ou simplesmente uma coincidência. A interpretação pertence ao jogador.
+Pode pedir socorro.
 
-A sanidade representa o quanto o jogador ainda confia naquilo que está vendo. Conforme ela diminui, começam pequenas anomalias, sons estranhos, interferências e acontecimentos que parecem impossíveis. Quando chega a zero, isso não precisa significar game over. O personagem pode se tornar um Encantado e continuar existindo no mundo como uma figura misteriosa que pode aparecer para outros jogadores.
+Pode atacar.
 
-Essa é outra regra importante do jogo: a morte não deve apagar a história.
+Pode fugir.
 
-Se você perder um barco, existe um naufrágio. Se fotografar uma criatura, existe uma prova. Se descobrir uma frequência, outros jogadores podem encontrá-la. Se morrer em uma tempestade, alguém pode ouvir sua história no porto. Suas ações permanecem no mundo.
+Ou pode simplesmente passar ao lado sem saber quem está naquela embarcação.
 
-O multiplayer foi pensado para criar histórias espontâneas. Pequenas tripulações podem dividir funções entre timoneiro, sonarista, pescador, mergulhador, cozinheiro e mecânico. Cada pessoa deve ter algo importante para fazer.
+A cooperação acontece entre barcos.
 
-Os jogadores também podem formar alianças, trabalhar para facções, atuar para a Marinha, virar comerciantes, pescadores, exploradores, caçadores de recompensa, contrabandistas ou piratas.
+Dois jogadores podem sair juntos para pescar.
 
-O sistema de reputação muda a maneira como o mundo trata o jogador. Pessoas podem confiar nele, oferecer informações, contratos e descontos. Ou podem fechar as portas, enviar patrulhas e colocar recompensas pela sua cabeça.
+Três barcos podem procurar um naufrágio.
 
-O mundo possui regiões diferentes, começando por uma pequena área de Peruíbe e posteriormente expandindo para locais inspirados em Mongaguá, Itanhaém, Juréia, Guarujá, Santos, Queimada Grande e o mar aberto.
+Um jogador pode ficar observando enquanto outro mergulha.
 
-Cada região deve ensinar uma nova maneira de jogar.
+Um barco pode escoltar outro carregando uma carga valiosa.
 
-A grande campanha se chama O Despertar da Serpente.
+Ou vários jogadores podem formar uma pequena frota para enfrentar uma tempestade.
 
-Existe algo relacionado à Pedra da Serpente. Alguns acreditam que seja apenas uma formação natural. Outros acreditam que seja um antigo selo. Pescadores possuem relatos. O Pajé conhece histórias. Pesquisadores possuem documentos. A Marinha possui arquivos. Ufólogos possuem fotografias.
+Cada jogador continua tendo controle completo sobre seu próprio barco.
 
-Aos poucos, essas histórias começam a se conectar.
+O COMEÇO
 
-O jogador precisa encontrar cinco fragmentos relacionados ao mistério. Cada descoberta responde uma pergunta, mas cria outras duas.
+O jogador começa em um porto.
 
-No final da campanha, os jogadores podem influenciar o futuro do servidor. Eles podem escolher proteger o selo e criar uma temporada chamada Mar Manso, romper o selo e entrar em uma era de Mar Bravo, ou aceitar o desconhecido e abrir caminho para o Mar Aberto, com novas regiões, criaturas e mistérios.
+Antes de sair, precisa preparar sua embarcação.
 
-O objetivo é fazer com que cada servidor desenvolva sua própria história.
+Combustível.
 
-Um servidor pode ficar conhecido como o lugar onde encontraram a Pedra. Outro pode ficar conhecido por uma grande batalha naval. Outro pelo primeiro Encantado. Outro pela descoberta de uma ilha desconhecida.
+Comida.
 
-O verdadeiro progresso do jogador não é apenas subir de nível.
+Equipamentos.
+
+Isca.
+
+Redes.
+
+Rádio.
+
+Sonar.
+
+Mergulho.
+
+Armazenamento.
+
+Equipamentos de navegação.
+
+Cada escolha possui consequências.
+
+Levar muito equipamento significa mais peso.
+
+Levar pouco equipamento significa correr riscos.
+
+Sair com pouco combustível pode transformar uma viagem tranquila em uma emergência.
+
+E o mar não espera você estar preparado.
+
+O MAR
+
+Quanto mais distante o jogador estiver da costa, maior o risco.
+
+Próximo dos portos existem águas relativamente conhecidas.
+
+Mais distante aparecem:
+
+águas profundas;
+tempestades;
+naufrágios;
+regiões de pesca;
+fenômenos estranhos;
+ilhas;
+áreas de proteção;
+zonas militares;
+regiões de contrabando;
+locais desconhecidos.
+
+O jogador precisa aprender a navegar.
+
+Não existe um GPS dizendo exatamente tudo.
+
+O mapa fornece informações.
+
+O mundo fornece pistas.
+
+E o jogador precisa juntar as duas coisas.
+
+PESCA
+
+A pesca é um dos principais sistemas do jogo.
+
+Os peixes possuem:
+
+habitat;
+profundidade;
+horário;
+comportamento;
+alimentação;
+sazonalidade;
+tamanho;
+população.
+
+Os cardumes se movimentam.
+
+Uma região pode estar cheia de peixe hoje e praticamente vazia amanhã.
+
+A pesca excessiva pode diminuir uma população.
+
+Isso afeta os preços dos portos e pode provocar fiscalização.
+
+Assim, milhares de jogadores podem alterar o ecossistema do servidor.
+
+O BARCO É O SEU LEGADO
+
+O barco não é apenas um veículo.
+
+É a sua história dentro do servidor.
+
+Ele pode receber:
+
+motores melhores;
+sonar;
+rádio;
+freezer;
+redes;
+equipamentos de mergulho;
+iluminação;
+armazenamento;
+combustível maior;
+equipamentos de navegação;
+melhorias estruturais.
+
+E o barco registra sua história.
+
+Viagens.
+
+Peixes capturados.
+
+Tempestades enfrentadas.
+
+Naufrágios encontrados.
+
+Jogadores encontrados.
+
+Combates.
+
+Descobertas.
+
+Acidentes.
+
+Missões.
+
+Até acontecimentos sobrenaturais.
+
+SEU BARCO PODE MORRER
+
+E aqui existe uma das principais características do jogo.
+
+Afundar não significa apagar sua história.
+
+Se seu barco naufragar, o naufrágio pode permanecer no mundo.
+
+Outro jogador pode encontrar sua embarcação.
+
+Pode mergulhar até ela.
+
+Pode recuperar sua carga.
+
+Pode encontrar equipamentos.
+
+Pode encontrar documentos.
+
+Pode encontrar fotografias.
+
+Pode descobrir quem era o dono daquele barco.
+
+Imagine encontrar no fundo do oceano um barco chamado:
+
+"São Jorge II"
+
+E descobrir que aquele barco desapareceu há três dias durante uma tempestade.
+
+Agora aquela história pertence ao mundo.
+
+COOPERAÇÃO
+
+Como cada barco possui apenas um jogador, a cooperação acontece entre embarcações.
+
+Um jogador pode chamar outro pelo rádio:
+
+"Preciso de ajuda. Motor parou."
+
+Outro pode responder:
+
+"Estou a dois quilômetros. Segura aí."
+
+Um segundo barco pode chegar.
+
+Pode rebocar o primeiro.
+
+Pode fornecer combustível.
+
+Pode escoltar.
+
+Pode ajudar em um combate.
+
+Ou simplesmente ignorar.
+
+Não existe obrigação de cooperar.
+
+O mundo é criado pelas decisões dos jogadores.
+
+FROTAS
+
+Jogadores podem formar grupos.
+
+Uma frota pode possuir vários barcos.
+
+Por exemplo:
+
+Frota Maré Alta
+
+Barco 01 — pesca
+Barco 02 — exploração
+Barco 03 — mergulho
+Barco 04 — escolta
+
+Mas cada jogador continua controlando seu próprio barco.
+
+Isso permite criar encontros enormes sem precisar colocar quatro pessoas dentro de uma única embarcação.
+
+COMBATE
+
+O combate também acontece entre barcos.
+
+Um jogador pode encontrar outro no mar.
+
+Pode haver perseguição.
+
+Fuga.
+
+Emboscada.
+
+Proteção de carga.
+
+Piratas.
+
+Contrabandistas.
+
+Caçadores de recompensa.
+
+Operações militares.
+
+O jogador precisa decidir se vale a pena lutar.
+
+Porque uma batalha pode destruir aquilo que levou horas para conquistar.
+
+COMÉRCIO
+
+Cada porto possui sua própria economia.
+
+Os preços mudam de acordo com:
+
+oferta;
+demanda;
+clima;
+quantidade de jogadores;
+pesca;
+eventos;
+regiões bloqueadas;
+acontecimentos do servidor.
+
+O jogador pode comprar barato em um porto e vender caro em outro.
+
+Mas transportar mercadoria significa correr riscos.
+
+Quanto maior a carga...
+
+maior a tentação.
+
+E maior o risco de alguém querer roubá-la.
+
+O RÁDIO
+
+O rádio VHF é um dos sistemas mais importantes do jogo.
+
+É através dele que o mundo ganha vida.
+
+O jogador pode ouvir:
+
+outros jogadores;
+pescadores;
+emergências;
+tempestades;
+operações navais;
+avisos;
+missões;
+rumores;
+transmissões desconhecidas.
+
+E existe o:
+
+CANAL 03
+
+Entre 02:00 e 04:00 da madrugada, algo pode acontecer.
+
+Uma voz feminina aparece no rádio.
+
+Às vezes fala números.
+
+Às vezes coordenadas.
+
+Às vezes nomes.
+
+Às vezes palavras que não deveriam estar sendo transmitidas.
+
+O jogador pode gravar.
+
+Pode anotar.
+
+Pode compartilhar com outros jogadores.
+
+Pode tentar descobrir o significado.
+
+Mas ninguém sabe quem está transmitindo.
+
+O MISTÉRIO
+
+O sobrenatural nunca é completamente explicado.
+
+Pode ser:
+
+uma criatura.
+
+Um fenômeno natural.
+
+Uma operação militar.
+
+Uma tecnologia desconhecida.
+
+Uma alucinação.
+
+Uma transmissão.
+
+Uma lenda.
+
+Ou alguma coisa realmente sobrenatural.
+
+O jogo nunca confirma completamente.
+
+O jogador precisa decidir no que acredita.
+
+A SANIDADE
+
+A sanidade representa o quanto o jogador ainda confia na própria percepção.
+
+Conforme ela diminui:
+
+sons começam a aparecer;
+o rádio sofre interferências;
+sombras podem surgir;
+luzes aparecem no horizonte;
+instrumentos podem apresentar comportamentos estranhos;
+acontecimentos aparentemente impossíveis começam a ocorrer.
+
+E chegar a zero não significa necessariamente morrer.
+
+O jogador pode se tornar um Encantado.
+
+Nesse caso, sua história continua de outra maneira.
+
+Seu antigo jogador desapareceu.
+
+Mas agora existe algo no mar.
+
+E outros jogadores podem encontrá-lo.
+
+MORTE NÃO APAGA A HISTÓRIA
+
+Essa é uma das regras fundamentais de Maré de Peruíbe.
+
+Se você perder o barco:
+
+fica o naufrágio.
+
+Se você encontrar algo:
+
+fica o registro.
+
+Se você fotografar uma criatura:
+
+fica a fotografia.
+
+Se você descobrir uma frequência:
+
+outros podem ouvi-la.
+
+Se você desaparecer:
+
+alguém pode contar sua história.
+
+O mundo guarda aquilo que aconteceu.
+
+O MAPA
+
+O mundo começa no litoral de Peruíbe e vai crescendo.
+
+A região possui áreas diferentes:
+
+Peruíbe → Itanhaém → Mongaguá → Praia Grande → Santos → Guarujá
+
+E depois:
+
+Juréia → Barra do Una → ilhas → mar aberto
+
+Entre elas existem áreas de:
+
+pesca livre;
+proteção ambiental;
+áreas militares;
+portos;
+naufrágios;
+eventos;
+ilhas;
+regiões perigosas;
+fenômenos sobrenaturais.
+
+A Ilha da Queimada Grande funciona como um dos pontos mais distantes e misteriosos da região.
+
+A Laje de Santos ocupa uma posição mais alinhada com Santos e funciona como uma importante área de exploração, pesca e mergulho.
+
+E existem outras ilhas, lajes e formações espalhadas pelo mapa.
+
+O jogador aprende a reconhecer esses lugares.
+
+O DESPERTAR DA SERPENTE
+
+A campanha principal se chama:
+
+O DESPERTAR DA SERPENTE
+
+Existe algo relacionado à chamada Pedra da Serpente.
+
+Alguns acreditam que seja apenas uma formação natural.
+
+Outros acreditam que seja um antigo selo.
+
+Pescadores possuem histórias.
+
+Pesquisadores possuem documentos.
+
+A Marinha possui arquivos.
+
+Ufólogos possuem fotografias.
+
+E alguns jogadores possuem experiências que não conseguem explicar.
+
+Aos poucos, tudo começa a se conectar.
+
+O jogador precisa encontrar cinco fragmentos relacionados ao mistério.
+
+Cada descoberta responde uma pergunta.
+
+Mas cria outras duas.
+
+O FUTURO DO SERVIDOR
+
+No final da campanha, os jogadores podem influenciar o futuro daquele mundo.
+
+MAR MANSO
+
+Os jogadores protegem o segredo.
+
+O mundo permanece relativamente estável.
+
+MAR BRAVO
+
+O selo é rompido.
+
+O oceano muda.
+
+Novos perigos aparecem.
+
+MAR ABERTO
+
+Os jogadores aceitam o desconhecido.
+
+Novas regiões começam a surgir.
+
+Novas criaturas.
+
+Novos fenômenos.
+
+Novos mistérios.
+
+Cada servidor pode acabar tendo sua própria história.
+
+Um servidor pode ficar conhecido como:
+
+"O servidor onde encontraram a Pedra."
+
+Outro:
+
+"O servidor da Grande Batalha."
+
+Outro:
+
+"O servidor onde apareceu o primeiro Encantado."
+
+Outro:
+
+"O servidor onde descobriram uma ilha que não estava no mapa."
+
+O VERDADEIRO PROGRESSO
+
+O objetivo não é simplesmente ficar mais rico.
 
 É aprender.
 
@@ -68,33 +553,39 @@ Aprender quando sair.
 
 Aprender quando voltar.
 
+Aprender a interpretar o céu.
+
 Aprender a reconhecer uma tempestade.
+
+Aprender uma corrente.
 
 Aprender uma rota.
 
-Conhecer uma tripulação.
+Conhecer outros jogadores.
+
+Criar aliados.
+
+Criar inimigos.
 
 Ter um barco com história.
 
-Ter amigos.
+E eventualmente ter uma história que ninguém acredita.
 
-Ter inimigos.
+Porque o objetivo de Maré de Peruíbe não é fazer o jogador terminar o jogo pensando:
 
-E ter histórias que ninguém acredita.
+"Completei todas as missões."
 
-Por isso, o jogo não deve terminar fazendo o jogador pensar que completou três missões.
-
-Ele deve desligar o jogo e pensar:
+É fazer ele desligar o jogo pensando:
 
 "Você não vai acreditar no que aconteceu comigo hoje."
 
-Essa é a verdadeira proposta de Maré de Peruíbe.
-
-Não é um jogo sobre conquistar o mar.
+Maré de Peruíbe não é um jogo sobre conquistar o mar.
 
 É um jogo sobre aprender a respeitá-lo.
 
-Entre a serra e o mar, o que a gente vê é o que está escondido.
+Entre a serra e o mar...
+
+o que a gente vê é o que está escondido.
 
 Pesque.
 
@@ -108,4 +599,4 @@ Descubra.
 
 E se o rádio chamar...
 
-**não responda.**
+não responda.
