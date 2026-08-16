@@ -1,15 +1,11 @@
-// js/world/world-map.js — SÓ A CAMADA DA FRENTE + MORROS PROCEDURAIS (sem textura de imagem)
+// js/world/world-map.js — MAPA FIXO: cidades/serra/estruturas em GRUPOS CULLÁVEIS
 import * as THREE from 'three';
 import { state } from '../state.js';
 import { CONFIG } from '../config.js';
 import { MATS } from '../boats/boat-base.js';
-import { buildPeruibe } from './cities/peruibe.js';
-import { buildItanhaem } from './cities/itanhaem.js';
-import { buildMongagua } from './cities/mongagua.js';
-import { buildPraiaGrande } from './cities/praiagrande.js';
-import { buildSantos } from './cities/santos.js';
-import { buildGuaruja } from './cities/guaruja.js';
+import { registerVisibility } from './visibility.js';
 
+// ================= MARÉ =================
 export const tide = { level: 0 };
 export function updateTide(dt) {
   const h = CONFIG.time.hour;
@@ -18,8 +14,8 @@ export function updateTide(dt) {
 export function tideM() { return tide.level; }
 export function isHighTide() { return tide.level > 0.35; }
 
+// ================= GEOGRAFIA =================
 export const SPAWN = { x: -780, z: 520 };
-
 export const COAST = [
   [-1600, 650], [-1304, 527], [-1082, 436], [-860, 344], [-638, 252], [-379, 145],
   [-194, 68], [65, -39], [324, -147], [620, -269], [879, -376], [1175, -499],
@@ -78,7 +74,7 @@ const REGIONS = [
   { id: 'barrauna',   name: 'Barra do Una',            mood: 'selva',   x: -1600, z: 650, r: 260, swell: 0.80, chop: 0.80, tint: [0.55, 0.95, 0.75] },
   { id: 'guarau',     name: 'Guarau',                  mood: 'selva',   x: -1304, z: 527, r: 160, swell: 0.85, chop: 0.85, tint: [0.55, 0.95, 0.75] },
   { id: 'reserva',    name: 'Lagoas da Reserva',       mood: 'selva',   x: -419,  z: 53,  r: 140, swell: 0.90, chop: 0.90, tint: [0.60, 0.95, 0.80] },
-  { id: 'peruibe',    name: 'Peruíbe',                 mood: 'caicara', x: -860,  z: 344, r: 200, swell: 1.00, chop: 1.00, tint: [1, 1, 1] },
+  { id: 'peruibe',    name: 'Peruíbe',                 mood: 'caicara', x: -720,  z: 220, r: 200, swell: 1.00, chop: 1.00, tint: [1, 1, 1] },
   { id: 'pedra',      name: 'Pedra da Serpente',       mood: 'mistico', x: -1106, z: 381, r: 150, swell: 1.05, chop: 1.10, tint: [0.80, 0.90, 1.00] },
   { id: 'costao',     name: 'Ilha do Costão',          mood: 'mistico', x: -812,  z: 454, r: 120, swell: 1.10, chop: 1.10, tint: [0.70, 0.85, 0.95] },
   { id: 'itanhaem',   name: 'Itanhaém',                mood: 'caicara', x: 65,    z: -39, r: 300, swell: 1.00, chop: 1.00, tint: [1, 1, 1] },
@@ -117,6 +113,7 @@ export function getRegionAt(x, z) {
     : { id: 'aberto', name: 'Mar Aberto', pvp: 'open', fishing: 'legal' };
 }
 
+// ================= BATIMETRIA =================
 export const WORLD = { minX: -2200, minZ: -1400, sizeX: 5600, sizeZ: 2800 };
 const N = 256;
 const cpu = new Float32Array(N * N * 4);
@@ -205,18 +202,104 @@ export const COLLIDERS = [
 ];
 export const worldFX = { cityMats: [], round: [], mountainMats: [] };
 
-// ============================================================
-// 🏔️ MORROS 100% THREE.JS — sem textura de imagem
-//    vertex colors: mata embaixo → vegetação → rocha no topo
-// ============================================================
-const C_MATA  = new THREE.Color(0x1e3a28);
-const C_VEGET = new THREE.Color(0x3a5c38);
-const C_ROCHA = new THREE.Color(0x71695c);
-const _hc = new THREE.Color();
+// ================= CIDADES (grupos culláveis) =================
+const UNIT_BOX = new THREE.BoxGeometry(1, 1, 1);
+const CITIES = [
+  { id: 'peruibe',    x: -720,  z: 182,  n: 16, hMin: 4,  hMax: 10, spread: 110, inset: 55 },
+  { id: 'itanhaem',   x: 65,    z: -39,  n: 44, hMin: 5,  hMax: 16, spread: 300, inset: 60 },
+  { id: 'mongagua',   x: 620,   z: -269, n: 24, hMin: 6,  hMax: 18, spread: 170, inset: 55 },
+  { id: 'praiagrande',x: 1175,  z: -499, n: 64, hMin: 18, hMax: 48, spread: 310, inset: 55 },
+  { id: 'santos',     x: 1619,  z: -683, n: 48, hMin: 22, hMax: 52, spread: 150, inset: 70 },
+  { id: 'guaruja',    x: 1841,  z: -775, n: 32, hMin: 14, hMax: 36, spread: 170, inset: 60 }
+];
+function makeCityMat() {
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xb9b2a4, roughness: 0.85, metalness: 0.05,
+    emissive: 0xffd9a0, emissiveIntensity: 0
+  });
+  worldFX.cityMats.push(mat);
+  return mat;
+}
+function buildCity(city) {
+  const g = new THREE.Group();
+  const mat = makeCityMat();
+  const im = new THREE.InstancedMesh(UNIT_BOX, mat, city.n);
+  const dummy = new THREE.Object3D(), col = new THREE.Color();
+  for (let i = 0; i < city.n; i++) {
+    const t = ((i + 0.5) / city.n - 0.5) * 2 * city.spread;
+    const off = city.inset + Math.random() * 70;
+    const x = city.x + CC.x * t - SD.x * off + (Math.random() - 0.5) * 14;
+    const z = city.z + CC.z * t - SD.z * off + (Math.random() - 0.5) * 14;
+    const center = 1 - Math.abs(t) / city.spread;
+    const h = city.hMin + (city.hMax - city.hMin) * Math.pow(Math.random(), 1.2) * (0.45 + 0.55 * center);
+    dummy.position.set(x, h / 2 + 1.6, z);
+    dummy.scale.set(5 + Math.random() * 7, h, 5 + Math.random() * 7);
+    dummy.rotation.y = Math.atan2(CC.x, CC.z) + (Math.random() - 0.5) * 0.1;
+    dummy.updateMatrix();
+    im.setMatrixAt(i, dummy.matrix);
+    im.setColorAt(i, col.setHSL(0.09, 0.04 + Math.random() * 0.10, 0.55 + Math.random() * 0.30));
+  }
+  im.instanceMatrix.needsUpdate = true;
+  if (im.instanceColor) im.instanceColor.needsUpdate = true;
+  if (im.computeBoundingSphere) im.computeBoundingSphere(); // frustum culling real
+  g.add(im);
+  // ícones por cidade
+  if (city.id === 'peruibe') {
+    const rm = new THREE.MeshStandardMaterial({ color: 0xf2f0e8, roughness: 0.6, emissive: 0xffe9c0, emissiveIntensity: 0 });
+    worldFX.round.push({ mat: rm, k: 0.12 });
+    const tw = new THREE.Mesh(new THREE.CylinderGeometry(6, 6.5, 26, 20), rm);
+    tw.position.set(LANDMARKS.serraItatis[0], 14.6, LANDMARKS.serraItatis[1]); g.add(tw);
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(6, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), rm);
+    dome.position.set(LANDMARKS.serraItatis[0], 27.6, LANDMARKS.serraItatis[1]); g.add(dome);
+    const bandMat = new THREE.MeshStandardMaterial({ color: 0x1c2a33, emissive: 0xffd9a0, emissiveIntensity: 0 });
+    worldFX.round.push({ mat: bandMat, k: 0.9 });
+    for (let i = 0; i < 6; i++) {
+      const b = new THREE.Mesh(new THREE.TorusGeometry(6.05, 0.12, 6, 24), bandMat);
+      b.rotation.x = Math.PI / 2; b.position.set(LANDMARKS.serraItatis[0], 4.6 + i * 4, LANDMARKS.serraItatis[1]);
+      g.add(b);
+    }
+  }
+  if (city.id === 'praiagrande') {
+    for (const [px, pz] of [[1155, -545], [1170, -552]]) {
+      const tw = new THREE.Mesh(new THREE.BoxGeometry(8, 62, 8), mat);
+      tw.position.set(px, 32.6, pz); g.add(tw);
+    }
+  }
+  if (city.id === 'santos') {
+    const portM = new THREE.MeshStandardMaterial({ color: 0x2a2f36, roughness: 0.9 });
+    const crMat = new THREE.MeshStandardMaterial({ color: 0xe8b833, roughness: 0.7 });
+    for (let i = 0; i < 4; i++) {
+      const b = new THREE.Mesh(new THREE.BoxGeometry(12, 8 + ((i * 7) % 8), 8), portM);
+      b.position.set(1560 + i * 24 - SD.x * 40, 5, -640 - SD.z * 40); g.add(b);
+      const cr = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 20, 6), crMat);
+      cr.position.set(1570 + i * 24, 10, -630); g.add(cr);
+    }
+  }
+  const showR = city.spread * 2 + 500, hideR = showR + 300; // pop escondido pelo fog
+  state.scene.add(g);
+  registerVisibility(g, city.x, city.z, showR, hideR);
+  return g;
+}
+
+// ================= SERRA (chunks culláveis) =================
+function makeFallbackRockTex(baseHex) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 512;
+  const g = c.getContext('2d');
+  g.fillStyle = '#' + baseHex.toString(16).padStart(6, '0'); g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 4000; i++) {
+    const x = Math.random() * 512, y = Math.random() * 512;
+    const r = 2 + Math.random() * 8;
+    const v = Math.floor(Math.random() * 40) - 20;
+    g.fillStyle = `rgba(${Math.max(0, Math.min(255, ((baseHex >> 16) & 255) + v))},${Math.max(0, Math.min(255, ((baseHex >> 8) & 255) + v))},${Math.max(0, Math.min(255, (baseHex & 255) + v))},${0.15 + Math.random() * 0.35})`;
+    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.repeat.set(2, 2);
+  return t;
+}
 function hillGeo(r, h, seed) {
   const g = new THREE.SphereGeometry(r, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2);
   const p = g.attributes.position;
-  const colors = new Float32Array(p.count * 3);
   for (let i = 0; i < p.count; i++) {
     const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
     const n = Math.sin(x * 0.045 + seed) * Math.cos(z * 0.055 + seed * 1.7)
@@ -226,69 +309,82 @@ function hillGeo(r, h, seed) {
     p.setX(i, x * (1 + n * 0.14 * lift));
     p.setZ(i, z * (1 + n * 0.14 * lift));
     p.setY(i, y * (1 + n * 0.22 * lift));
-    // cor por altura + ruído de manchas
-    const hn = THREE.MathUtils.clamp(p.getY(i) / r + n * 0.18, 0, 1);
-    if (hn < 0.5) _hc.copy(C_MATA).lerp(C_VEGET, hn / 0.5);
-    else _hc.copy(C_VEGET).lerp(C_ROCHA, (hn - 0.5) / 0.5);
-    _hc.multiplyScalar(0.88 + 0.24 * Math.abs(Math.sin(seed * 7.3 + i * 0.131)));
-    colors[i * 3] = _hc.r; colors[i * 3 + 1] = _hc.g; colors[i * 3 + 2] = _hc.b;
   }
-  g.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   g.scale(1, h / r, 1);
   g.computeVertexNormals();
   return g;
 }
-// material único procedural (recebe luz do sol / noite automaticamente)
-const hillMat = new THREE.MeshStandardMaterial({
-  vertexColors: true, roughness: 1, metalness: 0, fog: false
-});
-worldFX.mountainMats.push(hillMat);
-
-// SÓ A CAMADA DA FRENTE (a que estava perfeita) — a de trás foi removida
-function buildMountainLayer(dist, n, rMin, rMax, hMin, hMax, sMin, sMax) {
-  const group = new THREE.Group();
+function buildMountainLayer(tex, dist, n, rMin, rMax, hMin, hMax, sMin, sMax, tint, showR, hideR) {
+  const mat = new THREE.MeshStandardMaterial({ map: tex, color: tint, roughness: 1, metalness: 0, fog: false });
+  worldFX.mountainMats.push(mat);
+  let chunk = new THREE.Group(), cn = 0, cx = 0, cz = 0;
+  const flush = () => {
+    if (!cn) return;
+    state.scene.add(chunk);
+    registerVisibility(chunk, cx / cn, cz / cn, showR, hideR);
+  };
   const coastLen = COAST.length - 1;
-  const startT = -0.2, endT = 1.2;
-  const step = (endT - startT) / n;
+  const startT = -0.2, endT = 1.2, step = (endT - startT) / n;
   for (let i = 0; i < n; i++) {
     const t = startT + (i + 0.5) * step;
     const idx = Math.min(coastLen - 1, Math.max(0, Math.floor(t * coastLen)));
     const f = t * coastLen - idx;
     const a = COAST[idx], b = COAST[Math.min(idx + 1, coastLen)];
-    const cx = a[0] + (b[0] - a[0]) * f, cz = a[1] + (b[1] - a[1]) * f;
     const off = dist + (Math.random() - 0.5) * 240;
-    const px = cx - SD.x * off + (Math.random() - 0.5) * 60;
-    const pz = cz - SD.z * off + (Math.random() - 0.5) * 60;
+    const px = a[0] + (b[0] - a[0]) * f - SD.x * off + (Math.random() - 0.5) * 60;
+    const pz = a[1] + (b[1] - a[1]) * f - SD.z * off + (Math.random() - 0.5) * 60;
     const center = 1 - Math.abs(t - 0.5) * 1.2;
     const h = (hMin + (hMax - hMin) * Math.pow(Math.random(), 0.8)) * (0.6 + 0.4 * center);
     const r = rMin + (rMax - rMin) * Math.random();
-    const m = new THREE.Mesh(hillGeo(r, h, i * 7.3 + dist * 0.01), hillMat);
+    const m = new THREE.Mesh(hillGeo(r, h, i * 7.3 + dist * 0.01), mat);
     m.position.set(px, -3, pz);
     m.rotation.y = Math.atan2(CC.x, CC.z) + (Math.random() - 0.5) * 0.5;
     m.scale.set(sMin + Math.random() * (sMax - sMin), 1, 1);
-    group.add(m);
-    if (Math.random() < 0.75) {
-      const h2 = h * (0.4 + Math.random() * 0.35), r2 = r * (0.5 + Math.random() * 0.3);
-      const side = Math.random() < 0.5 ? -1 : 1;
-      const m2 = new THREE.Mesh(hillGeo(r2, h2, i * 3.1 + dist), hillMat);
-      m2.position.set(px + CC.x * side * r * 0.85, -3, pz + CC.z * side * r * 0.85);
-      m2.rotation.y = m.rotation.y;
-      m2.scale.set(sMin + Math.random() * (sMax - sMin), 1, 1);
-      group.add(m2);
-    }
+    chunk.add(m);
+    cx += px; cz += pz;
+    if (++cn >= 6) { flush(); chunk = new THREE.Group(); cn = 0; cx = 0; cz = 0; }
   }
-  state.scene.add(group);
-}
-function buildMountains() {
-  // apenas a camada da frente, agora procedural
-  buildMountainLayer(700, 30, 60, 110, 45, 90, 1.6, 2.6);
-}
-export function updateWorldFX() {
-  const nf = state.nightF;
-  for (const m of worldFX.cityMats) m.emissiveIntensity = nf * 1.2;
-  for (const r of worldFX.round) r.mat.emissiveIntensity = nf * r.k;
+  flush();
 }
 
+// ================= ESTRUTURAS (grupo do portinho) =================
+function buildPortinho() {
+  const g = new THREE.Group();
+  const merc = new THREE.Mesh(new THREE.BoxGeometry(5, 3, 5), MATS.mCream);
+  merc.position.set(-882, 2.6, 338); g.add(merc);
+  const roof = new THREE.Mesh(new THREE.ConeGeometry(4.5, 2.5, 4), MATS.mRed);
+  roof.position.set(-882, 5.2, 338); roof.rotation.y = Math.PI / 4; g.add(roof);
+  const cais = new THREE.Mesh(new THREE.BoxGeometry(3, 0.5, 14), MATS.mWood);
+  cais.position.set(-870, 1.6, 352); g.add(cais);
+  state.scene.add(g);
+  registerVisibility(g, LANDMARKS.portinho[0], LANDMARKS.portinho[1], 900, 1200);
+}
+function buildPonteGuarau() {
+  const g = new THREE.Group();
+  const ponte = new THREE.Mesh(new THREE.BoxGeometry(7, 0.3, 2.2), MATS.mWood);
+  ponte.position.set(LANDMARKS.ponteMadeira[0], 2.3, LANDMARKS.ponteMadeira[1]); g.add(ponte);
+  for (const cc of COLLIDERS.slice(ISLANDS.length, ISLANDS.length + 2)) {
+    const st = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 3, 6), MATS.mDark);
+    st.position.set(cc.x, 1, cc.z); g.add(st);
+  }
+  state.scene.add(g);
+  registerVisibility(g, LANDMARKS.ponteMadeira[0], LANDMARKS.ponteMadeira[1], 900, 1200);
+}
+function buildPassarela() {
+  const g = new THREE.Group();
+  const dir = new THREE.Vector2(0.25, 0.97);
+  const pass = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.3, 95), MATS.mWood);
+  pass.position.set(LANDMARKS.passarelaItanhaem[0] + dir.x * 45, 2.0, LANDMARKS.passarelaItanhaem[1] + dir.y * 45);
+  pass.rotation.y = Math.atan2(dir.x, dir.y); g.add(pass);
+  for (const cc of COLLIDERS.slice(ISLANDS.length + 2, ISLANDS.length + 5)) {
+    const st = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 3, 6), MATS.mDark);
+    st.position.set(cc.x, 1, cc.z); g.add(st);
+  }
+  state.scene.add(g);
+  registerVisibility(g, LANDMARKS.passarelaItanhaem[0], LANDMARKS.passarelaItanhaem[1], 900, 1200);
+}
+
+// ================= TERRENO / INIT =================
 function landShape(coastOff, backOff) {
   const sh = new THREE.Shape();
   const pts = COAST.map(p => [p[0] - SD.x * coastOff, -(p[1] - SD.z * coastOff)]);
@@ -306,17 +402,21 @@ function flat(geo, mat, y) {
   state.scene.add(m);
   return m;
 }
+export function updateWorldFX() {
+  const nf = state.nightF;
+  for (const m of worldFX.cityMats) m.emissiveIntensity = nf * 1.2;
+  for (const r of worldFX.round) r.mat.emissiveIntensity = nf * r.k;
+}
 export function initWorldMap() {
   CONFIG.wind.direction = Math.atan2(-SD.z, -SD.x);
+  // terreno (sempre visível — é o chão)
   const geo = new THREE.PlaneGeometry(WORLD.sizeX, WORLD.sizeZ, 240, 170);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;
   const cols = new Float32Array(pos.count * 3);
-  const sand = new THREE.Color(0.80, 0.70, 0.50);
-  const rock = new THREE.Color(0.30, 0.28, 0.25);
-  const deep = new THREE.Color(0.05, 0.08, 0.12);
-  const land = new THREE.Color(0.62, 0.55, 0.38);
-  const c = new THREE.Color();
+  const sand = new THREE.Color(0.80, 0.70, 0.50), rock = new THREE.Color(0.30, 0.28, 0.25),
+        deep = new THREE.Color(0.05, 0.08, 0.12), land = new THREE.Color(0.62, 0.55, 0.38),
+        c = new THREE.Color();
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), z = pos.getZ(i), d = depthAt(x, z);
     pos.setY(i, d > 0 ? -Math.min(d, 42) : Math.min(1.8, -d * 0.30));
@@ -325,7 +425,6 @@ export function initWorldMap() {
     else if (d < 12) c.copy(sand).lerp(rock, (d - 2) / 10);
     else c.copy(rock).lerp(deep, Math.min(1, (d - 12) / 25));
     c.multiplyScalar(0.92 + Math.sin(x * 0.3 + z * 0.2) * 0.08);
-    if (d > -0.5 && d < 1.6) c.multiplyScalar(0.58);
     cols[i * 3] = c.r; cols[i * 3 + 1] = c.g; cols[i * 3 + 2] = c.b;
   }
   geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
@@ -335,89 +434,47 @@ export function initWorldMap() {
   state.scene.add(terr);
   flat(new THREE.ShapeGeometry(landShape(-25, 900)), new THREE.MeshStandardMaterial({ color: 0xd8c49a, roughness: 1 }), 0.9);
   flat(new THREE.ShapeGeometry(landShape(70, 900)), new THREE.MeshStandardMaterial({ color: 0x2d4a33, roughness: 1 }), 1.5);
-
-  buildMountains();
-
-  // Morro do Itatins — agora com o mesmo material procedural
-  const morroMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 });
+  // morro do Itatins + Pedra (perto do spawn: sempre ligados)
+  const morroMat = new THREE.MeshStandardMaterial({ color: 0x24402e, roughness: 1 });
   const morro = new THREE.Mesh(hillGeo(160, 120, 42.7), morroMat);
   morro.position.set(LANDMARKS.morroItatins[0], -2, LANDMARKS.morroItatins[1]);
   morro.scale.set(1.6, 1, 1.3);
   state.scene.add(morro);
-  for (let i = 0; i < 4; i++) {
-    const a = (i / 4) * Math.PI * 2 + 0.3;
-    const d = 90 + Math.random() * 40;
-    const sub = new THREE.Mesh(hillGeo(50 + Math.random() * 30, 40 + Math.random() * 30, i * 9.1), morroMat);
-    sub.position.set(LANDMARKS.morroItatins[0] + Math.cos(a) * d, -2, LANDMARKS.morroItatins[1] + Math.sin(a) * d);
-    state.scene.add(sub);
-  }
   const rockM = new THREE.MeshStandardMaterial({ color: 0x1c2024, roughness: 1, flatShading: true });
   const p1 = new THREE.Mesh(new THREE.ConeGeometry(7, 16, 5), rockM);
   const p2 = new THREE.Mesh(new THREE.ConeGeometry(5, 11, 5), rockM);
   p1.position.set(LANDMARKS.pedraSerpente[0], 6, LANDMARKS.pedraSerpente[1]);
-  p2.position.set(p1.position.x + 6, 4, p1.position.z + 3);
-  p2.rotation.z = 0.3;
+  p2.position.set(p1.position.x + 6, 4, p1.position.z + 3); p2.rotation.z = 0.3;
   state.scene.add(p1, p2);
-
-  const lagoonM = new THREE.MeshStandardMaterial({ color: 0x14486a, roughness: 0.15, metalness: 0.3 });
-  for (const [lx, lz, lr] of [[-419, 53, 26], [-380, 90, 18], [-460, 20, 20]]) {
-    const lg = new THREE.Mesh(new THREE.CylinderGeometry(lr, lr * 1.1, 0.15, 16), lagoonM);
-    lg.position.set(lx, 1.1, lz);
-    state.scene.add(lg);
-  }
-  const hutM = new THREE.MeshStandardMaterial({ color: 0x6b4a2a, roughness: 0.9 });
-  const strawM = new THREE.MeshStandardMaterial({ color: 0x9a7a3a, roughness: 1 });
-  for (let i = 0; i < 5; i++) {
-    const a = (i / 5) * Math.PI * 2;
-    const hx = -419 + Math.cos(a) * 40, hz = 53 + Math.sin(a) * 30;
-    const hut = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.6, 1.4, 8), hutM);
-    hut.position.set(hx, 1.9, hz); state.scene.add(hut);
-    const roof = new THREE.Mesh(new THREE.ConeGeometry(2.2, 1.6, 8), strawM);
-    roof.position.set(hx, 3.4, hz); state.scene.add(roof);
-  }
-
+  // ilhas (cada uma cullável individualmente)
   for (const il of ISLANDS) {
+    const g = new THREE.Group();
     const m = new THREE.Mesh(new THREE.ConeGeometry(il.r, il.h, 7),
       new THREE.MeshStandardMaterial({ color: il.c, roughness: 1, flatShading: true }));
     m.position.set(il.x, il.h * 0.5 - 0.6, il.z);
-    state.scene.add(m);
+    g.add(m);
+    state.scene.add(g);
+    registerVisibility(g, il.x, il.z, il.r * 8 + 400, il.r * 8 + 700);
   }
+  // mangue (perto da Barra do Una)
   for (const mg of MANGUE) {
     const m = new THREE.Mesh(new THREE.CylinderGeometry(mg.r, mg.r * 1.1, 0.7, 12),
       new THREE.MeshStandardMaterial({ color: 0x1e3a24, roughness: 1 }));
     m.position.set(mg.x, 0.6, mg.z);
     state.scene.add(m);
   }
-  const ponte = new THREE.Mesh(new THREE.BoxGeometry(7, 0.3, 2.2), MATS.mWood);
-  ponte.position.set(LANDMARKS.ponteMadeira[0], 2.3, LANDMARKS.ponteMadeira[1]);
-  state.scene.add(ponte);
-  for (const cc of COLLIDERS.slice(ISLANDS.length, ISLANDS.length + 2)) {
-    const st = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 3, 6), MATS.mDark);
-    st.position.set(cc.x, 1, cc.z); state.scene.add(st);
-  }
-  const merc = new THREE.Mesh(new THREE.BoxGeometry(5, 3, 5), MATS.mCream);
-  merc.position.set(-882, 2.6, 338); state.scene.add(merc);
-  const roofM = new THREE.Mesh(new THREE.ConeGeometry(4.5, 2.5, 4), MATS.mRed);
-  roofM.position.set(-882, 5.2, 338); roofM.rotation.y = Math.PI / 4; state.scene.add(roofM);
-  const cais = new THREE.Mesh(new THREE.BoxGeometry(3, 0.5, 14), MATS.mWood);
-  cais.position.set(-870, 1.6, 352); state.scene.add(cais);
-  const buoyM = new THREE.MeshStandardMaterial({ color: 0xddcc33 });
-  for (let i = 0; i < 8; i++) {
-    const a = i / 8 * Math.PI * 2;
-    const b = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.2, 8), buoyM);
-    b.position.set(-1600 + Math.cos(a) * 260, 0.6, 830 + Math.sin(a) * 260);
-    state.scene.add(b);
-  }
-
-  buildPeruibe(worldFX);
-  buildItanhaem(worldFX);
-  buildMongagua(worldFX);
-  buildPraiaGrande(worldFX);
-  buildSantos(worldFX);
-  buildGuaruja(worldFX);
-
+  // serra em chunks culláveis
+  const tex1 = makeFallbackRockTex(0x2a3d2e), tex2 = makeFallbackRockTex(0x1e3026);
+  buildMountainLayer(tex1, 700, 30, 60, 110, 45, 90, 1.6, 2.6, 0xbfd6e4, 1500, 1900);
+  buildMountainLayer(tex2, 1150, 24, 90, 160, 90, 175, 1.8, 3.0, 0x9dbcd2, 2000, 2400);
+  buildMountainLayer(tex2, 1700, 16, 140, 240, 170, 300, 2.0, 3.4, 0x5a7590, 2600, 3000);
+  // cidades + estruturas
+  for (const city of CITIES) buildCity(city);
+  buildPortinho();
+  buildPonteGuarau();
+  buildPassarela();
+  // spawn
   state.boatRoot.position.set(SPAWN.x, 0, SPAWN.z);
-  state.physics.y = 0;
-  state.physics.vy = 0;
+  state.physics.y = 0; state.physics.vy = 0;
   updateWorldFX();
 }
