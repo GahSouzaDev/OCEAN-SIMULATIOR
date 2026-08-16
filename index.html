@@ -1,83 +1,23 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OCEAN SIMULATOR // SONS IMERSIVOS</title>
+<title>Maré de Peruíbe</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Oswald:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-<div id="loading-screen">
-  <div id="loading-title">OCEAN SIMULATOR</div>
-  <div id="loading-bar-track"><div id="loading-bar-fill"></div></div>
-  <div id="loading-sub">carregando módulos three.js…</div>
-</div>
-<canvas id="app-canvas"></canvas>
-<div id="lightning-flash"></div>
-<div id="vignette"></div>
-<div id="intro-hint">clique para assumir o controle // WASD navegar // M áudio // L luz // H buzina (segure) // B barco</div>
-
-<div class="hud-panel" id="panel-status">
-  <div class="hud-eyebrow">NAVAL SYSTEMS · V9.0</div>
-  <div class="hud-title">OCEAN SIMULATOR</div>
-  <div class="hud-divider"></div>
-  <div class="readout-row"><span class="lbl">WIND</span><span class="val" id="ro-wind">-- kn</span></div>
-  <div class="readout-row"><span class="lbl">WAVE HEIGHT</span><span class="val" id="ro-waveheight">-- m</span></div>
-  <div class="readout-row"><span class="lbl">WAVE SPEED</span><span class="val" id="ro-wavespeed">--</span></div>
-  <div class="readout-row"><span class="lbl">BOAT SPEED</span><span class="val" id="ro-boatspeed">-- kn</span></div>
-  <div class="readout-row"><span class="lbl">TIME</span><span class="val" id="ro-time">--:--</span></div>
-  <div class="readout-row"><span class="lbl">WEATHER</span><span class="val" id="ro-weather">--</span></div>
-  <div id="compass"><span class="needle" id="ro-heading">HDG 000°</span></div>
-</div>
-
-<div class="hud-panel" id="panel-controls">
-  <div class="hud-eyebrow">ENVIRONMENT CONTROL</div>
-  <div class="slider-row"><label>Altura das ondas <span class="v" id="lbl-amp">1.0x</span></label><input type="range" id="sld-amp" min="0" max="2.4" step="0.05" value="1"></div>
-  <div class="slider-row"><label>Velocidade das ondas <span class="v" id="lbl-speed">1.0x</span></label><input type="range" id="sld-speed" min="0" max="2" step="0.05" value="1"></div>
-  <div class="slider-row"><label>Vento <span class="v" id="lbl-wind">1.0x</span></label><input type="range" id="sld-wind" min="0" max="2.2" step="0.05" value="1"></div>
-  <div class="slider-row"><label>Espuma <span class="v" id="lbl-foam">1.0x</span></label><input type="range" id="sld-foam" min="0" max="2" step="0.05" value="1"></div>
-  <div class="slider-row"><label>Horário <span class="v" id="lbl-hour">06:30</span></label><input type="range" id="sld-hour" min="0" max="24" step="0.05" value="6.5"></div>
-  <div class="btn-row">
-    <div class="hbtn active" data-time="morning">MANHÃ</div><div class="hbtn" data-time="noon">MEIO-DIA</div><div class="hbtn" data-time="afternoon">TARDE</div><div class="hbtn" data-time="sunset">POR-DO-SOL</div><div class="hbtn" data-time="night">NOITE</div>
-  </div>
-  <div class="btn-row" style="margin-top:8px;">
-    <div class="hbtn weather" data-weather="CALM">☀ CALM</div><div class="hbtn weather active" data-weather="MODERATE">🌊 MODERATE</div><div class="hbtn weather storm" data-weather="STORM">🌪 STORM</div><div class="hbtn weather" data-weather="FOG">🌫 FOG</div><div class="hbtn weather" data-weather="RAIN">🌧 RAIN</div>
-  </div>
-  <div class="btn-row" style="margin-top:8px;"><div class="hbtn sun-active" id="btn-auto-sun">☀ AUTO SUN ON</div></div>
-  <div class="slider-row"><label>Vel. do sol <span class="v" id="lbl-sun-speed">0.10x</span></label><input type="range" id="sld-sun-speed" min="0.01" max="1.0" step="0.01" value="0.10"></div>
-  <div class="hud-eyebrow" style="margin-top:10px;">EMBARCAÇÃO // TECLA B</div>
-  <div class="btn-row" style="margin-top:4px;">
-    <div class="hbtn boat active" data-boat="trawler">🎣 PESQUEIRO</div>
-    <div class="hbtn boat" data-boat="pilot">⚓ PILOTO</div>
-  </div>
-  <div class="btn-row" style="margin-top:8px;">
-    <div class="hbtn" id="btn-deck-light" style="flex:1 1 100%;">💡 LUZ DO CONVÉS: OFF</div>
-  </div>
-  <div class="btn-row" style="margin-top:8px;">
-    <div class="hbtn" id="btn-horn" style="flex:1 1 100%;">📯 BUZINA (SEGURE H)</div>
-  </div>
-</div>
-
-<div class="hud-panel" id="panel-camera">
-  <div class="hud-eyebrow">CAMERA</div>
-  <div class="btn-row" style="margin-top:6px;"><div class="hbtn" id="btn-cam-cycle" style="flex:1 1 100%;">ORBIT CAMERA</div></div>
-  <div style="font-size:9px; letter-spacing:1px; color:var(--hud-cyan-dim); margin-top:8px; line-height:1.6;">C — alternar câmera<br>Scroll — zoom · Botão direito — orbitar<br>L — luz do convés · B — trocar barco<br>H — buzina (segure)</div>
-</div>
-
-<div class="hud-panel" id="panel-audio">
-  <div class="hud-eyebrow">ÁUDIO AMBIENTE</div>
-  <div class="toggle-row">SOM <div class="sw on" id="sw-audio"></div></div>
-</div>
-
-<div id="throttle-bar"><div id="throttle-fill"></div></div>
-<div id="throttle-label">THROTTLE</div>
-<div id="rudder-bar">
-  <div id="rudder-fill"></div>
-</div>
-<div id="rudder-label">RUDDER</div>
-
+<style>
+  /*  LOGO NO LOADING — substitui o texto "OCEAN SIMULATOR" */
+  #loading-logo{
+    width:min(560px, 74vw); height:auto;
+    filter: drop-shadow(0 8px 46px rgba(0,0,0,.65)) drop-shadow(0 0 30px rgba(111,228,255,.12));
+    animation: logoIn 1.4s ease both;
+  }
+  @keyframes logoIn{ from{ opacity:0; transform:translateY(14px) scale(.97);} to{ opacity:1; transform:none;} }
+  #loading-title{ margin-top:4px; }
+</style>
 <script type="importmap">
 {
   "imports": {
@@ -86,6 +26,92 @@
   }
 }
 </script>
+</head>
+<body>
+<canvas id="app-canvas"></canvas>
+
+<!-- ============ LOADING COM A LOGO DO JOGO ============ -->
+<div id="loading-screen">
+  <img id="loading-logo" src="assets/card-mare-de-peruibe.png" alt="Maré de Peruíbe">
+  <div id="loading-title">MARÉ DE PERUÍBE</div>
+  <div id="loading-bar-track"><div id="loading-bar-fill"></div></div>
+  <div id="loading-sub">pesque · navegue · explore · sobreviva · descubra</div>
+</div>
+
+<!-- ============ PAINEL DE STATUS ============ -->
+<div id="panel-status" class="hud-panel">
+  <div class="hud-eyebrow">LITORAL SUL · SÃO PAULO</div>
+  <div class="hud-title">MARÉ DE PERUÍBE</div>
+  <div class="hud-divider"></div>
+  <div class="readout-row"><span class="lbl">WIND</span><span class="val" id="ro-wind">-- kn</span></div>
+  <div class="readout-row"><span class="lbl">WAVE HEIGHT</span><span class="val" id="ro-waveheight">-- m</span></div>
+  <div class="readout-row"><span class="lbl">WAVE SPEED</span><span class="val" id="ro-wavespeed">--</span></div>
+  <div class="readout-row"><span class="lbl">BOAT SPEED</span><span class="val" id="ro-boatspeed">-- kn</span></div>
+  <div class="readout-row"><span class="lbl">TIME</span><span class="val" id="ro-time">--:--</span></div>
+  <div class="readout-row"><span class="lbl">WEATHER</span><span class="val" id="ro-weather">--</span></div>
+  <div class="readout-row"><span class="lbl">HDG</span><span class="val" id="ro-heading">000°</span></div>
+  <div id="compass"><span class="needle">N · NE · L · SE · S · SO · O · NO</span></div>
+</div>
+
+<!-- ============ CONTROLE DO AMBIENTE ============ -->
+<div id="panel-controls" class="hud-panel">
+  <div class="hud-eyebrow">CONTROLE DO AMBIENTE</div>
+  <div class="slider-row"><label>ALTURA DAS ONDAS <span class="v" id="lbl-amp">1.0x</span></label>
+    <input type="range" id="sld-amp" min="0" max="2.5" step="0.05" value="1"></div>
+  <div class="slider-row"><label>VELOCIDADE DAS ONDAS <span class="v" id="lbl-speed">1.0x</span></label>
+    <input type="range" id="sld-speed" min="0" max="3" step="0.05" value="1"></div>
+  <div class="slider-row"><label>VENTO <span class="v" id="lbl-wind">1.0x</span></label>
+    <input type="range" id="sld-wind" min="0" max="3" step="0.05" value="1"></div>
+  <div class="slider-row"><label>ESPUMA <span class="v" id="lbl-foam">1.0x</span></label>
+    <input type="range" id="sld-foam" min="0" max="3" step="0.05" value="1"></div>
+  <div class="slider-row"><label>HORÁRIO <span class="v" id="lbl-hour">06:30</span></label>
+    <input type="range" id="sld-hour" min="0" max="24" step="0.1" value="6.5"></div>
+  <div class="slider-row"><label>VEL. DO SOL <span class="v" id="lbl-sun-speed">0.10x</span></label>
+    <input type="range" id="sld-sun-speed" min="0" max="1" step="0.01" value="0.1"></div>
+  <div class="btn-row">
+    <button class="hbtn" data-time="morning">MANHÃ</button>
+    <button class="hbtn" data-time="noon">MEIO-DIA</button>
+    <button class="hbtn" data-time="afternoon">TARDE</button>
+    <button class="hbtn" data-time="sunset">POR-DO-SOL</button>
+    <button class="hbtn" data-time="night">NOITE</button>
+  </div>
+  <div class="btn-row">
+    <button class="hbtn weather" data-weather="CALM">☀ CALM</button>
+    <button class="hbtn weather" data-weather="MODERATE">🌊 MODERATE</button>
+    <button class="hbtn weather storm" data-weather="STORM">🌪 STORM</button>
+    <button class="hbtn weather" data-weather="FOG">🌫 FOG</button>
+    <button class="hbtn weather" data-weather="RAIN">🌧 RAIN</button>
+  </div>
+  <div class="btn-row">
+    <button class="hbtn" id="btn-auto-sun">☀ AUTO SUN ON</button>
+    <button class="hbtn" id="btn-deck-light">💡 LUZ DO CONVÉS: OFF</button>
+    <button class="hbtn" id="btn-horn">📯 BUZINA (SEGURE H)</button>
+  </div>
+  <div class="btn-row">
+    <button class="hbtn boat active" data-boat="trawler">🎣 PESQUEIRO</button>
+    <button class="hbtn boat" data-boat="pilot">⚡ PILOTO</button>
+  </div>
+</div>
+
+<!-- ============ CÂMERA / ÁUDIO ============ -->
+<div id="panel-camera" class="hud-panel">
+  <div class="hud-eyebrow">CÂMERA</div>
+  <button class="hbtn" id="btn-cam-cycle">ORBIT CAMERA</button>
+  <div class="toggle-row" style="margin-top:8px; letter-spacing:1px;">C alternar · scroll zoom · direito orbitar</div>
+</div>
+<div id="panel-audio" class="hud-panel">
+  <div class="toggle-row"><span>ÁUDIO AMBIENTE</span><div class="sw on" id="sw-audio"></div></div>
+</div>
+
+<!-- ============ THROTTLE / RUDDER ============ -->
+<div id="throttle-bar"><div id="throttle-fill"></div></div>
+<div id="throttle-label">THROTTLE</div>
+<div id="rudder-bar"><div id="rudder-fill"></div></div>
+<div id="rudder-label">RUDDER</div>
+
+<div id="intro-hint">WASD navegar · M áudio · L luz · H buzina · B barco · C câmera</div>
+<div id="lightning-flash"></div>
+<div id="vignette"></div>
 
 <script type="module" src="js/main.js"></script>
 </body>

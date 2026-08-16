@@ -1,16 +1,19 @@
-// js/ocean/waves.js — ondas com damping de praia (CPU)
+// js/ocean/waves.js — SWELL VIAJANDO EM DIREÇÃO À COSTA (oeste, onde o mar encontra a terra)
 import * as THREE from 'three';
 import { state } from '../state.js';
-import { sampleBathy } from '../world/world-map.js';
+
+// 🌊 Direções recalculadas: o swell agora se propaga no vetor da costa
+// (direção -SD do world-map ≈ -113°), com dispersão natural em volta.
+// Antes o mar corria pra esquerda (15°/42°); agora ele "sobe" na praia.
 export const WAVES = [
-  { deg:  15, len: 60.0, a: 0.75 },
-  { deg:  42, len: 38.0, a: 0.52 },
-  { deg: -18, len: 46.0, a: 0.46 },
-  { deg:   8, len: 25.0, a: 0.30 },
-  { deg:  65, len: 17.0, a: 0.18 },
-  { deg: -35, len: 11.0, a: 0.12 },
-  { deg:  25, len:  7.0, a: 0.08 },
-  { deg: -60, len:  4.5, a: 0.05 }
+  { deg: -113, len: 60.0, a: 0.75 },   // swell principal → costa
+  { deg: -100, len: 38.0, a: 0.52 },
+  { deg: -125, len: 46.0, a: 0.46 },
+  { deg: -108, len: 25.0, a: 0.30 },
+  { deg: -140, len: 17.0, a: 0.18 },
+  { deg:  -85, len: 11.0, a: 0.12 },
+  { deg: -118, len:  7.0, a: 0.08 },
+  { deg: -150, len:  4.5, a: 0.05 }
 ];
 WAVES.forEach(v => {
   const r = v.deg * Math.PI / 180;
@@ -21,16 +24,16 @@ WAVES.forEach(v => {
 });
 export const AMP_SUM = WAVES.reduce((s, v) => s + v.a, 0);
 export function waveHAt(x, z) {
-  const B = sampleBathy(x, z);
-  const f = B.damp * B.swell * state.waveHMul;
   let h = 0;
   for (const v of WAVES) {
     const ph = v.k * (v.dx * x + v.dz * z) - v.w * state.wavePhase;
     h += v.a * Math.sin(ph);
   }
-  return h * f;
+  return h * state.waveHMul;
 }
-export function waveHeightEnvelope(x, z) { return Math.abs(waveHAt(x, z)); }
+export function waveHeightEnvelope(x, z) {
+  return Math.abs(waveHAt(x, z));
+}
 export function waveSprayFactor(waveLocalH) {
   const maxRef = Math.max(AMP_SUM * state.waveHMul * 1.8, 0.4);
   const normalized = Math.min(waveLocalH / maxRef, 1.0);
@@ -47,25 +50,24 @@ export function waveGradient(x, z) {
   return { dx: hx / (2 * delta), dz: hz / (2 * delta) };
 }
 export function waveWaterVelocity(x, z, phase) {
-  const B = sampleBathy(x, z);
-  const f = B.damp * B.swell * state.waveHMul;
   let vx = 0, vz = 0;
   for (const v of WAVES) {
     const theta = v.k * (v.dx * x + v.dz * z) - v.w * phase;
     const cosT = Math.cos(theta);
-    const speed = (v.w / v.k) * v.a * f * cosT;
+    const amp = v.a * state.waveHMul;
+    const speed = (v.w / v.k) * amp * cosT;
     vx += speed * v.dx;
     vz += speed * v.dz;
   }
   return { vx, vz };
 }
 export function waveAccelVertical(x, z, phase) {
-  const B = sampleBathy(x, z);
-  const f = B.damp * B.swell * state.waveHMul;
   let acc = 0;
   for (const v of WAVES) {
     const theta = v.k * (v.dx * x + v.dz * z) - v.w * phase;
-    acc += -v.a * f * v.w * v.w * Math.sin(theta);
+    const sinT = Math.sin(theta);
+    const amp = v.a * state.waveHMul;
+    acc += -amp * v.w * v.w * sinT;
   }
   return acc;
 }
