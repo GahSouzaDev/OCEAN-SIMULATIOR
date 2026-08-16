@@ -1,5 +1,6 @@
+// js/config.js — CORRIGIDO: chaves wave/wind/foam (weather.js original) + oceano leve
 export const CONFIG = {
-  ocean: { size: 3000, segments: 512 },
+  ocean: { size: 2400, segments: 256 },
   wind: { direction: 0.6, strength: 1.0 },
   weather: { mode: 'MODERATE' },
   time: { hour: 6.5 },
@@ -21,4 +22,4 @@ export const TIME_PRESETS = {
   morning: 6.5, noon: 12, afternoon: 15.5, sunset: 19.5, night: 22
 };
 
-export const CAM_NAMES = ['CHASE','ORBIT','CINEMATIC','TOP','UNDERWATER'];
+export const CAM_NAMES = ['CHASE', 'ORBIT', 'CINEMATIC', 'TOP', 'UNDERWATER'];

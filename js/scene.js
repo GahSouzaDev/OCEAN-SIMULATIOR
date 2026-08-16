@@ -1,3 +1,4 @@
+// js/scene.js — CORRIGIDO: restaura boatRoot + tilt (boat-manager depende deles)
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -8,56 +9,66 @@ import { state } from './state.js';
 
 export function initScene() {
   const canvas = document.getElementById('app-canvas');
-  state.renderer = new THREE.WebGLRenderer({
-    canvas, antialias: true, powerPreference: 'high-performance'
+
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: true,
+    powerPreference: 'high-performance',
+    stencil: false
   });
-  state.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  state.renderer.setSize(innerWidth, innerHeight);
-  state.renderer.shadowMap.enabled = true;
-  state.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  state.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  
-  // 🔆 EXPOSIÇÃO REDUZIDA (1.45 → 1.15) - Evita estouro geral
-  state.renderer.toneMappingExposure = 1.15;
+  // 🔥 LIMITA o pixel ratio a 1.5 (corta ~55% dos pixels em tela retina)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
 
-  state.scene = new THREE.Scene();
-  state.scene.fog = new THREE.Fog(0x7a9bb8, 120, 1600);
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x7a9bb8, 120, 1600);
 
-  state.camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 15000);
-  state.camera.position.set(-14, 5, 10);
-
-  state.composer = new EffectComposer(state.renderer);
-  state.composer.addPass(new RenderPass(state.scene, state.camera));
-  
-  // 💡 BLOOM MAIS SUAVE - Evita glow excessivo
-  state.bloomPass = new UnrealBloomPass(
-    new THREE.Vector2(innerWidth, innerHeight), 0.25, 0.4, 0.88
+  const camera = new THREE.PerspectiveCamera(
+    60, window.innerWidth / window.innerHeight, 0.1, 6000
   );
-  state.composer.addPass(state.bloomPass);
-  state.fxaaPass = new ShaderPass(FXAAShader);
-  state.fxaaPass.uniforms['resolution'].value.set(
-    1 / (innerWidth * state.renderer.getPixelRatio()),
-    1 / (innerHeight * state.renderer.getPixelRatio())
-  );
-  state.composer.addPass(state.fxaaPass);
+  camera.position.set(-14, 5, 10);
 
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+
+  const bloom = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    0.25, 0.4, 0.88
+  );
+  composer.addPass(bloom);
+
+  const fxaa = new ShaderPass(FXAAShader);
+  composer.addPass(fxaa);
+
+  // ⚠️ ESSENCIAL — boatRoot + tilt (o boat-manager faz state.tilt.add(...))
   state.boatRoot = new THREE.Group();
   state.tilt = new THREE.Group();
   state.boatRoot.add(state.tilt);
-  state.scene.add(state.boatRoot);
+  scene.add(state.boatRoot);
 
+  state.renderer = renderer;
+  state.scene = scene;
+  state.camera = camera;
+  state.composer = composer;
+  state.bloomPass = bloom;
+  state.fxaaPass = fxaa;
   state.clock = new THREE.Clock();
 
-  addEventListener('resize', onResize);
-}
+  function applySize() {
+    const w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h);
+    composer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    const pr = renderer.getPixelRatio();
+    fxaa.material.uniforms['resolution'].value.set(1 / (w * pr), 1 / (h * pr));
+  }
+  applySize();
+  window.addEventListener('resize', applySize);
 
-function onResize() {
-  state.camera.aspect = innerWidth / innerHeight;
-  state.camera.updateProjectionMatrix();
-  state.renderer.setSize(innerWidth, innerHeight);
-  state.composer.setSize(innerWidth, innerHeight);
-  const pr = state.renderer.getPixelRatio();
-  state.fxaaPass.uniforms['resolution'].value.set(
-    1 / (innerWidth * pr), 1 / (innerHeight * pr)
-  );
+  return { renderer, scene, camera, composer };
 }

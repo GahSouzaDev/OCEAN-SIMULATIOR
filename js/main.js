@@ -1,4 +1,4 @@
-// js/main.js — loop com âncora integrada (init + update)
+// js/main.js
 import * as THREE from 'three';
 import { state, b2l } from './state.js';
 import { CONFIG, TIME_PRESETS } from './config.js';
@@ -8,6 +8,7 @@ import { waveHAt, waveHeightEnvelope, waveSprayFactor } from './ocean/waves.js';
 import { initSky, updateSky } from './sky.js';
 import { initWeather, updateRain, updateLightning, maybeSpawnLightning, setWeather } from './weather.js';
 import { initObjects, updateObjects } from './world/objects.js';
+import { updateStreaming } from './world/streaming.js';
 import { initBoatManager, curBoat, setBoat, setDeckLight } from './boats/boat-manager.js';
 import { updateHullPhysics } from './physics/hull-physics.js';
 import { applyBuoyancy } from './physics/buoyancy.js';
@@ -22,8 +23,13 @@ import { initAudioManager, toggleAudio, updateListener } from './audio/audio-man
 import { initAmbient, updateAmbient } from './audio/ambient.js';
 import { initEngineSound, updateEngineSound } from './audio/engine-sound.js';
 import {
-  playSplashSound, playReentrySound, playClickSound, playClickSound3D,
-  startHorn, stopHorn, thunderSnd
+  playSplashSound,
+  playReentrySound,
+  playClickSound,
+  playClickSound3D,
+  startHorn,
+  stopHorn,
+  thunderSnd
 } from './audio/effects.js';
 import { updateHUD, bindSliders } from './ui/hud.js';
 import { runLoadingScreen } from './ui/loading.js';
@@ -34,10 +40,12 @@ import { setGameMode, updateGame } from './game/game-manager.js';
 
 const _bowTip = new THREE.Vector3(), _bowPortS = new THREE.Vector3(), _bowStbdS = new THREE.Vector3();
 let prevBowSub = -1, bowMistAcc = 0, sideMistAccP = 0, sideMistAccS = 0;
+
 function localToWorldBoat(lx, ly, lz, out) {
   out.set(lx, ly, lz);
   return state.tilt.localToWorld(out);
 }
+
 function updateBowSpray(dt, spdN, fwdX, fwdZ, rightX, rightZ) {
   localToWorldBoat(0, 0.18, 4.15, _bowTip);
   localToWorldBoat(-0.62, 0.14, 3.55, _bowPortS);
@@ -49,6 +57,7 @@ function updateBowSpray(dt, spdN, fwdX, fwdZ, rightX, rightZ) {
   const sprayScale = waveSprayFactor(waveLocalH);
   const absSpeed = Math.abs(state.speed);
   const fwdSign = state.speed >= 0 ? 1 : -1;
+
   if (bowSub > 0 && absSpeed > 0.5 && sprayScale > 0.03) {
     const rate = (bowSub * 10 + absSpeed * 2.8) * state.foamMul * (0.4 + spdN * 0.7) * sprayScale;
     bowMistAcc += rate * dt;
@@ -61,9 +70,13 @@ function updateBowSpray(dt, spdN, fwdX, fwdZ, rightX, rightZ) {
         fwdX * absSpeed * 0.35 * fwdSign + rightX * sSpread * absSpeed * 0.3 + (Math.random() - 0.5) * 0.4,
         upKick,
         fwdZ * absSpeed * 0.35 * fwdSign + rightZ * sSpread * absSpeed * 0.3 + (Math.random() - 0.5) * 0.4,
-        { size: (0.10 + Math.random() * 0.10 + bowSub * 0.12) * sprayScale, life: 0.55 + Math.random() * 0.45 });
+        { size: (0.10 + Math.random() * 0.10 + bowSub * 0.12) * sprayScale, life: 0.55 + Math.random() * 0.45 }
+      );
     }
-  } else bowMistAcc = Math.min(bowMistAcc, 0);
+  } else {
+    bowMistAcc = Math.min(bowMistAcc, 0);
+  }
+
   if (prevBowSub <= 0 && bowSub > 0 && absSpeed > 1.0 && sprayScale > 0.05) {
     const impactPower = THREE.MathUtils.clamp(absSpeed * 0.5 + Math.abs(state.physics.vy) * 0.8, 0.5, 7);
     const n = Math.round((15 + impactPower * 9) * sprayScale);
@@ -76,10 +89,13 @@ function updateBowSpray(dt, spdN, fwdX, fwdZ, rightX, rightZ) {
         fwdX * (absSpeed * 0.25 * fwdSign + lFwd * spd) + rightX * lRight * spd,
         1.3 + Math.random() * impactPower * 0.8,
         fwdZ * (absSpeed * 0.25 * fwdSign + lFwd * spd) + rightZ * lRight * spd,
-        { size: (0.14 + Math.random() * 0.14) * (0.6 + sprayScale * 0.5), life: 0.7 + Math.random() * 0.5 + impactPower * 0.03 });
+        { size: (0.14 + Math.random() * 0.14) * (0.6 + sprayScale * 0.5),
+          life: 0.7 + Math.random() * 0.5 + impactPower * 0.03 }
+      );
     }
     playSplashSound(impactPower * 0.35 * sprayScale);
   }
+
   if (prevBowSub > 0 && bowSub <= 0 && absSpeed > 0.5 && sprayScale > 0.04) {
     const n = Math.round((8 + Math.random() * 8) * sprayScale);
     for (let i = 0; i < n; i++) {
@@ -89,41 +105,56 @@ function updateBowSpray(dt, spdN, fwdX, fwdZ, rightX, rightZ) {
         fwdX * absSpeed * 0.4 * fwdSign + (Math.random() - 0.5) * 0.5,
         0.5 + Math.random() * 0.8,
         fwdZ * absSpeed * 0.4 * fwdSign + (Math.random() - 0.5) * 0.5,
-        { size: (0.10 + Math.random() * 0.08) * sprayScale, life: 0.5 + Math.random() * 0.35 });
+        { size: (0.10 + Math.random() * 0.08) * sprayScale, life: 0.5 + Math.random() * 0.35 }
+      );
     }
   }
+
   const turnBoost = 1 + Math.abs(state.rudder) * spdN * 1.8;
+
   if (portSub > 0 && absSpeed > 1.5 && sprayScale > 0.04) {
     const rate = (portSub * 8 + (absSpeed - 1.4) * 2.2) * state.foamMul * turnBoost * sprayScale;
     sideMistAccP += rate * dt;
     while (sideMistAccP >= 1) {
       sideMistAccP--;
-      emitSpray(_bowPortS.x, _bowPortS.y + 0.06, _bowPortS.z,
+      emitSpray(
+        _bowPortS.x, _bowPortS.y + 0.06, _bowPortS.z,
         fwdX * absSpeed * 0.35 * fwdSign - rightX * (absSpeed * 0.25 + 0.5),
         0.6 + Math.random() * 1.1,
         fwdZ * absSpeed * 0.35 * fwdSign - rightZ * (absSpeed * 0.25 + 0.5),
-        { size: (0.10 + Math.random() * 0.08) * sprayScale, life: 0.45 + Math.random() * 0.35 });
+        { size: (0.10 + Math.random() * 0.08) * sprayScale, life: 0.45 + Math.random() * 0.35 }
+      );
     }
-  } else sideMistAccP = Math.min(sideMistAccP, 0);
+  } else {
+    sideMistAccP = Math.min(sideMistAccP, 0);
+  }
+
   if (stbdSub > 0 && absSpeed > 1.5 && sprayScale > 0.04) {
     const rate = (stbdSub * 8 + (absSpeed - 1.4) * 2.2) * state.foamMul * turnBoost * sprayScale;
     sideMistAccS += rate * dt;
     while (sideMistAccS >= 1) {
       sideMistAccS--;
-      emitSpray(_bowStbdS.x, _bowStbdS.y + 0.06, _bowStbdS.z,
+      emitSpray(
+        _bowStbdS.x, _bowStbdS.y + 0.06, _bowStbdS.z,
         fwdX * absSpeed * 0.35 * fwdSign + rightX * (absSpeed * 0.25 + 0.5),
         0.6 + Math.random() * 1.1,
         fwdZ * absSpeed * 0.35 * fwdSign + rightZ * (absSpeed * 0.25 + 0.5),
-        { size: (0.10 + Math.random() * 0.08) * sprayScale, life: 0.45 + Math.random() * 0.35 });
+        { size: (0.10 + Math.random() * 0.08) * sprayScale, life: 0.45 + Math.random() * 0.35 }
+      );
     }
-  } else sideMistAccS = Math.min(sideMistAccS, 0);
+  } else {
+    sideMistAccS = Math.min(sideMistAccS, 0);
+  }
+
   prevBowSub = bowSub;
 }
+
 function toggleDeckLight() {
   const newState = !state.deckOn;
   setDeckLight(newState, null);
   playClickSound3D();
 }
+
 function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(state.clock.getDelta(), 0.05);
@@ -147,7 +178,8 @@ function animate() {
       }
     }
   });
-  updateAnchor(dt); // ⚓ âncora: animação, corrente, fundeio
+  updateAnchor(dt);
+  updateStreaming(dt);
   recordWakePoint();
   const fwdX = Math.sin(state.heading), fwdZ = Math.cos(state.heading);
   const rightX = fwdZ, rightZ = -fwdX;
@@ -190,6 +222,7 @@ function animate() {
   state.composer.render();
   updateHUD(dt);
 }
+
 function bindUI() {
   bindSliders();
   document.querySelectorAll('.hbtn[data-time]').forEach(btn => {
@@ -227,6 +260,7 @@ function bindUI() {
   document.getElementById('btn-cam-cycle').addEventListener('click', cycleCamera);
   document.getElementById('sw-audio').addEventListener('click', toggleAudio);
 }
+
 function boot() {
   initScene();
   const sea = createOceanMesh();
@@ -241,7 +275,7 @@ function boot() {
   initWorldMap();
   initUnderwater();
   initDamage();
-  initAnchor(); // ⚓ âncora: mesh, corrente, botão, tecla E, voz
+  initAnchor();
   initInput({
     toggleAudio,
     setDeckLight: toggleDeckLight,

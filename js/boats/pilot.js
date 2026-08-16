@@ -256,7 +256,7 @@ export function buildPilot() {
     minTurnRadius: 8,
     radiusGrowth: 0.8,
     turnResponse: 5.0,
-    waterDragRot: 0.6,
+    waterDragRot: 0.25,
     rudderSpeed: 3.5,
 
     throttleResponseSpeed: 1.8,
