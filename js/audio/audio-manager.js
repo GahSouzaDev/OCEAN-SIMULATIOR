@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { state } from '../state.js';
+import { waveHAt } from '../ocean/waves.js';
 
 export let actx = null;
 export let masterG = null, masterFilter = null;
@@ -66,11 +67,15 @@ export function updateListener() {
     masterG.gain.linearRampToValueAtTime(targetGain, t + 0.1);
   } catch (e) {}
 
-  if (state.camMode === 4) {
-    try { masterFilter.frequency.linearRampToValueAtTime(250, t + 0.2); } catch (e) {}
-  } else {
-    try { masterFilter.frequency.linearRampToValueAtTime(20000, t + 0.1); } catch (e) {}
-  }
+  // --- Filtro subaquático automático ---
+  const camPos = state.camera.position;
+  const waterHeight = waveHAt(camPos.x, camPos.z);
+  const underwater = camPos.y < waterHeight;
+  const targetFreq = underwater ? 250 : 20000;
+
+  try {
+    masterFilter.frequency.linearRampToValueAtTime(targetFreq, t + 0.2);
+  } catch (e) {}
 
   const l = actx.listener;
   const camDir = new THREE.Vector3();

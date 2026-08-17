@@ -1,4 +1,4 @@
-// js/world/world-map.js
+// js/world/world-map.js — CORREÇÃO: Mini-continentes nas ilhas, remoção do "chão de areia" plano e Morro do Itatins (apenas o grande movido para trás)
 import * as THREE from 'three';
 import { state } from '../state.js';
 import { CONFIG } from '../config.js';
@@ -21,14 +21,12 @@ export function isHighTide() { return tide.level > 0.35; }
 
 export const SPAWN = { x: -780, z: 520 };
 
-// ---- COSTA ORIGINAL (com mais pontos interpolados para suavizar) ----
 const COAST_RAW = [
   [-1600, 650], [-1304, 527], [-1082, 436], [-860, 344], [-638, 252], [-379, 145],
   [-194, 68], [65, -39], [324, -147], [620, -269], [879, -376], [1175, -499],
   [1434, -606], [1619, -683], [1730, -729], [1841, -775]
 ];
 
-// ---- INTERPOLAÇÃO CATMULL-ROM (suaviza a costa) ----
 function catmullRom(points, segments = 4) {
   const pts = points.map(p => ({ x: p[0], z: p[1] }));
   const result = [];
@@ -58,9 +56,7 @@ function catmullRom(points, segments = 4) {
   return result;
 }
 
-// Gerar costa suavizada com 8 segmentos entre cada par de pontos
 export const COAST = catmullRom(COAST_RAW, 8);
-// Ajustar SD e CC para a costa suavizada (usando os pontos originais para manter referência)
 export const SD = { x: 0.40, z: 0.92 };
 export const CC = { x: 0.925, z: -0.383 };
 export const RIVERS = [
@@ -87,6 +83,14 @@ export const ISLANDS = [
   { name: 'ilhote Guarau A',         x: -1200, z: 720,  r: 16, h: 6,   c: 0x2d4a33, type: 'rock' },
   { name: 'ilhote Guarau B',         x: -1150, z: 760,  r: 13, h: 5,   c: 0x2d4a33, type: 'rock' },
   { name: 'Refúgio',                 x: -1400, z: 850,  r: 40, h: 15,  c: 0x2d4a33, type: 'forest' }
+];
+
+export const TRENCHES = [
+  { name: 'Fossa da Serpente',  x: -920,  z: 520,  r: 90,  depth: 60 },
+  { name: 'Abismo de Queimada', x:  180,  z: 1050, r: 110, depth: 70 },
+  { name: 'Vale do Alcatrazes', x: 2500,  z: 550,  r: 130, depth: 75 },
+  { name: 'Poço de Santos',     x: 1950,  z: -350, r: 85,  depth: 55 },
+  { name: 'Fenda do Costão',    x: -420,  z: 820,  r: 70,  depth: 50 }
 ];
 
 export const LANDMARKS = {
@@ -156,7 +160,11 @@ export function getRegionAt(x, z) {
     : { id: 'aberto', name: 'Mar Aberto', pvp: 'open', fishing: 'legal' };
 }
 
-export const WORLD = { minX: -2200, minZ: -1400, sizeX: 5600, sizeZ: 2800 };
+export const WORLD = { minX: -3000, minZ: -2800, sizeX: 7200, sizeZ: 5600 };
+
+const EDGE_WIDTH = 700;
+const EDGE_HEIGHT = 6.0;
+
 const N = 256;
 const cpu = new Float32Array(N * N * 4);
 let bathyTex = null, tintTex = null;
@@ -182,10 +190,6 @@ export function offshore(x, z) {
     const r = distSeg(x, z, COAST[i][0], COAST[i][1], COAST[i + 1][0], COAST[i + 1][1]);
     if (!best || r.d < best.d) best = r;
   }
-  // O sinal é dado pela projeção do vetor (x - ponto) na direção SD (mar)
-  // Usamos a direção do mar para determinar se está dentro ou fora
-  // Se offshore > 0, está no mar; se < 0, está em terra.
-  // Para simplificar, usamos a projeção no vetor SD a partir do ponto mais próximo.
   const dx = x - best.qx, dz = z - best.qz;
   const s = dx * SD.x + dz * SD.z;
   return s;
@@ -199,9 +203,9 @@ function distPoly(x, z, pts) {
   return m;
 }
 
-// ============================================================
-// 🌊 BATIMETRIA: usa offshore com costa suavizada (curvada)
-// ============================================================
+const MAX_OCEAN_DEPTH = 180;
+const MAX_TRENCH_DEPTH = 225;
+
 function depthAtRaw(x, z) {
   const s = offshore(x, z);
   const santosRegion = REGIONS.find(r => r.id === 'santos');
@@ -213,17 +217,23 @@ function depthAtRaw(x, z) {
     d = Math.max(-2.5, Math.min(0, d));
   } else {
     if (isSantos) {
-      const A = 80, k = 0.022, n = 1.6;
+      const A = 65, k = 0.022, n = 1.6;
       const sn = Math.pow(s, n);
       d = A * sn / (Math.pow(k, n) + sn);
       d = Math.max(0.5, Math.min(A, d));
     } else {
-      d = 0.2 + s * 0.035 + Math.pow(s, 1.5) * 0.00003;
-      d = Math.min(80, d);
+      const shelf = 22 * sstep(0, 120, s);
+      const slope = (110 - 22) * sstep(120, 420, s);
+      const abyss = (150 - 110) * sstep(420, 1200, s);
+      d = shelf + slope + abyss;
+
+      d += Math.sin(x * 0.008 + z * 0.006) * 3.0
+         + Math.cos(z * 0.01 - x * 0.005) * 3.0
+         + Math.sin(x * 0.021 + z * 0.017) * 1.5;
+
+      d = Math.max(0.3, Math.min(MAX_OCEAN_DEPTH, d));
     }
   }
-
-  d += Math.sin(x * 0.008 + z * 0.006) * 0.3 + Math.cos(z * 0.01 - x * 0.005) * 0.3;
 
   for (const r of RIVERS) {
     const dd = distPoly(x, z, r.pts);
@@ -239,22 +249,55 @@ function depthAtRaw(x, z) {
       d = Math.max(d, m.depth * fator);
     }
   }
+
+  // ─── 🏝️ MINI-CONTINENTES (ILHAS) ───
+  // O terreno sobe agressivamente do fundo do mar para criar uma base de terra firme/praia ao redor das ilhas
   for (const il of ISLANDS) {
     const dd = Math.hypot(x - il.x, z - il.z);
-    if (dd < il.r * 2.5) {
-      const h = il.h * 0.9;
-      d -= h * Math.exp(-(dd * dd) / (1.3 * il.r * il.r));
+    if (dd < il.r * 5.0) {
+      const baseH = il.h + 18;
+      d -= baseH * Math.exp(-(dd * dd) / (4.5 * il.r * il.r));
+      
+      if (dd < il.r * 1.3) {
+        d = Math.min(d, -1.5);
+      }
     }
   }
+
+  for (const tr of TRENCHES) {
+    const dd = Math.hypot(x - tr.x, z - tr.z);
+    if (dd < tr.r * 1.6) {
+      const t = 1 - Math.min(1, dd / tr.r);
+      const profile = Math.pow(t, 1.8);
+      d += tr.depth * profile;
+    }
+  }
+
+  d = Math.min(d, MAX_TRENCH_DEPTH);
+
+  const distToLeft   = x - WORLD.minX;
+  const distToRight  = (WORLD.minX + WORLD.sizeX) - x;
+  const distToTop    = z - WORLD.minZ;
+  const distToBottom = (WORLD.minZ + WORLD.sizeZ) - z;
+  const distToEdge = Math.min(distToLeft, distToRight, distToTop, distToBottom);
+
+  if (distToEdge < EDGE_WIDTH) {
+    const t = 1 - (distToEdge / EDGE_WIDTH);
+    const profile = t * t * t;
+    const edgeDepth = -EDGE_HEIGHT * profile;
+    d = Math.min(d, edgeDepth);
+  }
+
   return d;
 }
 
 export function depthAt(x, z) {
   return getDepth(x, z);
 }
+
 export function groundHeightAt(x, z) {
   const d = depthAt(x, z);
-  return d > 0 ? -Math.min(d, 42) : Math.min(1.8, -d * 0.30);
+  return d > 0 ? -Math.min(d, 225) : Math.min(EDGE_HEIGHT, -d);
 }
 
 (function bake() {
@@ -289,11 +332,29 @@ export function sampleBathy(x, z) {
   const k = (j * N + i) * 4;
   return { damp: cpu[k], swell: cpu[k + 1], chop: cpu[k + 2], surf: cpu[k + 3] };
 }
+
+export function nearestTrench(x, z) {
+  let best = null, bestD = Infinity;
+  for (const tr of TRENCHES) {
+    const d = Math.hypot(x - tr.x, z - tr.z);
+    if (d < bestD) { bestD = d; best = tr; }
+  }
+  return best ? { trench: best, dist: bestD } : null;
+}
+
+const worldMaxX = WORLD.minX + WORLD.sizeX;
+const worldMaxZ = WORLD.minZ + WORLD.sizeZ;
+const edgeR = 12;
+const EDGE_COLLIDER_MARGIN = EDGE_WIDTH * 0.35;
 export const COLLIDERS = [
   ...ISLANDS.map(il => ({ x: il.x, z: il.z, r: il.r * 0.75 })),
   { x: -1318, z: 493, r: 0.4 }, { x: -1323, z: 498, r: 0.4 },
   { x: 80, z: -12, r: 0.4 }, { x: 92, z: 16, r: 0.4 }, { x: 104, z: 44, r: 0.4 },
-  { x: -870, z: 352, r: 0.4 }
+  { x: -870, z: 352, r: 0.4 },
+  { x: WORLD.minX + EDGE_COLLIDER_MARGIN, z: 0, r: edgeR, edge: true },
+  { x: worldMaxX - EDGE_COLLIDER_MARGIN, z: 0, r: edgeR, edge: true },
+  { x: 0, z: worldMaxZ - EDGE_COLLIDER_MARGIN, r: edgeR, edge: true },
+  { x: 0, z: WORLD.minZ + EDGE_COLLIDER_MARGIN, r: edgeR, edge: true }
 ];
 export const worldFX = { cityMats: [], round: [], mountainMats: [] };
 
@@ -495,24 +556,6 @@ function buildIsland(il) {
   state.scene.add(group);
 }
 
-function landShape(coastOff, backOff) {
-  const sh = new THREE.Shape();
-  const pts = COAST.map(p => [p[0] - SD.x * coastOff, -(p[1] - SD.z * coastOff)]);
-  const back = [...COAST].reverse().map(p => [p[0] - SD.x * backOff, -(p[1] - SD.z * backOff)]);
-  sh.moveTo(pts[0][0], pts[0][1]);
-  for (let i = 0; i < pts.length; i++) sh.lineTo(pts[i][0], pts[i][1]);
-  for (let i = 0; i < back.length; i++) sh.lineTo(back[i][0], back[i][1]);
-  sh.closePath();
-  return sh;
-}
-function flat(geo, mat, y) {
-  geo.rotateX(-Math.PI / 2);
-  const m = new THREE.Mesh(geo, mat);
-  m.position.y = y; m.receiveShadow = true;
-  state.scene.add(m);
-  return m;
-}
-
 function buildPortoAreia() {
   const portoX = 2200, portoZ = -900;
   const matAreia = new THREE.MeshStandardMaterial({ color: 0xd4b896, roughness: 0.95 });
@@ -622,22 +665,38 @@ function loadCitiesLazy() {
 }
 
 export function initWorldMap() {
-  const geo = new THREE.PlaneGeometry(WORLD.sizeX, WORLD.sizeZ, 120, 85);
+  const geo = new THREE.PlaneGeometry(WORLD.sizeX, WORLD.sizeZ, 155, 170);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;
   const cols = new Float32Array(pos.count * 3);
   const sand = new THREE.Color(0.80, 0.70, 0.50);
   const rock = new THREE.Color(0.30, 0.28, 0.25);
   const deep = new THREE.Color(0.05, 0.08, 0.12);
+  const abyss = new THREE.Color(0.02, 0.03, 0.06);
   const land = new THREE.Color(0.62, 0.55, 0.38);
+  const beachSand = new THREE.Color(0.88, 0.80, 0.58);
   const c = new THREE.Color();
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), z = pos.getZ(i), d = depthAt(x, z);
-    pos.setY(i, d > 0 ? -Math.min(d, 42) : Math.min(1.8, -d * 0.30));
-    if (d < 0) c.copy(land).lerp(sand, 0.5);
-    else if (d < 2) c.copy(sand);
-    else if (d < 12) c.copy(sand).lerp(rock, (d - 2) / 10);
-    else c.copy(rock).lerp(deep, Math.min(1, (d - 12) / 25));
+    pos.setY(i, d > 0 ? -Math.min(d, 225) : Math.min(EDGE_HEIGHT, -d));
+
+    if (d < -0.3) {
+      c.copy(beachSand);
+      if (d < -2.5) {
+        const vegMix = Math.min(1, (-d - 2.5) / 2.5);
+        c.lerp(new THREE.Color(0.35, 0.52, 0.28), vegMix * 0.4);
+      }
+    } else if (d < 0) {
+      c.copy(land).lerp(sand, 0.5);
+    } else if (d < 2) {
+      c.copy(sand);
+    } else if (d < 12) {
+      c.copy(sand).lerp(rock, (d - 2) / 10);
+    } else if (d < 80) {
+      c.copy(rock).lerp(deep, (d - 12) / 68);
+    } else {
+      c.copy(deep).lerp(abyss, Math.min(1, (d - 80) / 150));
+    }
     c.multiplyScalar(0.92 + Math.sin(x * 0.3 + z * 0.2) * 0.08);
     if (d > -0.5 && d < 1.6) c.multiplyScalar(0.58);
     cols[i * 3] = c.r; cols[i * 3 + 1] = c.g; cols[i * 3 + 2] = c.b;
@@ -648,26 +707,31 @@ export function initWorldMap() {
   terr.receiveShadow = true;
   state.scene.add(terr);
 
-  flat(new THREE.ShapeGeometry(landShape(-25, 900)), new THREE.MeshStandardMaterial({ color: 0xd8c49a, roughness: 1 }), 0.9);
-  flat(new THREE.ShapeGeometry(landShape(70, 900)), new THREE.MeshStandardMaterial({ color: 0x2d4a33, roughness: 1 }), 1.5);
-
   buildMountains();
 
   const morroMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 });
   const morro = new THREE.Mesh(hillGeo(160, 120, 42.7, 18), morroMat);
-  morro.position.set(LANDMARKS.morroItatins[0], -2, LANDMARKS.morroItatins[1]);
+  
+  // Desloca APENAS o morro grande para trás (interior). 
+  // As pedras menores ao redor permanecem na posição original do marco.
+  const offsetX = -250;
+  const offsetZ = -150;
+  
+  morro.position.set(LANDMARKS.morroItatins[0] + offsetX, -2, LANDMARKS.morroItatins[1] + offsetZ);
   morro.scale.set(1.6, 1, 1.3);
   const morroGroup = new THREE.Group();
   morroGroup.add(morro);
-  registerCullGroup(morroGroup, LANDMARKS.morroItatins[0], LANDMARKS.morroItatins[1], 1200, 1800);
+  registerCullGroup(morroGroup, LANDMARKS.morroItatins[0] + offsetX, LANDMARKS.morroItatins[1] + offsetZ, 1200, 1800);
 
   for (let i = 0; i < 4; i++) {
     const a = (i / 4) * Math.PI * 2 + 0.3;
     const d = 90 + Math.random() * 40;
     const sub = new THREE.Mesh(hillGeo(50 + Math.random() * 30, 40 + Math.random() * 30, i * 9.1, 14), morroMat);
+    // Pedras menores usam a posição original, sem o offset
     sub.position.set(LANDMARKS.morroItatins[0] + Math.cos(a) * d, -2, LANDMARKS.morroItatins[1] + Math.sin(a) * d);
     state.scene.add(sub);
   }
+  
   const rockM = new THREE.MeshStandardMaterial({ color: 0x1c2024, roughness: 1, flatShading: true });
   const p1 = new THREE.Mesh(new THREE.ConeGeometry(7, 16, 5), rockM);
   const p2 = new THREE.Mesh(new THREE.ConeGeometry(5, 11, 5), rockM);

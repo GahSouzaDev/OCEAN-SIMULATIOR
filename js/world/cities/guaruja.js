@@ -1,4 +1,4 @@
-// js/world/cities/guaruja.js — ULTRA OTIMIZADO (convertido para InstancedMesh)
+// js/world/cities/guaruja.js — ULTRA OTIMIZADO (estilo Praia Grande)
 import * as THREE from 'three';
 import { state } from '../../state.js';
 import { CITY_DATA, CC, SD } from './city-shared.js';
@@ -35,24 +35,27 @@ export function buildGuaruja(worldFX) {
   const D = CITY_DATA.guaruja;
   const angle = Math.atan2(CC.x, CC.z);
 
-  // Materiais
-  const matWhite = new THREE.MeshStandardMaterial({ color: 0xf8f8f5, roughness: 0.6, emissive: 0xffd9a0, emissiveIntensity: 0 });
+  // ============================================================
+  // 🎨 MATERIAIS (iguais aos de Praia Grande)
+  // ============================================================
+  const matWhite = new THREE.MeshStandardMaterial({ color: 0xf8f8f5, roughness: 0.65, metalness: 0.05 });
   worldFX.cityMats.push(matWhite);
-  worldFX.round.push({ mat: matWhite, k: 0.2 });
 
-  const matWhiteLit = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 0.55, emissive: 0xffffff, emissiveIntensity: 0.25 });
+  const matWhiteLit = new THREE.MeshStandardMaterial({ 
+    color: 0xfcfcfc, roughness: 0.6, emissive: 0xffeebb, emissiveIntensity: 0.4 
+  });
   worldFX.cityMats.push(matWhiteLit);
-  worldFX.round.push({ mat: matWhiteLit, k: 0.65 });
-
-  const matBeige = new THREE.MeshStandardMaterial({ color: 0xe8dcc8, roughness: 0.8 });
-  worldFX.cityMats.push(matBeige);
+  worldFX.round.push({ mat: matWhiteLit, k: 0.8 });
 
   const matGreen = new THREE.MeshStandardMaterial({ color: 0xa8c9a0, roughness: 0.85 });
   worldFX.cityMats.push(matGreen);
 
-  const matGlass = new THREE.MeshStandardMaterial({ color: 0xaaccdd, roughness: 0.1, metalness: 0.6, transparent: true, opacity: 0.7, emissive: 0x88aacc, emissiveIntensity: 0 });
+  const matGlass = new THREE.MeshStandardMaterial({ 
+    color: 0xaaccdd, roughness: 0.15, metalness: 0.5, transparent: true, opacity: 0.7,
+    emissive: 0x88aacc, emissiveIntensity: 0.3
+  });
   worldFX.cityMats.push(matGlass);
-  worldFX.round.push({ mat: matGlass, k: 0.7 });
+  worldFX.round.push({ mat: matGlass, k: 0.6 });
 
   const matBalcony = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.8 });
   const matDark = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.5 });
@@ -72,10 +75,15 @@ export function buildGuaruja(worldFX) {
 
   const bldGeo = new THREE.BoxGeometry(1, 1, 1);
 
-  // Fileira 1
-  const row1 = makeInstanced(bldGeo, matWhite, D.n);
-  for (let i = 0; i < D.n; i++) {
-    const t = (i + 0.5) / D.n - 0.5;
+  // ============================================================
+  // 🏙️ EDIFÍCIOS DA ORLA — estilo Praia Grande (InstancedMesh)
+  // ============================================================
+
+  // Fileira 1 — prédios na orla (cores variadas)
+  const row1Count = 28;
+  const row1 = makeInstanced(bldGeo, matWhite, row1Count);
+  for (let i = 0; i < row1Count; i++) {
+    const t = (i + 0.5) / row1Count - 0.5;
     const along = t * 2 * D.spread;
     const x = D.x + CC.x * along - SD.x * D.inset + (Math.random() - 0.5) * 8;
     const z = D.z + CC.z * along - SD.z * D.inset + (Math.random() - 0.5) * 8;
@@ -85,58 +93,63 @@ export function buildGuaruja(worldFX) {
     row1.setMatrixAt(i, setDummy(x, h / 2 + 2, z, 8, h, 8, 0, angle, 0));
     row1.setColorAt(i, _col);
   }
-  row1.count = D.n;
+  row1.count = row1Count;
   finalizeInstanced(row1);
 
-  // Fileira 2 (Enseada)
-  const row2 = makeInstanced(bldGeo, matBeige, 16);
-  for (let i = 0; i < 16; i++) {
-    const t = (i + 0.5) / 16 - 0.5;
-    const along = t * 2 * 110;
-    const x = D.x + CC.x * 120 + CC.x * along - SD.x * 55 + (Math.random() - 0.5) * 10;
-    const z = D.z + CC.z * 120 + CC.z * along - SD.z * 55 + (Math.random() - 0.5) * 10;
-    const center = 1 - Math.abs(t) * 1.2;
-    const h = 10 + (24 - 10) * Math.pow(Math.random(), 0.9) * (0.5 + 0.5 * center);
-    _col.setHSL(0.1, 0.1, 0.72);
-    row2.setMatrixAt(i, setDummy(x, h / 2 + 2, z, 9, h, 9, 0, angle, 0));
-    row2.setColorAt(i, _col);
-  }
-  row2.count = 16;
-  finalizeInstanced(row2);
-
-  // Fileira 3 (iluminada)
-  const row3 = makeInstanced(bldGeo, matWhiteLit, 22);
-  for (let i = 0; i < 22; i++) {
-    const t = (i + 0.5) / 22 - 0.5;
+  // Fileira 2 — prédios iluminados
+  const row2Count = 20;
+  const row2 = makeInstanced(bldGeo, matWhiteLit, row2Count);
+  for (let i = 0; i < row2Count; i++) {
+    const t = (i + 0.5) / row2Count - 0.5;
     const along = t * 2 * (D.spread * 0.92);
     const x = D.x + CC.x * along - SD.x * (D.inset + 60) + (Math.random() - 0.5) * 10;
     const z = D.z + CC.z * along - SD.z * (D.inset + 60) + (Math.random() - 0.5) * 10;
     const center = 1 - Math.abs(t) * 1.2;
     const h = 14 + (30 - 14) * Math.pow(Math.random(), 0.9) * (0.5 + 0.5 * center);
     _col.setHSL(0.55, 0.1, 0.65);
-    row3.setMatrixAt(i, setDummy(x, h / 2 + 2, z, 9, h, 9, 0, angle, 0));
+    row2.setMatrixAt(i, setDummy(x, h / 2 + 2, z, 9, h, 9, 0, angle, 0));
+    row2.setColorAt(i, _col);
+  }
+  row2.count = row2Count;
+  finalizeInstanced(row2);
+
+  // Fileira 3 — torres de vidro
+  const row3Count = 22;
+  const row3 = makeInstanced(bldGeo, matGlass, row3Count);
+  for (let i = 0; i < row3Count; i++) {
+    const t = (i + 0.5) / row3Count - 0.5;
+    const along = t * 2 * (D.spread * 0.95);
+    const x = D.x + CC.x * along - SD.x * (D.inset + 110) + (Math.random() - 0.5) * 12;
+    const z = D.z + CC.z * along - SD.z * (D.inset + 110) + (Math.random() - 0.5) * 12;
+    const center = 1 - Math.abs(t) * 1.2;
+    const h = 22 + (40 - 22) * Math.pow(Math.random(), 0.85) * (0.5 + 0.5 * center);
+    _col.setHSL(0.55 + Math.random() * 0.05, 0.3, 0.6);
+    row3.setMatrixAt(i, setDummy(x, h / 2 + 2, z, 10, h, 10, 0, angle, 0));
     row3.setColorAt(i, _col);
   }
-  row3.count = 22;
+  row3.count = row3Count;
   finalizeInstanced(row3);
 
-  // Fileira 4 (verde)
-  const row4 = makeInstanced(bldGeo, matGreen, 26);
-  for (let i = 0; i < 26; i++) {
-    const t = (i + 0.5) / 26 - 0.5;
+  // Fileira 4 — prédios verdes (recuados)
+  const row4Count = 26;
+  const row4 = makeInstanced(bldGeo, matGreen, row4Count);
+  for (let i = 0; i < row4Count; i++) {
+    const t = (i + 0.5) / row4Count - 0.5;
     const along = t * 2 * (D.spread * 0.98);
-    const x = D.x + CC.x * along - SD.x * (D.inset + 120) + (Math.random() - 0.5) * 12;
-    const z = D.z + CC.z * along - SD.z * (D.inset + 120) + (Math.random() - 0.5) * 12;
+    const x = D.x + CC.x * along - SD.x * (D.inset + 160) + (Math.random() - 0.5) * 12;
+    const z = D.z + CC.z * along - SD.z * (D.inset + 160) + (Math.random() - 0.5) * 12;
     const center = 1 - Math.abs(t) * 1.2;
     const h = 8 + (18 - 8) * Math.pow(Math.random(), 0.9) * (0.5 + 0.5 * center);
     _col.setHSL(0.3, 0.15, 0.6);
     row4.setMatrixAt(i, setDummy(x, h / 2 + 2, z, 7, h, 7, 0, angle, 0));
     row4.setColorAt(i, _col);
   }
-  row4.count = 26;
+  row4.count = row4Count;
   finalizeInstanced(row4);
 
-  // Torres individuais
+  // ============================================================
+  // 🏢 TORRES INDIVIDUAIS (10 torres com sacadas)
+  // ============================================================
   const towerPositions = [];
   for (let i = 0; i < 10; i++) {
     const t = (i / 9 - 0.5) * D.spread * 0.85;
@@ -174,7 +187,9 @@ export function buildGuaruja(worldFX) {
   crownIM.count = 10;
   finalizeInstanced(crownIM);
 
-  // Morro
+  // ============================================================
+  // 🌄 MORRO (mantido)
+  // ============================================================
   const morroM = new THREE.MeshStandardMaterial({ color: 0x2d4a33, roughness: 1, flatShading: true });
   const morro = new THREE.Mesh(new THREE.SphereGeometry(55, 14, 12, 0, Math.PI * 2, 0, Math.PI / 2), morroM);
   morro.position.set(D.x - CC.x * 70, -1, D.z - CC.z * 70 - 50);
@@ -201,7 +216,9 @@ export function buildGuaruja(worldFX) {
   finalizeInstanced(palmMorroIM);
   finalizeInstanced(leafMorroIM);
 
-  // Palmeiras da orla
+  // ============================================================
+  // 🌴 PALMEIRAS DA ORLA
+  // ============================================================
   const totalPalms = 66;
   const trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 1, 6);
   const leafGeo = new THREE.SphereGeometry(1.8, 6, 4);
@@ -224,7 +241,9 @@ export function buildGuaruja(worldFX) {
   finalizeInstanced(trunkIM);
   finalizeInstanced(leafIM);
 
-  // Quiosques
+  // ============================================================
+  // 🏖️ QUIOSQUES (10)
+  // ============================================================
   const kioskGeo = new THREE.BoxGeometry(3.5, 2.5, 3.5);
   const kioskIM = makeInstanced(kioskGeo, matKiosk, 10, false);
   const kioskRoofGeo = new THREE.ConeGeometry(2.8, 1.2, 4);
@@ -242,11 +261,12 @@ export function buildGuaruja(worldFX) {
   kioskIM.count = kioskRoofIM.count = kioskLampIM.count = 10;
   [kioskIM, kioskRoofIM, kioskLampIM].forEach(finalizeInstanced);
 
-  // Marina e pier
+  // ============================================================
+  // ⚓ MARINA E PIER (mantido)
+  // ============================================================
   const woodM = new THREE.MeshStandardMaterial({ color: 0x8b6f47, roughness: 0.9 });
   const poleM = new THREE.MeshStandardMaterial({ color: 0x3a2a1c });
   const boatHullM = new THREE.MeshStandardMaterial({ color: 0x4a3a2a, roughness: 0.8 });
-  const boatHullM2 = new THREE.MeshStandardMaterial({ color: 0x2f4a5a, roughness: 0.8 });
   const boatCabinM = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 });
   const sailM = new THREE.MeshStandardMaterial({ color: 0xf2efe6, roughness: 0.9, side: THREE.DoubleSide });
 
@@ -277,7 +297,6 @@ export function buildGuaruja(worldFX) {
     state.scene.add(rail);
   }
 
-  // Postes do pier
   const pierPostGeo = new THREE.CylinderGeometry(0.14, 0.18, 12, 6);
   const pierPostIM = makeInstanced(pierPostGeo, poleM, 18, false);
   let postIdx = 0;
@@ -294,7 +313,7 @@ export function buildGuaruja(worldFX) {
   pierPostIM.count = 18;
   finalizeInstanced(pierPostIM);
 
-  // Barcos na marina
+  // Barcos
   const slipCount = 5;
   const lateralOffset = 5.5;
   const boatGeo = new THREE.BoxGeometry(4.4, 1, 1.8);
@@ -320,18 +339,20 @@ export function buildGuaruja(worldFX) {
     if (isSailboat) {
       mastIM.setMatrixAt(boatIdx, setDummy(bx, 4, bz, 1, 1, 1, 0, 0, 0));
       sailIM.setMatrixAt(boatIdx, setDummy(bx + SD.x * 0.6, 3.4, bz + SD.z * 0.6, 1, 1, 1, 0, pierAngle + Math.PI / 2, 0));
-      cabinIM.setMatrixAt(boatIdx, setDummy(0, -1000, 0, 0, 0, 0, 0, 0, 0)); // esconder
+      cabinIM.setMatrixAt(boatIdx, setDummy(0, -1000, 0, 0, 0, 0, 0, 0, 0));
     } else {
       cabinIM.setMatrixAt(boatIdx, setDummy(bx, 1.45, bz, 1, 1, 1, 0, pierAngle, 0));
-      mastIM.setMatrixAt(boatIdx, setDummy(0, -1000, 0, 0, 0, 0, 0, 0, 0)); // esconder
-      sailIM.setMatrixAt(boatIdx, setDummy(0, -1000, 0, 0, 0, 0, 0, 0, 0)); // esconder
+      mastIM.setMatrixAt(boatIdx, setDummy(0, -1000, 0, 0, 0, 0, 0, 0, 0));
+      sailIM.setMatrixAt(boatIdx, setDummy(0, -1000, 0, 0, 0, 0, 0, 0, 0));
     }
     boatIdx++;
   }
   boatIM.count = cabinIM.count = mastIM.count = sailIM.count = slipCount;
   [boatIM, cabinIM, mastIM, sailIM].forEach(finalizeInstanced);
 
-  // Terminal de balsas
+  // ============================================================
+  // 🚢 TERMINAL DE BALSAS (mantido)
+  // ============================================================
   const terminalX = 1790;
   const terminalZ = -710;
   const termM = new THREE.MeshStandardMaterial({ color: 0x888680, roughness: 0.85 });
@@ -360,7 +381,9 @@ export function buildGuaruja(worldFX) {
   pillarIM.count = 4;
   finalizeInstanced(pillarIM);
 
-  // Postes
+  // ============================================================
+  // 🌃 POSTES DE ILUMINAÇÃO (22)
+  // ============================================================
   const postGeo = new THREE.CylinderGeometry(0.1, 0.15, 5, 6);
   const lampGeo = new THREE.SphereGeometry(0.22, 8, 8);
   const postIM = makeInstanced(postGeo, matLampPost, 22, false);
@@ -376,7 +399,9 @@ export function buildGuaruja(worldFX) {
   finalizeInstanced(postIM);
   finalizeInstanced(lampIM);
 
-  // Rochas
+  // ============================================================
+  // 🪨 ROCHAS (8)
+  // ============================================================
   const rockGeo = new THREE.DodecahedronGeometry(1, 0);
   const rockIM = makeInstanced(rockGeo, matRock, 8, false);
   for (let i = 0; i < 8; i++) {

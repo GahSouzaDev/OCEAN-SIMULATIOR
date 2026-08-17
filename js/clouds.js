@@ -1,20 +1,14 @@
+// js/clouds.js — NUVENS VOLUMÉTRICAS 2.5D
+// Auto-sombra na direção do sol, prata nas bordas (silver lining),
+// gradiente de espessura, aquecimento no amanhecer/entardecer.
+// getCloudCoverage() mantém a MESMA matemática (contrato com weather.js).
 import * as THREE from 'three';
 import { state } from './state.js';
 import { CONFIG, WEATHERS } from './config.js';
 
 let cloudPlane, cloudMaterial;
 const cloudOffset = new THREE.Vector2(0, 0);
-
-// ==========================================================
-// 🌥️ SISTEMA DE NUVENS PROCEDURAIS MELHORADO (2D) - VERSÃO BAIXA
-// ==========================================================
-// - Altura reduzida para sobrevoar por baixo (sensação de volume)
-// - Escala de ruído aumentada para nuvens maiores e mais imponentes
-// - Gradiente de espessura escurecendo as partes mais densas (base)
-// - Plano maior para evitar que as bordas apareçam no horizonte
-// ==========================================================
-
-const CLOUD_HEIGHT = 120; // Altura bem mais baixa (antes 220)
+const CLOUD_HEIGHT = 130;
 
 function cloudNoise(x, z) {
   let v = 0;
@@ -29,168 +23,143 @@ function cloudNoise(x, z) {
 export function getCloudCoverage() {
   const x = state.boatRoot.position.x + cloudOffset.x;
   const z = state.boatRoot.position.z + cloudOffset.y;
-  
   const noise = cloudNoise(x, z);
   const weatherCoverage = (WEATHERS[CONFIG.weather.mode] || WEATHERS.MODERATE).cloudCoverage || 0.4;
-  
   const threshold = 0.3 - weatherCoverage * 0.6;
   let coverage = Math.max(0, Math.min(1, (noise - threshold) * 1.5));
-  
   coverage = coverage * coverage * (3 - 2 * coverage);
-  
   return coverage;
 }
 
 export function initClouds() {
-  // Aumentamos o tamanho do plano para 8000x8000. Como as nuvens estão mais baixas,
-  // elas precisam cobrir mais área para não vermos o "fim" do plano no horizonte.
-  const cloudGeo = new THREE.PlaneGeometry(8000, 8000, 1, 1);
+  const cloudGeo = new THREE.PlaneGeometry(9000, 9000, 1, 1);
   cloudGeo.rotateX(-Math.PI / 2);
-  
+
   cloudMaterial = new THREE.ShaderMaterial({
     uniforms: {
-      uTime: { value: 0 },
-      uOffset: { value: new THREE.Vector2(0, 0) },
-      uCoverage: { value: 0.4 },
-      uSunDir: { value: new THREE.Vector3(0, 1, 0) },
-      uSunColor: { value: new THREE.Color(0xffffff) },
-      uSkyColor: { value: new THREE.Color(0x87ceeb) },
-      uOpacity: { value: 1.0 },
-      uDayF: { value: 1.0 }
+      uTime:     { value: 0 },
+      uOffset:   { value: new THREE.Vector2() },
+      uCoverage: { value: 0.45 },
+      uSunDir:   { value: new THREE.Vector3(0, 1, 0) },
+      uSunColor: { value: new THREE.Color(1, 1, 1) },
+      uSkyColor: { value: new THREE.Color(0.6, 0.8, 0.95) },
+      uDayF:     { value: 1 },
+      uOpacity:  { value: 1 }
     },
-    vertexShader: `
+    vertexShader: /* glsl */`
       varying vec2 vUv;
-      varying vec3 vWorldPos;
+      varying vec3 vWorld;
       void main() {
         vUv = uv;
-        vec4 worldPos = modelMatrix * vec4(position, 1.0);
-        vWorldPos = worldPos.xyz;
-        gl_Position = projectionMatrix * viewMatrix * worldPos;
+        vec4 wp = modelMatrix * vec4(position, 1.0);
+        vWorld = wp.xyz;
+        gl_Position = projectionMatrix * viewMatrix * wp;
       }
     `,
-    fragmentShader: `
-      uniform float uTime;
+    fragmentShader: /* glsl */`
+      precision highp float;
+      uniform float uTime, uCoverage, uDayF, uOpacity;
       uniform vec2 uOffset;
-      uniform float uCoverage;
-      uniform vec3 uSunDir;
-      uniform vec3 uSunColor;
-      uniform vec3 uSkyColor;
-      uniform float uOpacity;
-      uniform float uDayF;
+      uniform vec3 uSunDir, uSunColor, uSkyColor;
       varying vec2 vUv;
-      varying vec3 vWorldPos;
+      varying vec3 vWorld;
 
-      // ---------- FUNÇÕES DE RUÍDO ----------
       float hash(vec2 p) {
-        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
       }
-
       float noise(vec2 p) {
-        vec2 i = floor(p);
-        vec2 f = fract(p);
-        f = f * f * (3.0 - 2.0 * f);
-        float a = hash(i);
-        float b = hash(i + vec2(1.0, 0.0));
-        float c = hash(i + vec2(0.0, 1.0));
-        float d = hash(i + vec2(1.0, 1.0));
-        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+        vec2 i = floor(p), f = fract(p);
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(
+          mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
+          mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
       }
-
       float fbm(vec2 p) {
-        float v = 0.0;
-        float a = 0.5;
-        mat2 rot = mat2(0.8, 0.6, -0.6, 0.8);
-        for (int i = 0; i < 6; i++) {
+        float v = 0.0, a = 0.5;
+        for (int i = 0; i < 5; i++) {
           v += a * noise(p);
-          p = rot * p * 2.0;
+          p = p * 2.03 + vec2(19.7, 7.3);
           a *= 0.5;
         }
         return v;
       }
 
+      float densityAt(vec2 p) {
+        vec2 warp = vec2(fbm(p * 1.6 + vec2(2.3, 9.1)), fbm(p * 1.6 + vec2(8.1, 3.7)));
+        float base = fbm(p + warp * 0.65 + vec2(uTime * 0.0042, uTime * 0.0026));
+        float thr = 0.62 - uCoverage * 0.5;
+        float d = smoothstep(thr, thr + 0.30, base);
+        return d * d * (3.0 - 2.0 * d);
+      }
+
       void main() {
-        // Escala aumentada para que as nuvens pareçam maiores e mais imponentes vistas de perto
-        vec2 p = (vWorldPos.xz + uOffset) * 0.0025;
-        p += uTime * 0.012;
+        vec2 p = (vWorld.xz + uOffset) * 0.0011;
+        float d = densityAt(p);
 
-        // Três camadas de FBM com velocidades diferentes
-        float n1 = fbm(p);
-        float n2 = fbm(p * 1.5 + vec2(1.5, 3.2) + uTime * 0.006);
-        float n3 = fbm(p * 2.5 + vec2(2.1, 1.3) + uTime * 0.004);
+        // ── auto-sombra: amostra deslocada na direção do sol ──
+        vec3 sd = normalize(uSunDir + vec3(0.0, 0.001, 0.0));
+        vec2 sunXZ = sd.xz / max(sd.y, 0.18);
+        float dSun = densityAt(p + sunXZ * 0.028);
+        float shadow = clamp(1.0 - max(dSun - d, 0.0) * 3.2, 0.22, 1.0);
 
-        // Combinação ponderada
-        float combined = n1 * 0.50 + n2 * 0.35 + n3 * 0.15;
+        // ── fase: prata na borda olhando pro sol ──
+        vec3 viewDir = normalize(vWorld - cameraPosition);
+        float mu = dot(viewDir, sd);
+        float silver = pow(max(mu, 0.0), 7.0);
 
-        // Threshold baseado na cobertura do clima (ajustado para nuvens mais densas)
-        float threshold = 0.40 - uCoverage * 0.45;
-        float cloud = smoothstep(threshold, threshold + 0.25, combined);
+        float sunH = clamp(uSunDir.y, 0.0, 1.0);
+        float warm = pow(1.0 - clamp(uSunDir.y, 0.0, 1.0), 2.0) * step(0.0, uSunDir.y);
 
-        // ---------- ILUMINAÇÃO SOLAR ----------
-        vec3 sunDir = normalize(uSunDir);
-        float sunFactor = max(dot(vec3(0.0, 1.0, 0.0), sunDir), 0.0);
+        vec3 bright = mix(vec3(0.98, 0.97, 0.95), uSunColor * 1.2, warm * 0.8);
+        vec3 darkBase = mix(vec3(0.30, 0.32, 0.40), vec3(0.06, 0.08, 0.15), 1.0 - uDayF);
+        float thick = smoothstep(0.10, 0.85, d);
+        vec3 cCol = mix(bright, darkBase, thick * 0.6);
+        cCol *= shadow;
+        cCol += uSunColor * silver * (0.35 + 0.65 * uDayF) * 0.7 * shadow;
+        cCol = mix(cCol, uSkyColor * 0.9, 0.16);
+        // lua: contorno frio sutil à noite
+        cCol += vec3(0.10, 0.13, 0.20) * (1.0 - uDayF) * thick * 0.4;
 
-        // Cores das nuvens (ajustadas para ficarem mais escuras e pesadas)
-        vec3 brightCloud = vec3(0.95, 0.93, 0.90);
-        vec3 darkCloud = vec3(0.30, 0.32, 0.40);
-
-        // Simulação de gradiente vertical: escurece as partes mais densas da nuvem,
-        // simulando a base escura e volumosa de nuvens baixas.
-        float thicknessGrad = smoothstep(0.2, 0.8, combined);
-        brightCloud = mix(brightCloud, darkCloud, thicknessGrad * 0.4);
-
-        vec3 cloudColor = mix(darkCloud, brightCloud, sunFactor * 0.65 + 0.35);
-
-        // Toque quente do sol ao amanhecer/entardecer
-        cloudColor = mix(cloudColor, uSunColor * 1.2, sunFactor * 0.3);
-
-        // ---------- BORDAS SUAVES ----------
+        // ── bordas suaves ──
         float dist = length(vUv - 0.5) * 2.0;
-        // Fade mais longo pois o plano agora é maior (8000)
-        float edgeFade = 1.0 - smoothstep(0.65, 1.0, dist);
+        float edgeFade = 1.0 - smoothstep(0.60, 0.98, dist);
+        float nightFade = mix(0.16, 1.0, uDayF);
+        float alpha = d * edgeFade * uOpacity * nightFade;
 
-        // ---------- OPACIDADE ----------
-        float nightFade = mix(0.15, 1.0, uDayF);
-        float alpha = cloud * edgeFade * uOpacity * nightFade;
-
-        vec3 finalColor = mix(uSkyColor, cloudColor, cloud);
-
-        gl_FragColor = vec4(finalColor, alpha * 0.90); // opacidade levemente aumentada para parecer mais denso
+        vec3 finalColor = mix(uSkyColor, cCol, clamp(d * 1.6, 0.0, 1.0));
+        gl_FragColor = vec4(finalColor, alpha * 0.93);
       }
     `,
     transparent: true,
     depthWrite: false,
     side: THREE.DoubleSide
   });
-  
+
   cloudPlane = new THREE.Mesh(cloudGeo, cloudMaterial);
-  cloudPlane.position.y = CLOUD_HEIGHT; // Altura das nuvens reduzida
+  cloudPlane.position.y = CLOUD_HEIGHT;
   cloudPlane.renderOrder = 999;
+  cloudPlane.frustumCulled = false;
   state.scene.add(cloudPlane);
-  
   return cloudPlane;
 }
 
 export function updateClouds(dt, sunDir, sunColor, skyColor) {
   if (!cloudPlane) return;
-  
-  // Move com o vento
   const windSpeed = state.windMul * 6.0;
   const windDir = CONFIG.wind.direction;
   cloudOffset.x += Math.cos(windDir) * windSpeed * dt;
   cloudOffset.y += Math.sin(windDir) * windSpeed * dt;
-  
-  // Segue o barco
+
   cloudPlane.position.x = state.boatRoot.position.x;
   cloudPlane.position.z = state.boatRoot.position.z;
-  
-  // Atualiza uniforms
+
   cloudMaterial.uniforms.uTime.value = state.simTime;
   cloudMaterial.uniforms.uOffset.value.copy(cloudOffset);
   cloudMaterial.uniforms.uSunDir.value.copy(sunDir);
   cloudMaterial.uniforms.uSunColor.value.copy(sunColor);
   cloudMaterial.uniforms.uSkyColor.value.copy(skyColor);
   cloudMaterial.uniforms.uDayF.value = state.dayF;
-  
+
   const weatherCoverage = (WEATHERS[CONFIG.weather.mode] || WEATHERS.MODERATE).cloudCoverage || 0.4;
   cloudMaterial.uniforms.uCoverage.value = weatherCoverage;
 }

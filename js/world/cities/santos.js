@@ -1,4 +1,4 @@
-// js/world/cities/santos.js — INSTANCED MESHES (mesmo visual, ~98% menos draw calls)
+// js/world/cities/santos.js — INSTANCED MESHES (estilo Praia Grande)
 import * as THREE from 'three';
 import { state } from '../../state.js';
 import { CITY_DATA, CC, SD } from './city-shared.js';
@@ -28,33 +28,31 @@ export function buildSantos(worldFX) {
   const seaAngle = Math.atan2(SD.x, SD.z);
 
   // ============================================================
-  // 🎨 MATERIAIS
+  // 🎨 MATERIAIS (iguais aos de Praia Grande)
   // ============================================================
-  const matWhite = new THREE.MeshStandardMaterial({ color: 0xf8f8f5, roughness: 0.6, emissive: 0xffd9a0, emissiveIntensity: 0 });
+  const matWhite = new THREE.MeshStandardMaterial({ color: 0xf8f8f5, roughness: 0.65, metalness: 0.05 });
   worldFX.cityMats.push(matWhite);
-  worldFX.round.push({ mat: matWhite, k: 0.2 });
 
-  const matWhiteLit = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 0.55, emissive: 0xffffff, emissiveIntensity: 0.25 });
+  const matWhiteLit = new THREE.MeshStandardMaterial({ 
+    color: 0xfcfcfc, roughness: 0.6, emissive: 0xffeebb, emissiveIntensity: 0.4 
+  });
   worldFX.cityMats.push(matWhiteLit);
-  worldFX.round.push({ mat: matWhiteLit, k: 0.65 });
+  worldFX.round.push({ mat: matWhiteLit, k: 0.8 });
 
-  const matGlass = new THREE.MeshStandardMaterial({ color: 0xaaccdd, roughness: 0.1, metalness: 0.6, transparent: true, opacity: 0.7, emissive: 0x88aacc, emissiveIntensity: 0 });
+  const matGlass = new THREE.MeshStandardMaterial({ 
+    color: 0xaaccdd, roughness: 0.15, metalness: 0.5, transparent: true, opacity: 0.7,
+    emissive: 0x88aacc, emissiveIntensity: 0.3
+  });
   worldFX.cityMats.push(matGlass);
-  worldFX.round.push({ mat: matGlass, k: 0.7 });
+  worldFX.round.push({ mat: matGlass, k: 0.6 });
 
   const matBalcony = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.8 });
-  worldFX.cityMats.push(matBalcony);
-
   const matDark = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.5 });
-  worldFX.cityMats.push(matDark);
-
   const matConcrete = new THREE.MeshStandardMaterial({ color: 0xb5b0a6, roughness: 0.95 });
-  worldFX.cityMats.push(matConcrete);
-
   const matTrunk = new THREE.MeshStandardMaterial({ color: 0x6b4f3a, roughness: 0.9 });
   const matLeaf = new THREE.MeshStandardMaterial({ color: 0x3a7d44, roughness: 0.7 });
 
-  // Materiais do porto
+  // Materiais do porto (mantidos)
   const portConcrete = new THREE.MeshStandardMaterial({ color: 0x6a6a6a, roughness: 0.9 });
   const portDark = new THREE.MeshStandardMaterial({ color: 0x2a2f36, roughness: 0.8 });
   const craneMat = new THREE.MeshStandardMaterial({ color: 0xe8b833, roughness: 0.5, metalness: 0.3 });
@@ -73,14 +71,15 @@ export function buildSantos(worldFX) {
   ];
 
   // ============================================================
-  // 🏙️ MURALHA DE TORRES (4 fileiras densas — instanciadas)
+  // 🏙️ EDIFÍCIOS DA ORLA — estilo Praia Grande (InstancedMesh)
   // ============================================================
   const bldGeo = new THREE.BoxGeometry(1, 1, 1);
 
-  // Fileira 1 — 48 prédios brancos na orla
-  const row1 = makeInstanced(bldGeo, matWhite, D.n);
-  for (let i = 0; i < D.n; i++) {
-    const t = (i + 0.5) / D.n - 0.5;
+  // Fileira 1 — prédios brancos/bege na orla
+  const row1Count = 30;
+  const row1 = makeInstanced(bldGeo, matWhite, row1Count);
+  for (let i = 0; i < row1Count; i++) {
+    const t = (i + 0.5) / row1Count - 0.5;
     const along = t * 2 * D.spread;
     const x = D.x + CC.x * along - SD.x * D.inset + (Math.random() - 0.5) * 8;
     const z = D.z + CC.z * along - SD.z * D.inset + (Math.random() - 0.5) * 8;
@@ -90,67 +89,70 @@ export function buildSantos(worldFX) {
     row1.setMatrixAt(i, setDummy(x, h / 2 + 2, z, 8, h, 8, 0, caisAngle, 0));
     row1.setColorAt(i, _col);
   }
-  row1.count = D.n;
+  row1.count = row1Count;
   row1.instanceMatrix.needsUpdate = true;
   row1.instanceColor.needsUpdate = true;
   state.scene.add(row1);
 
-  // Fileira 2 — 24 prédios iluminados
-  const row2 = makeInstanced(bldGeo, matWhiteLit, 24);
-  for (let i = 0; i < 24; i++) {
-    const t = (i + 0.5) / 24 - 0.5;
+  // Fileira 2 — prédios iluminados
+  const row2Count = 22;
+  const row2 = makeInstanced(bldGeo, matWhiteLit, row2Count);
+  for (let i = 0; i < row2Count; i++) {
+    const t = (i + 0.5) / row2Count - 0.5;
     const along = t * 2 * (D.spread * 0.92);
     const x = D.x + CC.x * along - SD.x * (D.inset + 60) + (Math.random() - 0.5) * 10;
     const z = D.z + CC.z * along - SD.z * (D.inset + 60) + (Math.random() - 0.5) * 10;
     const center = 1 - Math.abs(t) * 1.2;
-    const h = 15 + (32 - 15) * Math.pow(Math.random(), 0.9) * (0.5 + 0.5 * center);
+    const h = 20 + (38 - 20) * Math.pow(Math.random(), 0.9) * (0.5 + 0.5 * center);
     _col.setHSL(0.1, 0.06, 0.75 + Math.random() * 0.08);
     row2.setMatrixAt(i, setDummy(x, h / 2 + 2, z, 9, h, 9, 0, caisAngle, 0));
     row2.setColorAt(i, _col);
   }
-  row2.count = 24;
+  row2.count = row2Count;
   row2.instanceMatrix.needsUpdate = true;
   row2.instanceColor.needsUpdate = true;
   state.scene.add(row2);
 
-  // Fileira 3 — 28 torres de vidro
-  const row3 = makeInstanced(bldGeo, matGlass, 28);
-  for (let i = 0; i < 28; i++) {
-    const t = (i + 0.5) / 28 - 0.5;
+  // Fileira 3 — torres de vidro
+  const row3Count = 25;
+  const row3 = makeInstanced(bldGeo, matGlass, row3Count);
+  for (let i = 0; i < row3Count; i++) {
+    const t = (i + 0.5) / row3Count - 0.5;
     const along = t * 2 * (D.spread * 0.95);
     const x = D.x + CC.x * along - SD.x * (D.inset + 110) + (Math.random() - 0.5) * 12;
     const z = D.z + CC.z * along - SD.z * (D.inset + 110) + (Math.random() - 0.5) * 12;
     const center = 1 - Math.abs(t) * 1.2;
-    const h = 25 + (48 - 25) * Math.pow(Math.random(), 0.85) * (0.5 + 0.5 * center);
+    const h = 30 + (55 - 30) * Math.pow(Math.random(), 0.85) * (0.5 + 0.5 * center);
     _col.setHSL(0.55 + Math.random() * 0.05, 0.3, 0.6);
     row3.setMatrixAt(i, setDummy(x, h / 2 + 2, z, 10, h, 10, 0, caisAngle, 0));
     row3.setColorAt(i, _col);
   }
-  row3.count = 28;
+  row3.count = row3Count;
   row3.instanceMatrix.needsUpdate = true;
   row3.instanceColor.needsUpdate = true;
   state.scene.add(row3);
 
-  // Fileira 4 — 32 prédios recuados
-  const row4 = makeInstanced(bldGeo, matWhite, 32);
-  for (let i = 0; i < 32; i++) {
-    const t = (i + 0.5) / 32 - 0.5;
+  // Fileira 4 — prédios recuados
+  const row4Count = 28;
+  const row4 = makeInstanced(bldGeo, matWhite, row4Count);
+  for (let i = 0; i < row4Count; i++) {
+    const t = (i + 0.5) / row4Count - 0.5;
     const along = t * 2 * (D.spread * 0.98);
-    const x = D.x + CC.x * along - SD.x * (D.inset + 160) + (Math.random() - 0.5) * 12;
-    const z = D.z + CC.z * along - SD.z * (D.inset + 160) + (Math.random() - 0.5) * 12;
+    const x = D.x + CC.x * along - SD.x * (D.inset + 170) + (Math.random() - 0.5) * 12;
+    const z = D.z + CC.z * along - SD.z * (D.inset + 170) + (Math.random() - 0.5) * 12;
     const center = 1 - Math.abs(t) * 1.2;
-    const h = 18 + (38 - 18) * Math.pow(Math.random(), 0.9) * (0.5 + 0.5 * center);
+    const h = 25 + (45 - 25) * Math.pow(Math.random(), 0.9) * (0.5 + 0.5 * center);
     _col.setHSL(0.1, 0.05, 0.7 + Math.random() * 0.08);
     row4.setMatrixAt(i, setDummy(x, h / 2 + 2, z, 8, h, 8, 0, caisAngle, 0));
     row4.setColorAt(i, _col);
   }
-  row4.count = 32;
+  row4.count = row4Count;
   row4.instanceMatrix.needsUpdate = true;
   row4.instanceColor.needsUpdate = true;
   state.scene.add(row4);
 
   // ============================================================
-  // 🏢 TORRES INDIVIDUAIS (12 torres com sacadas — instanciadas)
+  // 🏢 TORRES INDIVIDUAIS (12 torres com sacadas — mantidas)
   // ============================================================
   const towerPositions = [];
   for (let i = 0; i < 12; i++) {
@@ -170,7 +172,7 @@ export function buildSantos(worldFX) {
   towerIM.instanceMatrix.needsUpdate = true;
   state.scene.add(towerIM);
 
-  // Sacadas (até ~16 por torre × 12 torres ≈ 192 sacadas)
+  // Sacadas
   const balconyGeo = new THREE.BoxGeometry(10.6, 0.4, 10.6);
   const balconyIM = makeInstanced(balconyGeo, matBalcony, 200, false);
   let bIdx = 0;
@@ -184,7 +186,7 @@ export function buildSantos(worldFX) {
   balconyIM.instanceMatrix.needsUpdate = true;
   state.scene.add(balconyIM);
 
-  // Coroas das torres
+  // Coroas
   const crownGeo = new THREE.BoxGeometry(12, 2, 12);
   const crownIM = makeInstanced(crownGeo, matDark, 12, false);
   towerPositions.forEach((tp, i) => {
@@ -248,7 +250,7 @@ export function buildSantos(worldFX) {
   molheIM.instanceMatrix.needsUpdate = true;
   state.scene.add(molheIM);
 
-  // Farol na ponta do molhe norte
+  // Farol
   const farolTip = {
     x: molhoStartX - CC.x * (channelWidth / 2 + 6) + molhoDirX * molhoLength,
     z: molhoStartZ - CC.z * (channelWidth / 2 + 6) + molhoDirZ * molhoLength
@@ -264,7 +266,7 @@ export function buildSantos(worldFX) {
   lighthouseLight.position.set(farolTip.x, 12, farolTip.z);
   state.scene.add(lighthouseLight);
 
-  // Boias de canal (6 vermelhas + 6 verdes)
+  // Boias
   const buoyRedMat = new THREE.MeshStandardMaterial({ color: 0xcc2222, emissive: 0xff3333, emissiveIntensity: 0.35 });
   const buoyGreenMat = new THREE.MeshStandardMaterial({ color: 0x1f9e46, emissive: 0x33ff77, emissiveIntensity: 0.35 });
   const buoyGeo = new THREE.ConeGeometry(0.8, 1.8, 8);
@@ -293,13 +295,13 @@ export function buildSantos(worldFX) {
   cais.rotation.y = caisAngle;
   state.scene.add(cais);
 
-  // Trilho dos portêineres
+  // Trilho
   const rail = new THREE.Mesh(new THREE.BoxGeometry(caisLength + 10, 0.25, 2), railMat);
   rail.position.set(caisMidX, 2.4, caisMidZ);
   rail.rotation.y = caisAngle;
   state.scene.add(rail);
 
-  // Defensas (21 defensas ao longo do cais)
+  // Defensas
   const fenderMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 1 });
   const fenderGeo = new THREE.CylinderGeometry(0.5, 0.5, 3, 8);
   const fenderIM = makeInstanced(fenderGeo, fenderMat, 21, false);
@@ -312,49 +314,37 @@ export function buildSantos(worldFX) {
   state.scene.add(fenderIM);
 
   // ============================================================
-  // 🏗️ PORTÊINERES (8 guindastes STS) — todos instanciados
+  // 🏗️ PORTÊINERES (8 guindastes STS) — tudo instanciado
   // ============================================================
   const craneAlongPositions = [15, 65, 115, 165, 260, 310, 360, 410];
   const legH = 34, gaugeSea = 3, gaugeLand = 15, legSpan = 9;
 
-  // Pernas: 4 por guindaste × 8 = 32
   const craneLegGeo = new THREE.CylinderGeometry(1.1, 1.5, legH, 8);
   const craneLegIM = makeInstanced(craneLegGeo, craneMat, 32, false);
-  // Contraventamentos: 4 × 8 = 32
   const braceGeo = new THREE.BoxGeometry(0.4, legH * 0.7, 0.4);
   const braceIM = makeInstanced(braceGeo, craneMatDark, 32, false);
-  // Vigas de topo mar: 8
   const seaTopGeo = new THREE.BoxGeometry(legSpan + 2, 1.6, 1.6);
   const seaTopIM = makeInstanced(seaTopGeo, craneMat, 8, false);
-  // Vigas de topo terra: 8
   const landTopGeo = new THREE.BoxGeometry(legSpan + 2, 1.6, 1.6);
   const landTopIM = makeInstanced(landTopGeo, craneMat, 8, false);
-  // Travessas: 2 × 8 = 16
   const crossSpan = gaugeLand + gaugeSea;
   const crossGeo = new THREE.BoxGeometry(1.4, 1.4, crossSpan + 2);
   const crossIM = makeInstanced(crossGeo, craneMatDark, 16, false);
-  // Lanças mar: 8
   const boomSea = 34;
   const boomSeaGeo = new THREE.BoxGeometry(1.6, 1.6, boomSea);
   const boomSeaIM = makeInstanced(boomSeaGeo, craneMat, 8, false);
-  // Contra-lanças: 8
   const boomLand = 14;
   const boomLandGeo = new THREE.BoxGeometry(1.6, 1.6, boomLand);
   const boomLandIM = makeInstanced(boomLandGeo, craneMatDark, 8, false);
-  // Casas de máquinas: 8
   const machineGeo = new THREE.BoxGeometry(6, 3, 5);
   const machineIM = makeInstanced(machineGeo, portDark, 8, false);
-  // Trolleys: 8
   const trolleyGeo = new THREE.BoxGeometry(2.4, 1, 2.4);
   const trolleyIM = makeInstanced(trolleyGeo, portDark, 8, false);
-  // Cabos: 8
   const cableLen = 14;
   const cableGeo = new THREE.CylinderGeometry(0.08, 0.08, cableLen, 4);
   const cableIM = makeInstanced(cableGeo, railMat, 8, false);
-  // Spreaders: 8
   const spreaderGeo = new THREE.BoxGeometry(6.3, 0.6, 2.6);
   const spreaderIM = makeInstanced(spreaderGeo, craneMatDark, 8, false);
-  // Containers suspensos: 8
   const hangContGeo = new THREE.BoxGeometry(6.1, 2.5, 2.4);
   const hangContIM = makeInstanced(hangContGeo, containerColors[0], 8);
 
@@ -413,12 +403,11 @@ export function buildSantos(worldFX) {
   state.scene.add(hangContIM);
 
   // ============================================================
-  // 📦 PÁTIO DE CONTÊINERES (blocos retangulares — tudo instanciado)
+  // 📦 PÁTIO DE CONTÊINERES
   // ============================================================
   const contL = 6.1, contW = 2.44, gapAlong = 1.0, gapDepth = 0.6;
   const contGeo = new THREE.BoxGeometry(contL, 2.6, contW);
 
-  // Calcular total de containers para instanciar
   const yardBlocks = [
     { alongStart: 10, alongLen: 100, depthStart: 22, depthLen: 68, stackH: 4, colorSeed: 0 },
     { alongStart: 10, alongLen: 100, depthStart: 100, depthLen: 68, stackH: 3, colorSeed: 2 },
@@ -463,7 +452,7 @@ export function buildSantos(worldFX) {
   state.scene.add(yardContIM);
 
   // ============================================================
-  // 🏗️ RTGs (4 guindastes de pátio — instanciados)
+  // 🏗️ RTGs (4 guindastes de pátio)
   // ============================================================
   const rtgPositions = [
     { along: 60, depth: 60, spanAlong: 90 },
@@ -504,7 +493,7 @@ export function buildSantos(worldFX) {
   });
 
   // ============================================================
-  // 🏭 ARMAZÉNS PORTUÁRIOS (6 armazéns — instanciados)
+  // 🏭 ARMAZÉNS PORTUÁRIOS (6)
   // ============================================================
   const warehouseGeo = new THREE.BoxGeometry(34, 13, 20);
   const warehouseIM = makeInstanced(warehouseGeo, portDark, 6, false);
@@ -577,7 +566,7 @@ export function buildSantos(worldFX) {
   state.scene.add(ferryDeck);
 
   // ============================================================
-  // 🏖️ QUIOSQUES DA PRAIA (14 — instanciados)
+  // 🏖️ QUIOSQUES DA PRAIA (14)
   // ============================================================
   const qMat = new THREE.MeshStandardMaterial({ color: 0xe8dfc4, roughness: 0.8, emissive: 0xffddaa, emissiveIntensity: 0 });
   worldFX.cityMats.push(qMat);
@@ -607,7 +596,7 @@ export function buildSantos(worldFX) {
   });
 
   // ============================================================
-  // 🌃 ILUMINAÇÃO PÚBLICA (30 postes — instanciados)
+  // 🌃 ILUMINAÇÃO PÚBLICA (30 postes)
   // ============================================================
   const streetLampMat = new THREE.MeshStandardMaterial({ color: 0xfff5d1, emissive: 0xffddaa, emissiveIntensity: 0.95 });
   worldFX.round.push({ mat: streetLampMat, k: 0.85 });
@@ -634,7 +623,7 @@ export function buildSantos(worldFX) {
   });
 
   // ============================================================
-  // 🪨 ROCHAS DECORATIVAS (6 — instanciadas)
+  // 🪨 ROCHAS DECORATIVAS (6)
   // ============================================================
   const rockMat = new THREE.MeshStandardMaterial({ color: 0x2a2620, roughness: 1, flatShading: true });
   const rockGeo = new THREE.DodecahedronGeometry(1, 0);

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>O MAR É O PERSONAGEM PRINCIPAL — Céu, Água e Sol</title>
+<style>
+  html, body { margin:0; height:100%; overflow:hidden; background:#000; }
+  canvas { display:block; }
+  #hud{
+    position:fixed; left:18px; bottom:16px; z-index:10;
+    color:#d7e8f2; font:11px/1.7 "Courier New", monospace;
+    letter-spacing:.08em; text-shadow:0 1px 3px rgba(0,0,0,.8);
+    pointer-events:none; opacity:.85;
+  }
+  #hud b{ color:#ffd9a0; font-weight:normal; }
+</style>
+</head>
+<body>
+<div id="hud">
+  <b>ARRASTE</b> olhar &nbsp;·&nbsp; <b>SCROLL</b> aproximar &nbsp;·&nbsp; <b>N</b> alterna dia → pôr do sol → noite<br>
+  <span id="clock">--:--</span> &nbsp; <span id="estado">DIA</span>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { Water } from 'three/addons/objects/Water.js';
+import { Sky } from 'three/addons/objects/Sky.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+/* ============================================================
+   RENDERER — ACES Filmic + exposição baixa = "claridade" do sol
+   ============================================================ */
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.55;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 1, 20000);
+camera.position.set(0, 6, 32);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 4, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.maxPolarAngle = Math.PI * 0.495;
+controls.minDistance = 8;
+controls.maxDistance = 220;
+
+/* ============================================================
+   NORMAIS DA ÁGUA — geradas proceduralmente (self-contained)
+   ============================================================ */
+function makeWaterNormals(size = 512) {
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  const img = ctx.createImageData(size, size);
+
+  let s = 9301;
+  const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const G = 64, grid = new Float32Array(G * G);
+  for (let i = 0; i < G*G; i++) grid[i] = rand();
+
+  const lat = (x, y) => {
+    x = ((x % G) + G) % G; y = ((y % G) + G) % G;
+    const x0 = Math.floor(x), y0 = Math.floor(y);
+    const x1 = (x0 + 1) % G, y1 = (y0 + 1) % G;
+    const fx = x - x0, fy = y - y0;
+    const sx = fx*fx*(3-2*fx), sy = fy*fy*(3-2*fy);
+    const a = grid[y0*G+x0], b = grid[y0*G+x1], c2 = grid[y1*G+x0], d = grid[y1*G+x1];
+    return a + (b-a)*sx + (c2-a)*sy + (a-b-c2+d)*sx*sy;
+  };
+  const fbm = (x, y) => {
+    let v = 0, amp = 0.5, f = 1;
+    for (let o = 0; o < 5; o++) { v += amp * lat(x*f, y*f); f *= 2.03; amp *= 0.5; }
+    return v;
+  };
+
+  const h = new Float32Array(size*size);
+  for (let y = 0; y < size; y++)
+    for (let x = 0; x < size; x++)
+      h[y*size+x] = fbm(x/size*7, y/size*7);
+
+  const st = 1.6;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const xm = (x+size-1)%size, xp = (x+1)%size;
+      const ym = (y+size-1)%size, yp = (y+1)%size;
+      const dx = (h[y*size+xp] - h[y*size+xm]) * st;
+      const dy = (h[yp*size+x] - h[ym*size+x]) * st;
+      const inv = 1 / Math.sqrt(dx*dx + dy*dy + 1);
+      const i = (y*size + x) * 4;
+      img.data[i  ] = (-dx*inv * 0.5 + 0.5) * 255;
+      img.data[i+1] = (-dy*inv * 0.5 + 0.5) * 255;
+      img.data[i+2] = (inv * 0.5 + 0.5) * 255;
+      img.data[i+3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+
+/* ============================================================
+   O MAR — reflexão planar real do céu e do sol
+   ============================================================ */
+const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
+const water = new Water(waterGeometry, {
+  textureWidth: 1024,
+  textureHeight: 1024,
+  waterNormals: makeWaterNormals(),
+  sunDirection: new THREE.Vector3(0, 1, 0),
+  sunColor: 0xfff2d9,
+  waterColor: 0x06222e,
+  distortionScale: 3.9,
+  fog: false
+});
+water.rotation.x = -Math.PI / 2;
+water.material.uniforms.size.value = 5.5;
+scene.add(water);
+
+/* ============================================================
+   O CÉU — espalhamento atmosférico físico (Rayleigh/Mie)
+   ============================================================ */
+const sky = new Sky();
+sky.scale.setScalar(15000);
+scene.add(sky);
+const skyU = sky.material.uniforms;
+skyU.turbidity.value = 7.5;
+skyU.rayleigh.value = 2.1;
+skyU.mieCoefficient.value = 0.0055;
+skyU.mieDirectionalG.value = 0.82;
+
+const sun = new THREE.Vector3();
+
+/* ============================================================
+   ESTRELAS — aparecem quando o sol mergulha
+   ============================================================ */
+const starGeo = new THREE.BufferGeometry();
+{
+  const N = 2200, pos = new Float32Array(N*3);
+  for (let i = 0; i < N; i++) {
+    const t = Math.random() * Math.PI * 2;
+    const p = Math.acos(Math.random() * 0.95);       // hemisfério superior
+    const r = 9000;
+    pos[i*3  ] = r * Math.sin(p) * Math.cos(t);
+    pos[i*3+1] = r * Math.cos(p) + 40;
+    pos[i*3+2] = r * Math.sin(p) * Math.sin(t);
+  }
+  starGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+}
+const starMat = new THREE.PointsMaterial({
+  color: 0xcfe0ff, size: 2.2, sizeAttenuation: false,
+  transparent: true, opacity: 0, depthWrite: false
+});
+scene.add(new THREE.Points(starGeo, starMat));
+
+/* ============================================================
+   ILHA DISTANTE — silhueta que ancora o horizonte
+   ============================================================ */
+const island = new THREE.Group();
+{
+  const mat = new THREE.MeshBasicMaterial({ color: 0x0c1a20 });
+  const base = new THREE.Mesh(new THREE.ConeGeometry(190, 60, 9), mat);
+  base.position.y = 18;
+  const pico = new THREE.Mesh(new THREE.ConeGeometry(70, 95, 7), mat);
+  pico.position.set(40, 46, -30);
+  island.add(base, pico);
+}
+island.position.set(-1500, 0, -3400);
+scene.add(island);
+
+/* ============================================================
+   BOIA — balanço, luz piscando, escala humana
+   ============================================================ */
+const buoy = new THREE.Group();
+{
+  const hull = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.55, 0.8, 1.6, 12),
+    new THREE.MeshStandardMaterial({ color: 0xb03a2e, roughness: 0.6 })
+  );
+  hull.position.y = 0.4;
+  const mast = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.06, 0.06, 2.2, 6),
+    new THREE.MeshStandardMaterial({ color: 0x222831 })
+  );
+  mast.position.y = 2.2;
+  const lamp = new THREE.Mesh(
+    new THREE.SphereGeometry(0.16, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0xffcf6a })
+  );
+  lamp.position.y = 3.3;
+  buoy.add(hull, mast, lamp);
+  buoy.userData.lamp = lamp;
+}
+buoy.position.set(14, 0, -18);
+scene.add(buoy);
+
+const buoyLight = new THREE.PointLight(0xffc966, 0, 30, 2);
+buoyLight.position.copy(buoy.position).y += 3.2;
+scene.add(buoyLight);
+
+const sunLight = new THREE.DirectionalLight(0xfff2d9, 2.2);
+scene.add(sunLight);
+scene.add(new THREE.HemisphereLight(0x9db8d6, 0x0a1a22, 0.5));
+
+/* ============================================================
+   PÓS-PROCESSAMENTO — bloom = estouro do disco solar
+   ============================================================ */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(
+  new THREE.Vector2(innerWidth, innerHeight), 0.55, 0.65, 0.82
+);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+/* ============================================================
+   CICLO DIA / PÔR DO SOL / NOITE  (tecla N)
+   ============================================================ */
+const STATES = [
+  { nome: 'DIA',          elev: 32,  azim: 180, exp: 0.55, bloom: 0.45, turb: 6.0, rayl: 1.9, sunCor: 0xfff6e0, agua: 0x07303f },
+  { nome: 'PÔR DO SOL',   elev: 3.2, azim: 245, exp: 0.50, bloom: 0.95, turb: 10.5, rayl: 2.6, sunCor: 0xff9a3c, agua: 0x0a2233 },
+  { nome: 'NOITE',        elev: -16, azim: 245, exp: 0.38, bloom: 0.35, turb: 1.2, rayl: 0.45, sunCor: 0x24384f, agua: 0x03101a }
+];
+let stateIdx = 0;
+let elev = STATES[0].elev, azim = STATES[0].azim;
+const clockEl = document.getElementById('clock');
+const estadoEl = document.getElementById('estado');
+
+addEventListener('keydown', e => {
+  if (e.key.toLowerCase() === 'n') stateIdx = (stateIdx + 1) % STATES.length;
+});
+
+const lerp = THREE.MathUtils.lerp;
+const smooth = (a, b, k) => a + (b - a) * Math.min(1, k);
+
+function updateSun(dt) {
+  const alvo = STATES[stateIdx];
+  elev = smooth(elev, alvo.elev, dt * 0.55);
+  azim = smooth(azim, alvo.azim, dt * 0.55);
+  renderer.toneMappingExposure = smooth(renderer.toneMappingExposure, alvo.exp, dt * 0.8);
+  bloom.strength = smooth(bloom.strength, alvo.bloom, dt * 0.8);
+  skyU.turbidity.value = smooth(skyU.turbidity.value, alvo.turb, dt * 0.8);
+  skyU.rayleigh.value  = smooth(skyU.rayleigh.value,  alvo.rayl, dt * 0.8);
+
+  const phi = THREE.MathUtils.degToRad(90 - elev);
+  const theta = THREE.MathUtils.degToRad(azim);
+  sun.setFromSphericalCoords(1, phi, theta);
+
+  skyU.sunPosition.value.copy(sun);
+  water.material.uniforms.sunDirection.value.copy(sun).normalize();
+  sunLight.position.copy(sun).multiplyScalar(800);
+  sunLight.color.setHex(alvo.sunCor);
+  sunLight.intensity = THREE.MathUtils.clamp(sun.y, 0, 1) * 3.0 + 0.02;
+  water.material.uniforms.sunColor.value.setHex(alvo.sunCor);
+  water.material.uniforms.waterColor.value.setHex(alvo.agua);
+
+  // estrelas: fundem quando o sol afunda
+  starMat.opacity = THREE.MathUtils.clamp(-elev / 14, 0, 1) * 0.9;
+
+  // boia só acende no escuro
+  const noite = THREE.MathUtils.clamp(-elev / 10, 0, 1);
+  buoy.userData.noite = noite;
+
+  estadoEl.textContent = alvo.nome;
+  const hFloat = ((elev + 16) / 48) * 24;                 // fake clock p/ HUD
+  const hh = Math.floor(THREE.MathUtils.clamp(hFloat, 0, 23.99));
+  const mm = Math.floor((hFloat - hh) * 60);
+  clockEl.textContent = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+}
+
+/* ============================================================
+   LOOP — balanço de câmera como se estivéssemos num barco
+   ============================================================ */
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t = clock.elapsedTime;
+
+  water.material.uniforms.time.value += dt * 0.6;
+
+  updateSun(dt);
+
+  // câmera: respiração do mar
+  camera.position.y += Math.sin(t * 0.5) * 0.004;
+  camera.position.x += Math.sin(t * 0.31) * 0.002;
+
+  // boia: flutua e pisca
+  buoy.position.y = Math.sin(t * 0.9) * 0.28 + Math.sin(t * 1.7) * 0.07;
+  buoy.rotation.z = Math.sin(t * 0.7) * 0.06;
+  buoy.rotation.x = Math.cos(t * 0.55) * 0.05;
+  const blink = (Math.sin(t * 2.4) > 0.55 ? 1 : 0.05) * (buoy.userData.noite ?? 0);
+  buoy.userData.lamp.material.color.setHex(0xffcf6a).multiplyScalar(0.2 + blink * 3);
+  buoyLight.intensity = blink * 8;
+  buoyLight.position.set(buoy.position.x, buoy.position.y + 3.2, buoy.position.z);
+
+  controls.update();
+  composer.render();
+}
+animate();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  composer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
