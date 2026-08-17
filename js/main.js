@@ -272,10 +272,16 @@ function boot() {
   initFoam();
   initSpray();
   initWake();
-  initWorldMap();
+
+  // --- Inicializa o mapa-mundo e a âncora DEPOIS que o barco estiver posicionado ---
+  setTimeout(() => {
+    initWorldMap();
+    initAnchor();   // <--- AGORA AQUI (começa ancorado)
+  }, 50);
+
   initUnderwater();
   initDamage();
-  initAnchor();
+  // initAnchor();   // <--- REMOVIDO DAQUI
   initInput({
     toggleAudio,
     setDeckLight: toggleDeckLight,

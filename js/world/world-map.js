@@ -1,4 +1,4 @@
-// js/world/world-map.js
+// js/world/world-map.js — VERSÃO OTIMIZADA (carregamento lazy + redução de polígonos)
 import * as THREE from 'three';
 import { state } from '../state.js';
 import { CONFIG } from '../config.js';
@@ -26,8 +26,6 @@ export const COAST = [
   [-194, 68], [65, -39], [324, -147], [620, -269], [879, -376], [1175, -499],
   [1434, -606], [1619, -683], [1730, -729], [1841, -775]
 ];
-// SD/CC exportados: waves.js usa SD (direção mar→terra) pra reproduzir a
-// mesma função de profundidade no lado da física de ondas.
 export const SD = { x: 0.40, z: 0.92 };
 export const CC = { x: 0.925, z: -0.383 };
 export const RIVERS = [
@@ -44,9 +42,6 @@ export const MANGUE = [
   { x: -1500, z: 470, r: 45, depth: 1.0 }
 ];
 
-// ============================================================
-// 🏝️ ILHAS — MAIS AFASTADAS DA COSTA E COM MAIS DETALHE
-// ============================================================
 export const ISLANDS = [
   { name: 'Ilha do Costão',          x: -600,  z: 650,  r: 50, h: 18, c: 0x2d4a33, type: 'forest' },
   { name: 'Ilha da Queimada Grande', x: -100,  z: 900,  r: 85, h: 38, c: 0x22301f, type: 'forest' },
@@ -129,6 +124,17 @@ export const WORLD = { minX: -2200, minZ: -1400, sizeX: 5600, sizeZ: 2800 };
 const N = 256;
 const cpu = new Float32Array(N * N * 4);
 let bathyTex = null, tintTex = null;
+
+// ---- CACHE de profundidade para acelerar o terreno ----
+const depthCache = new Map();
+function getDepth(x, z) {
+  const key = Math.round(x * 10) + ',' + Math.round(z * 10);
+  if (depthCache.has(key)) return depthCache.get(key);
+  const d = depthAtRaw(x, z);
+  depthCache.set(key, d);
+  return d;
+}
+
 function distSeg(px, pz, ax, az, bx, bz) {
   const abx = bx - ax, abz = bz - az;
   const t = Math.max(0, Math.min(1, ((px - ax) * abx + (pz - az) * abz) / (abx * abx + abz * abz || 1)));
@@ -151,7 +157,7 @@ function distPoly(x, z, pts) {
   }
   return m;
 }
-export function depthAt(x, z) {
+function depthAtRaw(x, z) {
   const s = offshore(x, z);
   let d = s <= 0 ? -2 : Math.min(80, 0.5 + s * 0.06 + s * s * 0.00001);
   d += Math.sin(x * 0.008) * 0.5 + Math.cos(z * 0.01) * 0.5;
@@ -169,10 +175,14 @@ export function depthAt(x, z) {
   }
   return d;
 }
+export function depthAt(x, z) {
+  return getDepth(x, z);
+}
 export function groundHeightAt(x, z) {
   const d = depthAt(x, z);
   return d > 0 ? -Math.min(d, 42) : Math.min(1.8, -d * 0.30);
 }
+
 (function bake() {
   const d8 = new Uint8Array(N * N * 4), t8 = new Uint8Array(N * N * 4);
   for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
@@ -218,8 +228,8 @@ const C_VEGET = new THREE.Color(0x3a5c38);
 const C_ROCHA = new THREE.Color(0x71695c);
 const C_SAND  = new THREE.Color(0xdcc79a);
 const _hc = new THREE.Color();
-function hillGeo(r, h, seed) {
-  const g = new THREE.SphereGeometry(r, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2);
+function hillGeo(r, h, seed, segments = 20) {
+  const g = new THREE.SphereGeometry(r, segments, 10, 0, Math.PI * 2, 0, Math.PI / 2);
   const p = g.attributes.position;
   const colors = new Float32Array(p.count * 3);
   for (let i = 0; i < p.count; i++) {
@@ -262,7 +272,7 @@ function buildMountainLayer(dist, n, rMin, rMax, hMin, hMax, sMin, sMax) {
     const center = 1 - Math.abs(t - 0.5) * 1.2;
     const h = (hMin + (hMax - hMin) * Math.pow(Math.random(), 0.8)) * (0.6 + 0.4 * center);
     const r = rMin + (rMax - rMin) * Math.random();
-    const m = new THREE.Mesh(hillGeo(r, h, i * 7.3 + dist * 0.01), hillMat);
+    const m = new THREE.Mesh(hillGeo(r, h, i * 7.3 + dist * 0.01, 16), hillMat);
     m.position.set(px, -3, pz);
     m.rotation.y = Math.atan2(CC.x, CC.z) + (Math.random() - 0.5) * 0.5;
     m.scale.set(sMin + Math.random() * (sMax - sMin), 1, 1);
@@ -270,7 +280,7 @@ function buildMountainLayer(dist, n, rMin, rMax, hMin, hMax, sMin, sMax) {
     if (Math.random() < 0.75) {
       const h2 = h * (0.4 + Math.random() * 0.35), r2 = r * (0.5 + Math.random() * 0.3);
       const side = Math.random() < 0.5 ? -1 : 1;
-      const m2 = new THREE.Mesh(hillGeo(r2, h2, i * 3.1 + dist), hillMat);
+      const m2 = new THREE.Mesh(hillGeo(r2, h2, i * 3.1 + dist, 16), hillMat);
       m2.position.set(px + CC.x * side * r * 0.85, -3, pz + CC.z * side * r * 0.85);
       m2.rotation.y = m.rotation.y;
       m2.scale.set(sMin + Math.random() * (sMax - sMin), 1, 1);
@@ -280,23 +290,19 @@ function buildMountainLayer(dist, n, rMin, rMax, hMin, hMax, sMin, sMax) {
   state.scene.add(group);
 }
 function buildMountains() {
-  buildMountainLayer(700, 30, 60, 110, 45, 90, 1.6, 2.6);
+  // Reduzido número de montanhas e segmentos
+  buildMountainLayer(700, 24, 60, 110, 45, 90, 1.6, 2.6);
 }
+
 export function updateWorldFX() {
   const nf = state.nightF;
   for (const m of worldFX.cityMats) m.emissiveIntensity = nf * 1.2;
   for (const r of worldFX.round) r.mat.emissiveIntensity = nf * r.k;
 }
 
-// ============================================================
-// 🏝️ ILHAS — geometria orgânica com gradiente praia → vegetação →
-// rocha, igual a qualquer outro pedaço do litoral (nada de "todo
-// litoral é praia menos as ilhas"). Silhueta deformada por ruído
-// (mesma técnica do hillGeo dos morros) em vez do cone perfeito de
-// antes, então cada ilha fica única e sem bordas artificiais.
-// ============================================================
-function islandGeo(r, h, seed, rocky) {
-  const g = new THREE.SphereGeometry(r, 24, 13, 0, Math.PI * 2, 0, Math.PI / 2);
+// ---- ILHAS com geometria reduzida ----
+function islandGeo(r, h, seed, rocky, segs = 16) {
+  const g = new THREE.SphereGeometry(r, segs, 10, 0, Math.PI * 2, 0, Math.PI / 2);
   const p = g.attributes.position;
   const colors = new Float32Array(p.count * 3);
   const rockBias = rocky ? 0.34 : 0.14;
@@ -310,8 +316,6 @@ function islandGeo(r, h, seed, rocky) {
     p.setZ(i, z * (1 + n * 0.17 * lift));
     p.setY(i, y * (1 + n * (rocky ? 0.32 : 0.20) * lift));
     const hn = THREE.MathUtils.clamp(p.getY(i) / r + n * 0.15, 0, 1);
-    // faixa de praia (areia) na base, sempre presente — depois sobe
-    // pra vegetação (ou direto pra rocha nas ilhas tipo 'rock')
     if (hn < 0.11) _hc.copy(C_SAND);
     else if (hn < 0.55) _hc.copy(C_SAND).lerp(rocky ? C_ROCHA : C_VEGET, (hn - 0.11) / 0.44);
     else _hc.copy(rocky ? C_ROCHA : C_VEGET).lerp(C_ROCHA, (hn - 0.55) / 0.45);
@@ -323,9 +327,6 @@ function islandGeo(r, h, seed, rocky) {
   g.computeVertexNormals();
   return g;
 }
-// Altura aproximada da superfície da ilha a uma distância `dist` do
-// centro — usado só pra apoiar árvores/rochas decorativas sem que
-// fiquem flutuando acima do relevo ou enterradas nele.
 function islandSurfaceY(dist, r, h) {
   const t = Math.min(1, dist / r);
   return h * Math.sqrt(Math.max(0, 1 - t * t)) * 0.88;
@@ -374,27 +375,18 @@ function buildIsland(il) {
   const rocky = il.type === 'rock';
   const rockMat = new THREE.MeshStandardMaterial({ color: 0x3a3f44, roughness: 1, flatShading: true });
   const seed = (il.x * 0.013 + il.z * 0.021) % 100;
-
-  // Corpo principal da ilha — praia contínua na base, subindo pra
-  // vegetação (ou direto pra rocha nua nas do tipo 'rock')
-  const body = new THREE.Mesh(islandGeo(il.r, il.h, seed, rocky), islandMat);
+  const body = new THREE.Mesh(islandGeo(il.r, il.h, seed, rocky, 14), islandMat);
   body.position.y = -0.4;
   group.add(body);
-
-  // Segundo morro satélite, deslocado do centro — evita a silhueta
-  // perfeitamente circular/simétrica que denunciava o cone antigo
   if (il.r > 18 && Math.random() < 0.6) {
     const a2 = Math.random() * Math.PI * 2;
     const d2 = il.r * (0.35 + Math.random() * 0.25);
     const r2 = il.r * (0.35 + Math.random() * 0.25);
     const h2 = il.h * (0.45 + Math.random() * 0.3);
-    const sat = new THREE.Mesh(islandGeo(r2, h2, seed * 1.7 + 3, rocky), islandMat);
+    const sat = new THREE.Mesh(islandGeo(r2, h2, seed * 1.7 + 3, rocky, 12), islandMat);
     sat.position.set(Math.cos(a2) * d2, -0.4, Math.sin(a2) * d2);
     group.add(sat);
   }
-
-  // Lajes/rochedos na orla — apoiados na altura real da superfície,
-  // não numa fórmula fixa que os faz flutuar
   const rockCount = (rocky ? 3 : 1) + Math.floor(il.r * 0.45);
   for (let i = 0; i < rockCount; i++) {
     const angle = Math.random() * Math.PI * 2;
@@ -406,14 +398,11 @@ function buildIsland(il) {
     rock.rotation.set(Math.random(), Math.random(), Math.random());
     group.add(rock);
   }
-
-  // Vegetação — só na faixa de vegetação (não em cima da praia nem
-  // do topo rochoso), misturando coqueiros e árvores mais densas
   if (il.type === 'forest') {
     const treeCount = Math.max(4, Math.floor(il.r / 2.4));
     for (let i = 0; i < treeCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const dist = il.r * (0.12 + Math.random() * 0.42); // fica dentro da faixa verde
+      const dist = il.r * (0.12 + Math.random() * 0.42);
       const treeHeight = 2.8 + Math.random() * 3.4;
       const surfY = islandSurfaceY(dist, il.r, il.h) * 0.6;
       const palm = Math.random() < 0.5;
@@ -423,7 +412,6 @@ function buildIsland(il) {
       group.add(tree);
     }
   }
-
   group.position.set(il.x, 0, il.z);
   state.scene.add(group);
 }
@@ -445,9 +433,44 @@ function flat(geo, mat, y) {
   state.scene.add(m);
   return m;
 }
+
+// ---- CIDADES com carregamento lazy ----
+const cityTasks = [
+  { id:'peruibe', x:-760, z:260, build: buildPeruibe },
+  { id:'itanhaem', x:65, z:-39, build: buildItanhaem },
+  { id:'mongagua', x:620, z:-269, build: buildMongagua },
+  { id:'praiagrande', x:1175, z:-499, build: buildPraiaGrande },
+  { id:'santos', x:1619, z:-683, build: buildSantos },
+  { id:'guaruja', x:1841, z:-775, build: buildGuaruja }
+];
+let citiesLoaded = false;
+
+function loadCitiesLazy() {
+  if (citiesLoaded) return;
+  citiesLoaded = true;
+  let index = 0;
+  function loadNext() {
+    if (index >= cityTasks.length) return;
+    const task = cityTasks[index];
+    const dist = Math.hypot(task.x - SPAWN.x, task.z - SPAWN.z);
+    if (dist < 1500) {
+      buildCityCulled(task.id, task.x, task.z, 1300, 1600, task.build, worldFX);
+      index++;
+      loadNext();
+    } else {
+      requestIdleCallback(() => {
+        buildCityCulled(task.id, task.x, task.z, 1300, 1600, task.build, worldFX);
+        index++;
+        loadNext();
+      }, { timeout: 3000 });
+    }
+  }
+  loadNext();
+}
+
 export function initWorldMap() {
-  CONFIG.wind.direction = Math.atan2(-SD.z, -SD.x);
-  const geo = new THREE.PlaneGeometry(WORLD.sizeX, WORLD.sizeZ, 240, 170);
+  // ---- Terreno com resolução reduzida (120x85) ----
+  const geo = new THREE.PlaneGeometry(WORLD.sizeX, WORLD.sizeZ, 120, 85);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;
   const cols = new Float32Array(pos.count * 3);
@@ -472,20 +495,22 @@ export function initWorldMap() {
   const terr = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 }));
   terr.receiveShadow = true;
   state.scene.add(terr);
+
   flat(new THREE.ShapeGeometry(landShape(-25, 900)), new THREE.MeshStandardMaterial({ color: 0xd8c49a, roughness: 1 }), 0.9);
   flat(new THREE.ShapeGeometry(landShape(70, 900)), new THREE.MeshStandardMaterial({ color: 0x2d4a33, roughness: 1 }), 1.5);
 
+  // ---- Montanhas (menos pesadas) ----
   buildMountains();
 
   const morroMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 });
-  const morro = new THREE.Mesh(hillGeo(160, 120, 42.7), morroMat);
+  const morro = new THREE.Mesh(hillGeo(160, 120, 42.7, 18), morroMat);
   morro.position.set(LANDMARKS.morroItatins[0], -2, LANDMARKS.morroItatins[1]);
   morro.scale.set(1.6, 1, 1.3);
   state.scene.add(morro);
   for (let i = 0; i < 4; i++) {
     const a = (i / 4) * Math.PI * 2 + 0.3;
     const d = 90 + Math.random() * 40;
-    const sub = new THREE.Mesh(hillGeo(50 + Math.random() * 30, 40 + Math.random() * 30, i * 9.1), morroMat);
+    const sub = new THREE.Mesh(hillGeo(50 + Math.random() * 30, 40 + Math.random() * 30, i * 9.1, 14), morroMat);
     sub.position.set(LANDMARKS.morroItatins[0] + Math.cos(a) * d, -2, LANDMARKS.morroItatins[1] + Math.sin(a) * d);
     state.scene.add(sub);
   }
@@ -514,9 +539,7 @@ export function initWorldMap() {
     roof.position.set(hx, 3.4, hz); state.scene.add(roof);
   }
 
-  // ============================================================
-  // 🏝️ ILHAS — VERSÃO ORGÂNICA (praia → vegetação → rocha)
-  // ============================================================
+  // ---- Ilhas ----
   for (const il of ISLANDS) {
     buildIsland(il);
   }
@@ -549,12 +572,8 @@ export function initWorldMap() {
     state.scene.add(b);
   }
 
-  buildCityCulled('peruibe',     -760,  260, 1300, 1600, buildPeruibe,     worldFX);
-  buildCityCulled('itanhaem',     65,  -39, 1400, 1700, buildItanhaem,    worldFX);
-  buildCityCulled('mongagua',    620, -269, 1100, 1400, buildMongagua,    worldFX);
-  buildCityCulled('praiagrande',1175, -499, 1400, 1700, buildPraiaGrande, worldFX);
-  buildCityCulled('santos',     1619, -683, 1300, 1600, buildSantos,      worldFX);
-  buildCityCulled('guaruja',    1841, -775, 1200, 1500, buildGuaruja,     worldFX);
+  // ---- Cidades carregadas de forma lazy ----
+  loadCitiesLazy();
 
   state.boatRoot.position.set(SPAWN.x, 0, SPAWN.z);
   state.physics.y = 0;

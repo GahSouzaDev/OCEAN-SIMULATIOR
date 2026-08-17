@@ -1,4 +1,4 @@
-// js/physics/anchor.js — ÂNCORA: SÓ o som da corrente descendo/subindo. ZERO estralo.
+// js/physics/anchor.js — ÂNCORA: começa lançada (deployed) com corrente no tamanho certo
 import * as THREE from 'three';
 import { state } from '../state.js';
 import { CONFIG } from '../config.js';
@@ -7,7 +7,8 @@ import * as WM from '../world/world-map.js';
 import { actx, boatPanner } from '../audio/audio-manager.js';
 
 export const anchor = {
-  mode: 'deployed', initialized: false,
+  mode: 'deployed', // <--- começa lançada no fundo
+  initialized: false,
   t: 0, depth: 7, seabedY: -7,
   pos: new THREE.Vector3(),
   mesh: null, stowed: null, chainSegs: [],
@@ -41,9 +42,7 @@ function buildAnchorMesh() {
 export function isAnchored() { return anchor.mode === 'deployed' || anchor.mode === 'dropping'; }
 
 // ============================================================
-// 🔊 ÁUDIO — SOMENTE loops contínuos (corrente / guincho).
-//    NENHUM one-shot metálico. NENHUM estralo. Se não tiver
-//    estralo possível, melhor: só o ranger contínuo da amarra.
+// 🔊 ÁUDIO — loops contínuos (corrente / guincho)
 // ============================================================
 let bufs = null;
 let runSrc = null, runG = null, weighSrc = null, weighG = null;
@@ -87,7 +86,6 @@ function toBuf(d) {
 function renderBufs() {
   const sr = actx.sampleRate;
   bufs = {};
-  // --- CORRENTE CORRENDO (fundeio): contínuo, suave, sem clanks secos ---
   bufs.run = toBuf(renderMetal(sr, 2.0, (n, sr2) => {
     const x = new Float32Array(n);
     let t = 0.04;
@@ -102,7 +100,6 @@ function renderBufs() {
     for (let i = 0; i < n; i++) { nw = (nw + 0.2 * ((Math.random() * 2 - 1) * 0.03)) / 1.2; x[i] += nw; }
     return x;
   }, [[620, 26, 0.5], [980, 34, 0.38], [1560, 40, 0.26], [2400, 46, 0.14], [3600, 50, 0.06]], 140, 0.35));
-  // --- GUINCHO (içamento): contínuo, sem clanks secos ---
   bufs.weigh = toBuf(renderMetal(sr, 1.7, (n, sr2) => {
     const x = new Float32Array(n);
     let t = 0.08;
@@ -166,7 +163,6 @@ function stopWeigh() {
   const s = weighSrc; weighSrc = null;
   try { s.stop(t + 0.2); } catch (e) {}
 }
-// bipes de bloqueio (aviso "içe a âncora") — curtos, no barco
 function warnBeeps() {
   if (!actx || !state.audioOn || !boatPanner) return;
   if (actx.state === 'suspended') actx.resume();
@@ -196,14 +192,19 @@ export function tryThrottleWarn() {
   }
 }
 
+// ---- Posiciona a âncora com base na posição atual do barco e profundidade ----
 function computeAnchorDropPosition() {
   const bp = state.boatRoot.position;
   const fx = Math.sin(state.heading), fz = Math.cos(state.heading);
-  anchor.pos.set(bp.x + fx * 5, 0, bp.z + fz * 5);
+  // Distância inicial da âncora: proporcional à profundidade, mas limitada
+  const depth = Math.max(3, Math.min(40, -seabedAt(bp.x, bp.z)));
+  const scope = Math.min(depth * 2.5 + 2, 20); // comprimento da corrente
+  anchor.pos.set(bp.x + fx * scope, 0, bp.z + fz * scope);
   anchor.seabedY = seabedAt(anchor.pos.x, anchor.pos.z) - 0.2;
   anchor.depth = Math.max(3, Math.min(40, -anchor.seabedY));
 }
-// 🔇 SEM ESTRALO: nenhum one-shot aqui. Só os loops contínuos.
+
+// 🔇 SEM ESTRALO: nenhum one-shot aqui.
 export function toggleAnchor() {
   const bp = state.boatRoot.position;
   const d = seabedAt(bp.x, bp.z);
@@ -246,6 +247,7 @@ function injectButtonCSS() {
 }
 
 export function initAnchor() {
+  if (anchor.initialized) return;
   injectButtonCSS();
   anchor.mesh = buildAnchorMesh(); state.scene.add(anchor.mesh);
   anchor.stowed = buildAnchorMesh(); anchor.stowed.scale.setScalar(0.9); state.scene.add(anchor.stowed);
@@ -266,7 +268,17 @@ export function initAnchor() {
   btn.addEventListener('click', toggleAnchor);
   document.body.appendChild(btn); anchor.btn = btn;
   addEventListener('keydown', e => { if (e.code === 'KeyE' && !e.repeat) toggleAnchor(); });
+
+  // ---- Posiciona a âncora já lançada com base no barco ----
   computeAnchorDropPosition();
+  // Coloca a âncora diretamente no fundo, sem animação de queda
+  anchor.mesh.position.set(anchor.pos.x, anchor.seabedY, anchor.pos.z);
+  anchor.mesh.rotation.set(0.6, 2.0, 0.4);
+  anchor.mesh.visible = true;
+  anchor.stowed.visible = false;
+  anchor.mode = 'deployed';
+  anchor.t = 1; // já finalizada
+
   anchor.initialized = true;
 }
 
@@ -328,7 +340,7 @@ export function updateAnchor(dt) {
     anchor.mesh.visible = true;
     if (anchor.mode === 'dropping') {
       anchor.t += dt / DROP_T;
-      if (anchor.t >= 1) { anchor.t = 1; anchor.mode = 'deployed'; btnChanged = true; } // 🔇 sem som de batida
+      if (anchor.t >= 1) { anchor.t = 1; anchor.mode = 'deployed'; btnChanged = true; }
       const k = anchor.t * anchor.t * (3 - 2 * anchor.t);
       anchor.mesh.position.set(
         THREE.MathUtils.lerp(bow.x, anchor.pos.x, k),
@@ -337,7 +349,7 @@ export function updateAnchor(dt) {
       anchor.mesh.rotation.set(k * 0.6, k * 2.0, k * 0.4);
     } else if (anchor.mode === 'retrieving') {
       anchor.t += dt / RET_T;
-      if (anchor.t >= 1) { anchor.t = 0; anchor.mode = 'stowed'; btnChanged = true; }   // 🔇 sem som de batida
+      if (anchor.t >= 1) { anchor.t = 0; anchor.mode = 'stowed'; btnChanged = true; }
       const k = anchor.t * anchor.t * (3 - 2 * anchor.t);
       anchor.mesh.position.set(
         THREE.MathUtils.lerp(anchor.pos.x, bow.x, k),
@@ -372,7 +384,6 @@ export function updateAnchor(dt) {
     updateChain(bow, anchor.mesh.position, true);
   }
 
-  // 🔊 só os loops: corrente correndo ao descer, guincho ao subir
   if (anchor.mode === 'dropping') startRun(); else if (before === 'dropping') stopRun();
   if (anchor.mode === 'retrieving') startWeigh(); else if (before === 'retrieving') stopWeigh();
 
