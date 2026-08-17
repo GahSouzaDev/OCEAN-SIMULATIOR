@@ -1,9 +1,9 @@
-// js/world/world-map.js — VERSÃO OTIMIZADA (carregamento lazy + redução de polígonos)
+// js/world/world-map.js
 import * as THREE from 'three';
 import { state } from '../state.js';
 import { CONFIG } from '../config.js';
 import { MATS } from '../boats/boat-base.js';
-import { buildCityCulled } from './streaming.js';
+import { buildCityCulled, registerCullGroup } from './streaming.js';
 import { buildPeruibe } from './cities/peruibe.js';
 import { buildItanhaem } from './cities/itanhaem.js';
 import { buildMongagua } from './cities/mongagua.js';
@@ -21,11 +21,46 @@ export function isHighTide() { return tide.level > 0.35; }
 
 export const SPAWN = { x: -780, z: 520 };
 
-export const COAST = [
+// ---- COSTA ORIGINAL (com mais pontos interpolados para suavizar) ----
+const COAST_RAW = [
   [-1600, 650], [-1304, 527], [-1082, 436], [-860, 344], [-638, 252], [-379, 145],
   [-194, 68], [65, -39], [324, -147], [620, -269], [879, -376], [1175, -499],
   [1434, -606], [1619, -683], [1730, -729], [1841, -775]
 ];
+
+// ---- INTERPOLAÇÃO CATMULL-ROM (suaviza a costa) ----
+function catmullRom(points, segments = 4) {
+  const pts = points.map(p => ({ x: p[0], z: p[1] }));
+  const result = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[Math.min(pts.length - 1, i + 2)];
+    for (let t = 0; t < 1; t += 1 / segments) {
+      const t2 = t * t, t3 = t2 * t;
+      const x = 0.5 * (
+        (2 * p1.x) +
+        (-p0.x + p2.x) * t +
+        (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 +
+        (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3
+      );
+      const z = 0.5 * (
+        (2 * p1.z) +
+        (-p0.z + p2.z) * t +
+        (2 * p0.z - 5 * p1.z + 4 * p2.z - p3.z) * t2 +
+        (-p0.z + 3 * p1.z - 3 * p2.z + p3.z) * t3
+      );
+      result.push([x, z]);
+    }
+  }
+  result.push([pts[pts.length - 1].x, pts[pts.length - 1].z]);
+  return result;
+}
+
+// Gerar costa suavizada com 8 segmentos entre cada par de pontos
+export const COAST = catmullRom(COAST_RAW, 8);
+// Ajustar SD e CC para a costa suavizada (usando os pontos originais para manter referência)
 export const SD = { x: 0.40, z: 0.92 };
 export const CC = { x: 0.925, z: -0.383 };
 export const RIVERS = [
@@ -47,10 +82,11 @@ export const ISLANDS = [
   { name: 'Ilha da Queimada Grande', x: -100,  z: 900,  r: 85, h: 38, c: 0x22301f, type: 'forest' },
   { name: 'Laje da Conceição',       x: 400,   z: 500,  r: 20, h: 3.5, c: 0x3a3f44, type: 'rock' },
   { name: 'Laje de Santos',          x: 2100,  z: -150, r: 28, h: 4,   c: 0x3a3f44, type: 'rock' },
-  { name: 'Ilha do Guarujá',         x: 2050,  z: -580, r: 55, h: 22,  c: 0x2d4a33, type: 'forest' },
+  { name: 'Ilha do Guarujá',         x: 2050,  z: -580, r: 60, h: 25,  c: 0x2d4a33, type: 'forest' },
   { name: 'Alcatrazes',              x: 2800,  z: 400,  r: 75, h: 28,  c: 0x2d4a33, type: 'rock' },
   { name: 'ilhote Guarau A',         x: -1200, z: 720,  r: 16, h: 6,   c: 0x2d4a33, type: 'rock' },
-  { name: 'ilhote Guarau B',         x: -1150, z: 760,  r: 13, h: 5,   c: 0x2d4a33, type: 'rock' }
+  { name: 'ilhote Guarau B',         x: -1150, z: 760,  r: 13, h: 5,   c: 0x2d4a33, type: 'rock' },
+  { name: 'Refúgio',                 x: -1400, z: 850,  r: 40, h: 15,  c: 0x2d4a33, type: 'forest' }
 ];
 
 export const LANDMARKS = {
@@ -125,7 +161,6 @@ const N = 256;
 const cpu = new Float32Array(N * N * 4);
 let bathyTex = null, tintTex = null;
 
-// ---- CACHE de profundidade para acelerar o terreno ----
 const depthCache = new Map();
 function getDepth(x, z) {
   const key = Math.round(x * 10) + ',' + Math.round(z * 10);
@@ -147,7 +182,13 @@ export function offshore(x, z) {
     const r = distSeg(x, z, COAST[i][0], COAST[i][1], COAST[i + 1][0], COAST[i + 1][1]);
     if (!best || r.d < best.d) best = r;
   }
-  return (x - best.qx) * SD.x + (z - best.qz) * SD.z;
+  // O sinal é dado pela projeção do vetor (x - ponto) na direção SD (mar)
+  // Usamos a direção do mar para determinar se está dentro ou fora
+  // Se offshore > 0, está no mar; se < 0, está em terra.
+  // Para simplificar, usamos a projeção no vetor SD a partir do ponto mais próximo.
+  const dx = x - best.qx, dz = z - best.qz;
+  const s = dx * SD.x + dz * SD.z;
+  return s;
 }
 function distPoly(x, z, pts) {
   let m = Infinity;
@@ -157,24 +198,57 @@ function distPoly(x, z, pts) {
   }
   return m;
 }
+
+// ============================================================
+// 🌊 BATIMETRIA: usa offshore com costa suavizada (curvada)
+// ============================================================
 function depthAtRaw(x, z) {
   const s = offshore(x, z);
-  let d = s <= 0 ? -2 : Math.min(80, 0.5 + s * 0.06 + s * s * 0.00001);
-  d += Math.sin(x * 0.008) * 0.5 + Math.cos(z * 0.01) * 0.5;
+  const santosRegion = REGIONS.find(r => r.id === 'santos');
+  const isSantos = santosRegion && Math.hypot(x - santosRegion.x, z - santosRegion.z) < santosRegion.r * 0.9;
+
+  let d;
+  if (s <= 0) {
+    d = -2.0 + (s + 2) * 0.3;
+    d = Math.max(-2.5, Math.min(0, d));
+  } else {
+    if (isSantos) {
+      const A = 80, k = 0.022, n = 1.6;
+      const sn = Math.pow(s, n);
+      d = A * sn / (Math.pow(k, n) + sn);
+      d = Math.max(0.5, Math.min(A, d));
+    } else {
+      d = 0.2 + s * 0.035 + Math.pow(s, 1.5) * 0.00003;
+      d = Math.min(80, d);
+    }
+  }
+
+  d += Math.sin(x * 0.008 + z * 0.006) * 0.3 + Math.cos(z * 0.01 - x * 0.005) * 0.3;
+
   for (const r of RIVERS) {
     const dd = distPoly(x, z, r.pts);
-    if (dd < r.w) d = Math.max(d, r.depth * (1 - (dd / r.w) * (dd / r.w) * 0.85));
+    if (dd < r.w) {
+      const fator = 1 - (dd / r.w) * (dd / r.w) * 0.85;
+      d = Math.max(d, r.depth * fator);
+    }
   }
   for (const m of MANGUE) {
     const dd = Math.hypot(x - m.x, z - m.z);
-    if (dd < m.r) d = Math.max(d, m.depth * (1 - dd / m.r));
+    if (dd < m.r) {
+      const fator = 1 - dd / m.r;
+      d = Math.max(d, m.depth * fator);
+    }
   }
   for (const il of ISLANDS) {
     const dd = Math.hypot(x - il.x, z - il.z);
-    d -= il.h * Math.exp(-(dd * dd) / (1.1 * il.r * il.r));
+    if (dd < il.r * 2.5) {
+      const h = il.h * 0.9;
+      d -= h * Math.exp(-(dd * dd) / (1.3 * il.r * il.r));
+    }
   }
   return d;
 }
+
 export function depthAt(x, z) {
   return getDepth(x, z);
 }
@@ -189,8 +263,8 @@ export function groundHeightAt(x, z) {
     const x = WORLD.minX + (i / (N - 1)) * WORLD.sizeX;
     const z = WORLD.minZ + (j / (N - 1)) * WORLD.sizeZ;
     const d = depthAt(x, z);
-    const damp = sstep(0.4, 4.5, d);
-    const surf = Math.exp(-((d - 1.6) * (d - 1.6)) / 1.1);
+    const damp = sstep(0.4, 5.5, d);
+    const surf = Math.exp(-((d - 1.8) * (d - 1.8)) / 1.2);
     const rw = regionWaveAt(x, z);
     const k = (j * N + i) * 4;
     cpu[k] = damp; cpu[k + 1] = rw.swell; cpu[k + 2] = rw.chop; cpu[k + 3] = surf;
@@ -252,7 +326,7 @@ function hillGeo(r, h, seed, segments = 20) {
   g.computeVertexNormals();
   return g;
 }
-const hillMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0, fog: false });
+const hillMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0 });
 worldFX.mountainMats.push(hillMat);
 
 function buildMountainLayer(dist, n, rMin, rMax, hMin, hMax, sMin, sMax) {
@@ -287,11 +361,13 @@ function buildMountainLayer(dist, n, rMin, rMax, hMin, hMax, sMin, sMax) {
       group.add(m2);
     }
   }
-  state.scene.add(group);
+  let cx = 0, cz = 0, count = 0;
+  group.children.forEach(m => { cx += m.position.x; cz += m.position.z; count++; });
+  if (count > 0) { cx /= count; cz /= count; }
+  registerCullGroup(group, cx, cz, 1200, 1800);
 }
 function buildMountains() {
-  // Reduzido número de montanhas e segmentos
-  buildMountainLayer(700, 24, 60, 110, 45, 90, 1.6, 2.6);
+  buildMountainLayer(700, 20, 60, 110, 45, 90, 1.6, 2.6);
 }
 
 export function updateWorldFX() {
@@ -300,7 +376,6 @@ export function updateWorldFX() {
   for (const r of worldFX.round) r.mat.emissiveIntensity = nf * r.k;
 }
 
-// ---- ILHAS com geometria reduzida ----
 function islandGeo(r, h, seed, rocky, segs = 16) {
   const g = new THREE.SphereGeometry(r, segs, 10, 0, Math.PI * 2, 0, Math.PI / 2);
   const p = g.attributes.position;
@@ -394,7 +469,11 @@ function buildIsland(il) {
     const rockSize = 1.0 + Math.random() * (rocky ? 3.2 : 2.2);
     const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(rockSize, 0), rockMat);
     const surfY = islandSurfaceY(Math.min(dist, il.r * 0.98), il.r, il.h);
-    rock.position.set(Math.cos(angle) * dist, Math.max(0.15, surfY * 0.35), Math.sin(angle) * dist);
+    rock.position.set(
+      Math.cos(angle) * dist,
+      surfY * 0.4 + rockSize * 0.15,
+      Math.sin(angle) * dist
+    );
     rock.rotation.set(Math.random(), Math.random(), Math.random());
     group.add(rock);
   }
@@ -407,7 +486,7 @@ function buildIsland(il) {
       const surfY = islandSurfaceY(dist, il.r, il.h) * 0.6;
       const palm = Math.random() < 0.5;
       const tree = makeIslandTree(treeHeight, palm);
-      tree.position.set(Math.cos(angle) * dist, surfY, Math.sin(angle) * dist);
+      tree.position.set(Math.cos(angle) * dist, surfY + 0.1, Math.sin(angle) * dist);
       tree.rotation.y = Math.random() * Math.PI * 2;
       group.add(tree);
     }
@@ -434,7 +513,81 @@ function flat(geo, mat, y) {
   return m;
 }
 
-// ---- CIDADES com carregamento lazy ----
+function buildPortoAreia() {
+  const portoX = 2200, portoZ = -900;
+  const matAreia = new THREE.MeshStandardMaterial({ color: 0xd4b896, roughness: 0.95 });
+  const matConcreto = new THREE.MeshStandardMaterial({ color: 0x9a9a9a, roughness: 0.9 });
+  const matMadeira = new THREE.MeshStandardMaterial({ color: 0x8b6f47, roughness: 0.85 });
+  const matMetal = new THREE.MeshStandardMaterial({ color: 0x5a5a5a, roughness: 0.6 });
+  const matLuz = new THREE.MeshStandardMaterial({ color: 0xfff5d1, emissive: 0xffddaa, emissiveIntensity: 1.2 });
+  worldFX.round.push({ mat: matLuz, k: 0.9 });
+
+  const base = new THREE.Mesh(new THREE.BoxGeometry(60, 1.5, 40), matAreia);
+  base.position.set(portoX, 1.5, portoZ);
+  state.scene.add(base);
+
+  const pier = new THREE.Mesh(new THREE.BoxGeometry(6, 0.8, 25), matMadeira);
+  pier.position.set(portoX, 2.5, portoZ - 15);
+  state.scene.add(pier);
+
+  for (let i = -3; i <= 3; i += 1.5) {
+    const pilar = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 8, 6), matConcreto);
+    pilar.position.set(portoX + i, -2.0, portoZ - 15);
+    state.scene.add(pilar);
+  }
+
+  const g = new THREE.Group();
+  const baseG = new THREE.Mesh(new THREE.BoxGeometry(3, 1.5, 3), matMetal);
+  baseG.position.y = 1.5;
+  g.add(baseG);
+  const coluna = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 10, 8), matMetal);
+  coluna.position.y = 7;
+  g.add(coluna);
+  const braco = new THREE.Mesh(new THREE.BoxGeometry(12, 0.4, 0.6), matMetal);
+  braco.position.set(4, 12, 0);
+  g.add(braco);
+  const cabo = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 6, 4), matMetal);
+  cabo.position.set(8, 9, 0);
+  g.add(cabo);
+  const gancho = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), matMetal);
+  gancho.position.set(8, 6, 0);
+  g.add(gancho);
+  g.position.set(portoX + 15, 1.5, portoZ);
+  state.scene.add(g);
+
+  const galpao = new THREE.Mesh(new THREE.BoxGeometry(20, 6, 14), new THREE.MeshStandardMaterial({ color: 0x8a8a8a, roughness: 0.7 }));
+  galpao.position.set(portoX - 20, 4.5, portoZ);
+  state.scene.add(galpao);
+  const telhado = new THREE.Mesh(new THREE.BoxGeometry(22, 0.5, 16), new THREE.MeshStandardMaterial({ color: 0x4a4a4a, roughness: 0.8 }));
+  telhado.position.set(portoX - 20, 7.8, portoZ);
+  state.scene.add(telhado);
+
+  for (let i = -2; i <= 2; i += 1) {
+    const poste = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.15, 4, 6), matMetal);
+    poste.position.set(portoX + i * 4, 3.5, portoZ - 10);
+    state.scene.add(poste);
+    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), matLuz);
+    lamp.position.set(portoX + i * 4, 5.5, portoZ - 10);
+    state.scene.add(lamp);
+  }
+
+  for (let i = 0; i < 3; i++) {
+    const draga = new THREE.Mesh(new THREE.BoxGeometry(4, 1.5, 2), matMetal);
+    draga.position.set(portoX + 10 + i * 5, 2.0, portoZ + 10);
+    draga.rotation.y = 0.3;
+    state.scene.add(draga);
+  }
+
+  const buoyMat = new THREE.MeshStandardMaterial({ color: 0xff6600 });
+  for (let i = 0; i < 6; i++) {
+    const ang = (i / 6) * Math.PI * 2;
+    const dist = 25;
+    const b = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.2, 8), buoyMat);
+    b.position.set(portoX + Math.cos(ang) * dist, 0.6, portoZ + Math.sin(ang) * dist);
+    state.scene.add(b);
+  }
+}
+
 const cityTasks = [
   { id:'peruibe', x:-760, z:260, build: buildPeruibe },
   { id:'itanhaem', x:65, z:-39, build: buildItanhaem },
@@ -469,7 +622,6 @@ function loadCitiesLazy() {
 }
 
 export function initWorldMap() {
-  // ---- Terreno com resolução reduzida (120x85) ----
   const geo = new THREE.PlaneGeometry(WORLD.sizeX, WORLD.sizeZ, 120, 85);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;
@@ -499,14 +651,16 @@ export function initWorldMap() {
   flat(new THREE.ShapeGeometry(landShape(-25, 900)), new THREE.MeshStandardMaterial({ color: 0xd8c49a, roughness: 1 }), 0.9);
   flat(new THREE.ShapeGeometry(landShape(70, 900)), new THREE.MeshStandardMaterial({ color: 0x2d4a33, roughness: 1 }), 1.5);
 
-  // ---- Montanhas (menos pesadas) ----
   buildMountains();
 
   const morroMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 });
   const morro = new THREE.Mesh(hillGeo(160, 120, 42.7, 18), morroMat);
   morro.position.set(LANDMARKS.morroItatins[0], -2, LANDMARKS.morroItatins[1]);
   morro.scale.set(1.6, 1, 1.3);
-  state.scene.add(morro);
+  const morroGroup = new THREE.Group();
+  morroGroup.add(morro);
+  registerCullGroup(morroGroup, LANDMARKS.morroItatins[0], LANDMARKS.morroItatins[1], 1200, 1800);
+
   for (let i = 0; i < 4; i++) {
     const a = (i / 4) * Math.PI * 2 + 0.3;
     const d = 90 + Math.random() * 40;
@@ -539,7 +693,6 @@ export function initWorldMap() {
     roof.position.set(hx, 3.4, hz); state.scene.add(roof);
   }
 
-  // ---- Ilhas ----
   for (const il of ISLANDS) {
     buildIsland(il);
   }
@@ -572,7 +725,7 @@ export function initWorldMap() {
     state.scene.add(b);
   }
 
-  // ---- Cidades carregadas de forma lazy ----
+  buildPortoAreia();
   loadCitiesLazy();
 
   state.boatRoot.position.set(SPAWN.x, 0, SPAWN.z);

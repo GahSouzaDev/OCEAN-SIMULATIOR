@@ -1,4 +1,4 @@
-// js/world/streaming.js — CULLING POR DISTÂNCIA + GRUPOS ESTÁTICOS (CORRIGIDO: import THREE)
+// js/world/streaming.js — CULLING POR DISTÂNCIA + GRUPOS ESTÁTICOS (otimizado)
 import * as THREE from 'three';
 import { state } from '../state.js';
 
@@ -6,7 +6,6 @@ const groups = [];
 let acc = 0;
 
 export function registerCullGroup(group, x, z, showR, hideR) {
-  // cidades são estáticas: congela a matrix mundial (economiza CPU)
   group.updateMatrix();
   group.matrixAutoUpdate = false;
   group.traverse(o => {
@@ -18,11 +17,12 @@ export function registerCullGroup(group, x, z, showR, hideR) {
   });
   groups.push({ group, x, z, showR, hideR, on: group.visible !== false });
   updateStreaming(1);
+  state.scene.add(group); // adiciona à cena
 }
 
 export function updateStreaming(dt) {
   acc += dt;
-  if (acc < 0.15) return;   // checa só ~6x por segundo
+  if (acc < 0.15) return;
   acc = 0;
   if (!state.boatRoot) return;
   const bx = state.boatRoot.position.x, bz = state.boatRoot.position.z;
@@ -37,9 +37,9 @@ export function buildCityCulled(id, x, z, showR, hideR, buildFn, worldFX) {
   const g = new THREE.Group();
   g.name = 'city_' + id;
   const real = state.scene;
-  state.scene = g;                 // durante o build, state.scene É o group da cidade
+  state.scene = g;
   try { buildFn(worldFX); }
-  finally { state.scene = real; }  // sempre restaura
+  finally { state.scene = real; }
   real.add(g);
   registerCullGroup(g, x, z, showR, hideR);
   return g;

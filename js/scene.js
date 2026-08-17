@@ -16,7 +16,6 @@ export function initScene() {
     powerPreference: 'high-performance',
     stencil: false
   });
-  // 🔥 LIMITA o pixel ratio a 1.5 (corta ~55% dos pixels em tela retina)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMap.enabled = true;
@@ -25,7 +24,8 @@ export function initScene() {
   renderer.toneMappingExposure = 1.15;
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0x7a9bb8, 120, 1600);
+  // Ajuste do fog: distâncias menores para melhor performance e transição suave
+  scene.fog = new THREE.Fog(0x7a9bb8, 80, 1200); // antes: 120, 1600
 
   const camera = new THREE.PerspectiveCamera(
     60, window.innerWidth / window.innerHeight, 0.1, 6000
@@ -44,7 +44,6 @@ export function initScene() {
   const fxaa = new ShaderPass(FXAAShader);
   composer.addPass(fxaa);
 
-  // ⚠️ ESSENCIAL — boatRoot + tilt (o boat-manager faz state.tilt.add(...))
   state.boatRoot = new THREE.Group();
   state.tilt = new THREE.Group();
   state.boatRoot.add(state.tilt);
