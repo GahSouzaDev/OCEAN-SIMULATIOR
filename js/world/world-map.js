@@ -1,4 +1,5 @@
-// js/world/world-map.js — CORREÇÃO: Mini-continentes nas ilhas, remoção do "chão de areia" plano e Morro do Itatins (apenas o grande movido para trás)
+// js/world/world-map.js — CORREÇÃO REAL: ilhas são o próprio fundo do mar subindo até furar a água
+// (sem "saia" colada, sem esfera solta) + vegetação de fundo do mar/praia + coqueiros
 import * as THREE from 'three';
 import { state } from '../state.js';
 import { CONFIG } from '../config.js';
@@ -22,7 +23,7 @@ export function isHighTide() { return tide.level > 0.35; }
 export const SPAWN = { x: -780, z: 520 };
 
 const COAST_RAW = [
-  [-1600, 650], [-1304, 527], [-1082, 436], [-860, 344], [-638, 252], [-379, 145],
+  [-1600, 650], [-1100, 750], [-900, 600], [-860, 344], [-638, 252], [-379, 145],
   [-194, 68], [65, -39], [324, -147], [620, -269], [879, -376], [1175, -499],
   [1434, -606], [1619, -683], [1730, -729], [1841, -775]
 ];
@@ -61,42 +62,42 @@ export const SD = { x: 0.40, z: 0.92 };
 export const CC = { x: 0.925, z: -0.383 };
 export const RIVERS = [
   { name: 'rio Barra do Una', depth: 1.5, w: 26, pts: [[-1620, 660], [-1660, 620], [-1690, 570], [-1670, 520], [-1620, 490], [-1560, 490], [-1510, 520]] },
-  { name: 'bifurcação Guarau (maré alta)', depth: 0.5, w: 14, pts: [[-1510, 520], [-1450, 510], [-1390, 500], [-1340, 490]] },
-  { name: 'rio Guarau', depth: 1.4, w: 20, pts: [[-1304, 527], [-1330, 500], [-1340, 470]] },
+  { name: 'bifurcação Guarau (maré alta)', depth: 0.5, w: 14, pts: [[-1150, 650], [-1200, 640], [-1250, 630]] },
+  { name: 'rio Guarau', depth: 1.4, w: 20, pts: [[-1100, 750], [-1130, 700], [-1150, 650]] },
   { name: 'portinho (mercado do peixe)', depth: 1.0, w: 10, pts: [[-870, 350], [-880, 335], [-890, 325]] },
   { name: 'rio Itanhaém', depth: 2.0, w: 26, pts: [[65, -39], [40, -70], [10, -100]] },
   { name: 'rio Mongaguá', depth: 1.6, w: 22, pts: [[620, -269], [600, -300], [580, -330]] }
 ];
 export const MANGUE = [
-  { x: -1590, z: 560, r: 55, depth: 1.2 },
-  { x: -1650, z: 610, r: 70, depth: 1.0 },
-  { x: -1500, z: 470, r: 45, depth: 1.0 }
+  { x: -1150, z: 680, r: 55, depth: 1.2 },
+  { x: -1200, z: 640, r: 70, depth: 1.0 },
+  { x: -1100, z: 600, r: 45, depth: 1.0 }
 ];
 
 export const ISLANDS = [
-  { name: 'Ilha do Costão',          x: -600,  z: 650,  r: 50, h: 18, c: 0x2d4a33, type: 'forest' },
-  { name: 'Ilha da Queimada Grande', x: -100,  z: 900,  r: 85, h: 38, c: 0x22301f, type: 'forest' },
-  { name: 'Laje da Conceição',       x: 400,   z: 500,  r: 20, h: 3.5, c: 0x3a3f44, type: 'rock' },
-  { name: 'Laje de Santos',          x: 2100,  z: -150, r: 28, h: 4,   c: 0x3a3f44, type: 'rock' },
+  { name: 'Ilha do Costão',          x: -650,  z: 850,  r: 55, h: 20, c: 0x2d4a33, type: 'forest' },
+  { name: 'Ilha da Queimada Grande', x: -150,  z: 1400, r: 95, h: 42, c: 0x22301f, type: 'forest' },
+  { name: 'Laje da Conceição',       x: 400,   z: 500,  r: 24, h: 3,  c: 0x3a3f44, type: 'rock' },
+  { name: 'Laje de Santos',          x: 2100,  z: -150, r: 32, h: 4,  c: 0x3a3f44, type: 'rock' },
   { name: 'Ilha do Guarujá',         x: 2050,  z: -580, r: 60, h: 25,  c: 0x2d4a33, type: 'forest' },
   { name: 'Alcatrazes',              x: 2800,  z: 400,  r: 75, h: 28,  c: 0x2d4a33, type: 'rock' },
-  { name: 'ilhote Guarau A',         x: -1200, z: 720,  r: 16, h: 6,   c: 0x2d4a33, type: 'rock' },
-  { name: 'ilhote Guarau B',         x: -1150, z: 760,  r: 13, h: 5,   c: 0x2d4a33, type: 'rock' },
-  { name: 'Refúgio',                 x: -1400, z: 850,  r: 40, h: 15,  c: 0x2d4a33, type: 'forest' }
+  { name: 'ilhote Guarau A',         x: -1050, z: 850,  r: 28, h: 12,  c: 0x2d4a33, type: 'forest' },
+  { name: 'ilhote Guarau B',         x: -980,  z: 880,  r: 22, h: 9,   c: 0x2d4a33, type: 'forest' },
+  { name: 'Refúgio',                 x: -1400, z: 850,  r: 45, h: 16,  c: 0x2d4a33, type: 'forest' }
 ];
 
 export const TRENCHES = [
   { name: 'Fossa da Serpente',  x: -920,  z: 520,  r: 90,  depth: 60 },
-  { name: 'Abismo de Queimada', x:  180,  z: 1050, r: 110, depth: 70 },
+  { name: 'Abismo de Queimada', x:  -50,  z: 1550, r: 120, depth: 75 },
   { name: 'Vale do Alcatrazes', x: 2500,  z: 550,  r: 130, depth: 75 },
   { name: 'Poço de Santos',     x: 1950,  z: -350, r: 85,  depth: 55 },
-  { name: 'Fenda do Costão',    x: -420,  z: 820,  r: 70,  depth: 50 }
+  { name: 'Fenda do Costão',    x: -550,  z: 1000, r: 80,  depth: 55 }
 ];
 
 export const LANDMARKS = {
   morroItatins: [-1130, 326], pedraSerpente: [-1106, 381], praiaCostao: [-971, 390],
   portinho: [-870, 350], passarelaItanhaem: [67, -34], ponteMadeira: [-1320, 495],
-  rotatoriaMangue: [-1590, 560], lagoasReserva: [-419, 53], serraItatis: [-840, 330]
+  rotatoriaMangue: [-1150, 680], lagoasReserva: [-419, 53], serraItatis: [-840, 330]
 };
 export const GATES = [
   { name: 'ponte de madeira', x: -1320, z: 495, r: 6, open: (cb, spec) => spec.airDraft <= 2.2 }
@@ -111,7 +112,7 @@ const ZONES = [
   { id: 'protecao', name: 'Proteção Ambiental (Una)',        pvp: 'limited', fishing: 'illegal', x: -1600, z: 830,  r: 260 },
   { id: 'protecao', name: 'Proteção Ambiental (Alcatrazes)', pvp: 'limited', fishing: 'illegal', x: 2800,  z: 400,  r: 250 },
   { id: 'mystic',   name: 'Zona da Pedra',                   pvp: 'strange', fishing: 'legal',   x: -1106, z: 381,  r: 150 },
-  { id: 'mystic',   name: 'Águas do Costão',                 pvp: 'strange', fishing: 'legal',   x: -600,  z: 650,  r: 150 },
+  { id: 'mystic',   name: 'Águas do Costão',                 pvp: 'strange', fishing: 'legal',   x: -650,  z: 850,  r: 180 },
   { id: 'marinha',  name: 'Baía da Marinha',                 pvp: 'limited', fishing: 'none',    x: 1650,  z: -600, r: 170 },
   { id: 'reserva',  name: 'Reserva Tekoa Kwaray',            pvp: 'safe',    fishing: 'none',    x: -419,  z: 53,   r: 120 },
   { id: 'pesca',    name: 'Pesca Livre',                     pvp: 'limited', fishing: 'legal',   x: -100,  z: 300,  r: 300 }
@@ -119,17 +120,17 @@ const ZONES = [
 export const OPEN_REGION = { id: 'aberto', name: 'Mar Aberto', mood: 'aberto', swell: 1.15, chop: 1.1, tint: [0.85, 1.0, 1.15] };
 const REGIONS = [
   { id: 'barrauna',   name: 'Barra do Una',            mood: 'selva',   x: -1600, z: 650, r: 260, swell: 0.80, chop: 0.80, tint: [0.55, 0.95, 0.75] },
-  { id: 'guarau',     name: 'Guarau',                  mood: 'selva',   x: -1304, z: 527, r: 160, swell: 0.85, chop: 0.85, tint: [0.55, 0.95, 0.75] },
+  { id: 'guarau',     name: 'Guarau',                  mood: 'selva',   x: -1100, z: 750, r: 180, swell: 0.85, chop: 0.85, tint: [0.55, 0.95, 0.75] },
   { id: 'reserva',    name: 'Lagoas da Reserva',       mood: 'selva',   x: -419,  z: 53,  r: 140, swell: 0.90, chop: 0.90, tint: [0.60, 0.95, 0.80] },
   { id: 'peruibe',    name: 'Peruíbe',                 mood: 'caicara', x: -860,  z: 344, r: 200, swell: 1.00, chop: 1.00, tint: [1, 1, 1] },
   { id: 'pedra',      name: 'Pedra da Serpente',       mood: 'mistico', x: -1106, z: 381, r: 150, swell: 1.05, chop: 1.10, tint: [0.80, 0.90, 1.00] },
-  { id: 'costao',     name: 'Ilha do Costão',          mood: 'mistico', x: -600,  z: 650, r: 150, swell: 1.10, chop: 1.10, tint: [0.70, 0.85, 0.95] },
+  { id: 'costao',     name: 'Ilha do Costão',          mood: 'mistico', x: -650,  z: 850, r: 180, swell: 1.10, chop: 1.10, tint: [0.70, 0.85, 0.95] },
   { id: 'itanhaem',   name: 'Itanhaém',                mood: 'caicara', x: 65,    z: -39, r: 300, swell: 1.00, chop: 1.00, tint: [1, 1, 1] },
   { id: 'mongagua',   name: 'Mongaguá',                mood: 'caicara', x: 620,   z: -269, r: 170, swell: 0.95, chop: 0.95, tint: [1, 1, 1] },
   { id: 'praiag',     name: 'Praia Grande',            mood: 'urbano',  x: 1175,  z: -499, r: 310, swell: 1.00, chop: 1.00, tint: [0.9, 0.95, 0.95] },
   { id: 'santos',     name: 'Baía de Santos',          mood: 'urbano',  x: 1619,  z: -683, r: 200, swell: 0.70, chop: 0.70, tint: [0.75, 0.85, 0.85] },
   { id: 'guaruja',    name: 'Guarujá',                 mood: 'urbano',  x: 1841,  z: -775, r: 170, swell: 0.80, chop: 0.85, tint: [0.8, 0.9, 0.9] },
-  { id: 'queimada',   name: 'Ilha da Queimada Grande', mood: 'perigo',  x: -100,  z: 900, r: 300, swell: 1.35, chop: 1.25, tint: [0.40, 0.50, 0.60] },
+  { id: 'queimada',   name: 'Ilha da Queimada Grande', mood: 'perigo',  x: -150,  z: 1400, r: 350, swell: 1.35, chop: 1.25, tint: [0.40, 0.50, 0.60] },
   { id: 'lajeconc',   name: 'Laje da Conceição',       mood: 'perigo',  x: 400,   z: 500, r: 140, swell: 1.15, chop: 1.15, tint: [0.60, 0.80, 0.90] },
   { id: 'lajesantos', name: 'Laje de Santos',          mood: 'aberto',  x: 2100,  z: -150, r: 160, swell: 1.20, chop: 1.10, tint: [0.80, 1.00, 1.20] },
   { id: 'alcatrazes', name: 'Alcatrazes',              mood: 'mistico', x: 2800,  z: 400, r: 250, swell: 1.25, chop: 1.20, tint: [0.50, 0.70, 0.90] }
@@ -250,17 +251,17 @@ function depthAtRaw(x, z) {
     }
   }
 
-  // ─── 🏝️ MINI-CONTINENTES (ILHAS) ───
-  // O terreno sobe agressivamente do fundo do mar para criar uma base de terra firme/praia ao redor das ilhas
   for (const il of ISLANDS) {
     const dd = Math.hypot(x - il.x, z - il.z);
-    if (dd < il.r * 5.0) {
-      const baseH = il.h + 18;
-      d -= baseH * Math.exp(-(dd * dd) / (4.5 * il.r * il.r));
-      
-      if (dd < il.r * 1.3) {
-        d = Math.min(d, -1.5);
-      }
+    const outerR = il.r * 4.0;
+    if (dd < outerR) {
+      const domeT = 1 - sstep(0, outerR, dd);
+      const seed = il.x * 0.017 + il.z * 0.013;
+      const bump = (Math.sin(x * 0.05 + seed) * Math.cos(z * 0.045 + seed * 1.6)
+                 + 0.5 * Math.sin(x * 0.11 - seed * 2.1) * Math.sin(z * 0.10 + seed * 0.8)) * il.h * 0.14;
+      const baseOffset = il.h < 10 ? 2 : il.h * 0.3 + 2;
+      const targetLand = -(il.h + baseOffset) + bump;
+      d = d * (1 - domeT) + targetLand * domeT;
     }
   }
 
@@ -297,7 +298,7 @@ export function depthAt(x, z) {
 
 export function groundHeightAt(x, z) {
   const d = depthAt(x, z);
-  return d > 0 ? -Math.min(d, 225) : Math.min(EDGE_HEIGHT, -d);
+  return d > 0 ? -Math.min(d, 225) : -d;
 }
 
 (function bake() {
@@ -425,7 +426,7 @@ function buildMountainLayer(dist, n, rMin, rMax, hMin, hMax, sMin, sMax) {
   let cx = 0, cz = 0, count = 0;
   group.children.forEach(m => { cx += m.position.x; cz += m.position.z; count++; });
   if (count > 0) { cx /= count; cz /= count; }
-  registerCullGroup(group, cx, cz, 1200, 1800);
+  registerCullGroup(group, cx, cz, 1800, 1800);
 }
 function buildMountains() {
   buildMountainLayer(700, 20, 60, 110, 45, 90, 1.6, 2.6);
@@ -436,39 +437,6 @@ export function updateWorldFX() {
   for (const m of worldFX.cityMats) m.emissiveIntensity = nf * 1.2;
   for (const r of worldFX.round) r.mat.emissiveIntensity = nf * r.k;
 }
-
-function islandGeo(r, h, seed, rocky, segs = 16) {
-  const g = new THREE.SphereGeometry(r, segs, 10, 0, Math.PI * 2, 0, Math.PI / 2);
-  const p = g.attributes.position;
-  const colors = new Float32Array(p.count * 3);
-  const rockBias = rocky ? 0.34 : 0.14;
-  for (let i = 0; i < p.count; i++) {
-    const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
-    const n = Math.sin(x * 0.05 + seed) * Math.cos(z * 0.06 + seed * 1.9)
-      + 0.5 * Math.sin(x * 0.11 + seed * 2.4) * Math.sin(z * 0.13 + seed * 0.6)
-      + rockBias * Math.sin(x * 0.24 + seed * 3.3) * Math.cos(z * 0.21 + seed * 1.1);
-    const lift = y / r;
-    p.setX(i, x * (1 + n * 0.17 * lift));
-    p.setZ(i, z * (1 + n * 0.17 * lift));
-    p.setY(i, y * (1 + n * (rocky ? 0.32 : 0.20) * lift));
-    const hn = THREE.MathUtils.clamp(p.getY(i) / r + n * 0.15, 0, 1);
-    if (hn < 0.11) _hc.copy(C_SAND);
-    else if (hn < 0.55) _hc.copy(C_SAND).lerp(rocky ? C_ROCHA : C_VEGET, (hn - 0.11) / 0.44);
-    else _hc.copy(rocky ? C_ROCHA : C_VEGET).lerp(C_ROCHA, (hn - 0.55) / 0.45);
-    _hc.multiplyScalar(0.88 + 0.22 * Math.abs(Math.sin(seed * 6.1 + i * 0.157)));
-    colors[i * 3] = _hc.r; colors[i * 3 + 1] = _hc.g; colors[i * 3 + 2] = _hc.b;
-  }
-  g.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  g.scale(1, h / r, 1);
-  g.computeVertexNormals();
-  return g;
-}
-function islandSurfaceY(dist, r, h) {
-  const t = Math.min(1, dist / r);
-  return h * Math.sqrt(Math.max(0, 1 - t * t)) * 0.88;
-}
-const islandMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0 });
-worldFX.mountainMats.push(islandMat);
 
 function makeIslandTree(height, palm) {
   const g = new THREE.Group();
@@ -507,53 +475,99 @@ function makeIslandTree(height, palm) {
 }
 
 function buildIsland(il) {
-  const group = new THREE.Group();
   const rocky = il.type === 'rock';
   const rockMat = new THREE.MeshStandardMaterial({ color: 0x3a3f44, roughness: 1, flatShading: true });
-  const seed = (il.x * 0.013 + il.z * 0.021) % 100;
-  const body = new THREE.Mesh(islandGeo(il.r, il.h, seed, rocky, 14), islandMat);
-  body.position.y = -0.4;
-  group.add(body);
-  if (il.r > 18 && Math.random() < 0.6) {
-    const a2 = Math.random() * Math.PI * 2;
-    const d2 = il.r * (0.35 + Math.random() * 0.25);
-    const r2 = il.r * (0.35 + Math.random() * 0.25);
-    const h2 = il.h * (0.45 + Math.random() * 0.3);
-    const sat = new THREE.Mesh(islandGeo(r2, h2, seed * 1.7 + 3, rocky, 12), islandMat);
-    sat.position.set(Math.cos(a2) * d2, -0.4, Math.sin(a2) * d2);
-    group.add(sat);
-  }
-  const rockCount = (rocky ? 3 : 1) + Math.floor(il.r * 0.45);
+
+  const rockCount = (rocky ? 5 : 2) + Math.floor(il.r * 0.3);
   for (let i = 0; i < rockCount; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const dist = il.r * (0.7 + Math.random() * 0.45);
-    const rockSize = 1.0 + Math.random() * (rocky ? 3.2 : 2.2);
+    const dist = il.r * (0.1 + Math.random() * 0.8);
+    const px = il.x + Math.cos(angle) * dist;
+    const pz = il.z + Math.sin(angle) * dist;
+    const y = groundHeightAt(px, pz);
+    if (y < 0.3) continue;
+    const rockSize = 1.0 + Math.random() * (rocky ? 3.0 : 2.0);
     const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(rockSize, 0), rockMat);
-    const surfY = islandSurfaceY(Math.min(dist, il.r * 0.98), il.r, il.h);
-    rock.position.set(
-      Math.cos(angle) * dist,
-      surfY * 0.4 + rockSize * 0.15,
-      Math.sin(angle) * dist
-    );
+    rock.position.set(px, y - rockSize * 0.15, pz);
     rock.rotation.set(Math.random(), Math.random(), Math.random());
-    group.add(rock);
+    state.scene.add(rock);
   }
+
   if (il.type === 'forest') {
-    const treeCount = Math.max(4, Math.floor(il.r / 2.4));
+    const treeCount = Math.max(4, Math.floor(il.r / 2.6));
     for (let i = 0; i < treeCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const dist = il.r * (0.12 + Math.random() * 0.42);
-      const treeHeight = 2.8 + Math.random() * 3.4;
-      const surfY = islandSurfaceY(dist, il.r, il.h) * 0.6;
-      const palm = Math.random() < 0.5;
+      const dist = il.r * (0.05 + Math.random() * 0.75);
+      const px = il.x + Math.cos(angle) * dist;
+      const pz = il.z + Math.sin(angle) * dist;
+      const y = groundHeightAt(px, pz);
+      if (y < 0.5) continue;
+      const treeHeight = 2.6 + Math.random() * 3.4;
+      const palm = Math.random() < 0.4;
       const tree = makeIslandTree(treeHeight, palm);
-      tree.position.set(Math.cos(angle) * dist, surfY + 0.1, Math.sin(angle) * dist);
+      tree.position.set(px, y, pz);
       tree.rotation.y = Math.random() * Math.PI * 2;
-      group.add(tree);
+      state.scene.add(tree);
     }
   }
-  group.position.set(il.x, 0, il.z);
-  state.scene.add(group);
+}
+
+function buildSeaweed() {
+  const spots = [
+    { x: -870, z: 322, r: 38 },
+    { x: -650, z: 890, r: 38 },
+    { x: 65,   z: -80, r: 46 },
+    { x: 620,  z: -310, r: 42 },
+    { x: 1175, z: -540, r: 46 },
+    { x: 1619, z: -720, r: 40 }
+  ];
+  const perSpot = 7;
+  const total = spots.length * perSpot;
+  const geo = new THREE.ConeGeometry(0.14, 1, 4, 1, true);
+  geo.translate(0, 0.5, 0);
+  const mat = new THREE.MeshStandardMaterial({ color: 0x2f6b3a, roughness: 1, side: THREE.DoubleSide });
+  const inst = new THREE.InstancedMesh(geo, mat, total);
+  const dummy = new THREE.Object3D();
+  let idx = 0;
+  for (const sp of spots) {
+    for (let i = 0; i < perSpot; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const dist = Math.random() * sp.r;
+      const px = sp.x + Math.cos(a) * dist;
+      const pz = sp.z + Math.sin(a) * dist;
+      const h = 0.6 + Math.random() * 1.0;
+      const y = groundHeightAt(px, pz);
+      dummy.position.set(px, y, pz);
+      dummy.scale.set(1, h, 1);
+      dummy.rotation.y = Math.random() * Math.PI * 2;
+      dummy.updateMatrix();
+      inst.setMatrixAt(idx++, dummy.matrix);
+    }
+  }
+  inst.instanceMatrix.needsUpdate = true;
+  state.scene.add(inst);
+}
+
+function buildBeachPalms() {
+  const clusters = [
+    { cx: 1619, cz: -683, count: 5, spread: 90 },
+    { cx: 1175, cz: -499, count: 5, spread: 100 },
+    { cx: -860, cz: 344,  count: 2, spread: 36 }
+  ];
+  for (const cl of clusters) {
+    for (let i = 0; i < cl.count; i++) {
+      const t = (i - (cl.count - 1) / 2) * (cl.spread / cl.count) + (Math.random() - 0.5) * 8;
+      const land = 10 + Math.random() * 12;
+      const px = cl.cx - SD.x * land + CC.x * t;
+      const pz = cl.cz - SD.z * land + CC.z * t;
+      const y = groundHeightAt(px, pz);
+      const h = 3.5 + Math.random() * 2.2;
+      const palm = makeIslandTree(h, true);
+      palm.position.set(px, y, pz);
+      palm.rotation.y = Math.random() * Math.PI * 2;
+      state.scene.add(palm);
+    }
+  }
 }
 
 function buildPortoAreia() {
@@ -665,7 +679,7 @@ function loadCitiesLazy() {
 }
 
 export function initWorldMap() {
-  const geo = new THREE.PlaneGeometry(WORLD.sizeX, WORLD.sizeZ, 155, 170);
+  const geo = new THREE.PlaneGeometry(WORLD.sizeX, WORLD.sizeZ, 190, 180);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;
   const cols = new Float32Array(pos.count * 3);
@@ -675,16 +689,22 @@ export function initWorldMap() {
   const abyss = new THREE.Color(0.02, 0.03, 0.06);
   const land = new THREE.Color(0.62, 0.55, 0.38);
   const beachSand = new THREE.Color(0.88, 0.80, 0.58);
+  const vegHigh = new THREE.Color(0.32, 0.50, 0.27);
+  const rockHigh = new THREE.Color(0.40, 0.38, 0.35);
   const c = new THREE.Color();
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), z = pos.getZ(i), d = depthAt(x, z);
-    pos.setY(i, d > 0 ? -Math.min(d, 225) : Math.min(EDGE_HEIGHT, -d));
+    pos.setY(i, d > 0 ? -Math.min(d, 225) : -d);
 
     if (d < -0.3) {
       c.copy(beachSand);
       if (d < -2.5) {
-        const vegMix = Math.min(1, (-d - 2.5) / 2.5);
-        c.lerp(new THREE.Color(0.35, 0.52, 0.28), vegMix * 0.4);
+        const vegMix = Math.min(1, (-d - 2.5) / 7);
+        c.lerp(vegHigh, vegMix);
+      }
+      if (d < -14) {
+        const rockMix = Math.min(1, (-d - 14) / 28);
+        c.lerp(rockHigh, rockMix);
       }
     } else if (d < 0) {
       c.copy(land).lerp(sand, 0.5);
@@ -712,8 +732,6 @@ export function initWorldMap() {
   const morroMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 });
   const morro = new THREE.Mesh(hillGeo(160, 120, 42.7, 18), morroMat);
   
-  // Desloca APENAS o morro grande para trás (interior). 
-  // As pedras menores ao redor permanecem na posição original do marco.
   const offsetX = -250;
   const offsetZ = -150;
   
@@ -727,7 +745,6 @@ export function initWorldMap() {
     const a = (i / 4) * Math.PI * 2 + 0.3;
     const d = 90 + Math.random() * 40;
     const sub = new THREE.Mesh(hillGeo(50 + Math.random() * 30, 40 + Math.random() * 30, i * 9.1, 14), morroMat);
-    // Pedras menores usam a posição original, sem o offset
     sub.position.set(LANDMARKS.morroItatins[0] + Math.cos(a) * d, -2, LANDMARKS.morroItatins[1] + Math.sin(a) * d);
     state.scene.add(sub);
   }
@@ -790,6 +807,8 @@ export function initWorldMap() {
   }
 
   buildPortoAreia();
+  buildSeaweed();
+  buildBeachPalms();
   loadCitiesLazy();
 
   state.boatRoot.position.set(SPAWN.x, 0, SPAWN.z);

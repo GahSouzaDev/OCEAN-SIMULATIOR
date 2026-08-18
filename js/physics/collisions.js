@@ -1,40 +1,60 @@
-// js/physics/collisions.js — AREIA FÍSICA: encalha só quando o casco toca
 import * as THREE from 'three';
 import { state } from '../state.js';
 import { groundHeightAt, COLLIDERS, GATES, BOAT_PHYS, updateTide, tideM } from '../world/world-map.js';
 import { applyDamage } from '../game/damage.js';
 import { curBoat, currentBoatName } from '../boats/boat-manager.js';
-let grounded = false, lastHit = 0;
+
+let lastHit = 0;
+
 export function updateCollisions(dt) {
   updateTide(dt);
   const cb = curBoat();
   if (!cb || !state.boatRoot) return;
   const spec = BOAT_PHYS[cb.name] || BOAT_PHYS.pilot;
   const bx = state.boatRoot.position.x, bz = state.boatRoot.position.z;
-  // ---------- ENCALHE POR CONTATO REAL ----------
-  const ground = groundHeightAt(bx, bz) + tideM() * 0.5;
-  const keel = state.physics.y - spec.draft;
-  if (keel < ground) {
-    const pen = ground - keel;
-    if (!grounded && Math.abs(state.speed) > 1.5 && state.simTime - lastHit > 1) {
+  
+  const groundY = groundHeightAt(bx, bz) + tideM() * 0.5;
+  const keelY = state.physics.y - spec.draft;
+  
+  const e = 2.0;
+  const gx = (groundHeightAt(bx + e, bz) - groundHeightAt(bx - e, bz)) / (2 * e);
+  const gz = (groundHeightAt(bx, bz + e) - groundHeightAt(bx, bz - e)) / (2 * e);
+  
+  state.groundSlopeX = gx;
+  state.groundSlopeZ = gz;
+
+  if (keelY < groundY) {
+    const pen = groundY - keelY;
+    if (!state.grounded && Math.abs(state.speed) > 1.5 && state.simTime - lastHit > 1) {
       lastHit = state.simTime;
       applyDamage(currentBoatName(), Math.abs(state.speed) * 2);
     }
-    grounded = true;
-    state.physics.y += pen;                 // apoia na areia
+    state.grounded = true;
+    
+    state.physics.y += pen;
     if (state.physics.vy < 0) state.physics.vy = 0;
-    if (state.speed >= 0) state.speed *= Math.exp(-dt * 3.5);   // areia segura a proa
-    else state.speed *= Math.exp(-dt * 0.6);                    // ré livre pra escapar
-    state.sideSpeed *= Math.exp(-dt * 3);
-    // desliza pro mar (descida do terreno)
-    const e = 2.0;
-    const gx = (groundHeightAt(bx + e, bz) - groundHeightAt(bx - e, bz)) / (2 * e);
-    const gz = (groundHeightAt(bx, bz + e) - groundHeightAt(bx, bz - e)) / (2 * e);
-    const gl = Math.hypot(gx, gz) || 1;
-    state.boatRoot.position.x += (-gx / gl) * dt * 1.2;
-    state.boatRoot.position.z += (-gz / gl) * dt * 1.2;
-  } else grounded = false;
-  // ---------- ILHAS / LAJES / PILARES (mola suave) ----------
+    
+    const speedMag = Math.hypot(state.speed, state.sideSpeed);
+    // Areia: resistência alta quando parado, mas permite deslizar se vier rápido
+    const sandDrag = 1.2 + 3.0 / (1.0 + speedMag * 0.3); 
+    
+    state.speed *= Math.exp(-dt * sandDrag);
+    state.sideSpeed *= Math.exp(-dt * sandDrag);
+    
+    // Escorregar pela descida do terreno (gravidade na areia)
+    const slideForceX = -gx * 9.81;
+    const slideForceZ = -gz * 9.81;
+    
+    const fwdX = Math.sin(state.heading), fwdZ = Math.cos(state.heading);
+    const rightX = Math.cos(state.heading), rightZ = -Math.sin(state.heading);
+    
+    state.speed += (slideForceX * fwdX + slideForceZ * fwdZ) * dt;
+    state.sideSpeed += (slideForceX * rightX + slideForceZ * rightZ) * dt;
+    
+  } else {
+    state.grounded = false;
+  }
+
   const fwdX = Math.sin(state.heading), fwdZ = Math.cos(state.heading);
   const rightX = Math.cos(state.heading), rightZ = -Math.sin(state.heading);
   for (const c of COLLIDERS) {
@@ -57,7 +77,7 @@ export function updateCollisions(dt) {
       }
     }
   }
-  // ---------- PORTÕES (ponte de madeira) ----------
+
   for (const gt of GATES) {
     const dx = bx - gt.x, dz = bz - gt.z, d = Math.hypot(dx, dz);
     if (d < gt.r && !gt.open(cb, spec, tideM())) {

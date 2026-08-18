@@ -8,20 +8,24 @@ export function buildTrawler() {
   let g;
 
   // ============================================================
-  //  CASCO
+  //  CASCO (CALADO AUMENTADO)
   // ============================================================
-  g = new THREE.ExtrudeGeometry(hullShape(0.99), { depth: 0.55, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06, bevelSegments: 2, curveSegments: 14 });
-  g.rotateX(Math.PI / 2); add(g, MATS.mHull, 0, 0.16, 0);
-  g = new THREE.ExtrudeGeometry(hullShape(1.015), { depth: 0.34, bevelEnabled: false, curveSegments: 14 });
-  g.rotateX(Math.PI / 2); add(g, MATS.mHull2, jit(0.02), 0.24, jit(0.05), 0, jit(0.004));
+  
+  // 1. Casco Principal: Aumentado de depth 0.55 para 0.90 e baixado no eixo Y
+  // Isso estende o fundo do barco bem mais para baixo sem alterar o topo
+  g = new THREE.ExtrudeGeometry(hullShape(0.99), { depth: 0.90, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06, bevelSegments: 2, curveSegments: 14 });
+  g.rotateX(Math.PI / 2); add(g, MATS.mHull, 0, -0.10, 0);
 
-  // 📉 FAIXA SUPERIOR DO CASCO REBAIXADA (antes: depth 0.40 em DECK_Y+0.02)
-  // Agora conecta de verdade com o casco de baixo, sem vão
+  // 2. Casco Intermediário (Faixa de transição): Ajustado para preencher o vão entre o casco profundo e a borda superior
+  g = new THREE.ExtrudeGeometry(hullShape(1.015), { depth: 0.45, bevelEnabled: false, curveSegments: 14 });
+  g.rotateX(Math.PI / 2); add(g, MATS.mHull2, jit(0.02), 0.15, jit(0.05), 0, jit(0.004));
+
+  // 3. Faixa Superior do Casco: MANTIDA INTACTA para conectar perfeitamente com o convés (DECK_Y)
   g = new THREE.ExtrudeGeometry(hullShape(1.03), { depth: 0.34, bevelEnabled: false, curveSegments: 14 });
   g.rotateX(Math.PI / 2); add(g, MATS.mHull, 0, DECK_Y - 0.06, 0, 0, jit(0.004));
 
   // ============================================================
-  //  ESTRUTURA ORIGINAL (mantida intacta)
+  //  ESTRUTURA ORIGINAL (MANTIDA INTACTA)
   // ============================================================
   box(0.16, 0.22, 7.4, MATS.mDark, 0, -0.42, -0.1);
   box(0.08, 0.7, 0.5, MATS.mDark, 0, -0.30, -4.05);
@@ -37,10 +41,7 @@ export function buildTrawler() {
 
   box(1.5, 0.16, 1.5, MATS.mWood, 0, DECK_Y + 0.10, 3.1, 0.10);
 
-  // 📉 BULWARK (muralha lateral) REBAIXADA - fecha o vão com o casco
-  // Antes: altura 0.55 em DECK_Y (topo ~1.15) | Agora: altura 0.42 em DECK_Y-0.08 (topo ~0.94)
   g = ringGeo(1.05, 0.97, 0.42); applySheer(g, 0.42); add(g, MATS.mCream, 0, DECK_Y - 0.08, 0);
-  // Capa superior da borda (acompanha o rebaixamento)
   g = ringGeo(1.07, 0.96, 0.08); applySheer(g, 0.08); add(g, MATS.mDark, 0, DECK_Y + 0.34, 0);
 
   box(0.14, 1.35, 0.34, MATS.mDark, 0, 1.45, 4.32, -0.16);
@@ -77,13 +78,12 @@ export function buildTrawler() {
 
   function sideX(z) { return 1.30 - Math.max(0, z - 1.0) * 0.14 - Math.max(0, -z - 2.0) * 0.05; }
 
-  // 📉 GUARDA-CORPO REBAIXADO - agora nasce em cima da nova borda (sem vão)
   for (const s of [-1, 1]) {
     let prev = null;
     for (let i = 0; i < 6; i++) {
       const z = -3.2 + i * 1.25 + jit(0.15);
       const x = s * sideX(z) * 0.985;
-      const yb = DECK_Y + 0.34 + sheer(z);   // antes: DECK_Y + 0.55 + sheer(z)
+      const yb = DECK_Y + 0.34 + sheer(z);
       cyl(0.025, 0.025, 0.42, MATS.mDark, x, yb + 0.21, z, 6, 0, jit(0.05));
       const top = new THREE.Vector3(x, yb + 0.42, z);
       if (prev) rope(prev, top, MATS.mRope, 0.02);
@@ -114,7 +114,6 @@ export function buildTrawler() {
   cyl(0.012, 0.012, 0.16, MATS.mMetal, 0.86, DECK_Y + 0.62, 0.35, 5, Math.PI / 2);
   add(new THREE.TorusGeometry(0.05, 0.014, 5, 8), MATS.mMetal, 0.88, DECK_Y + 0.55, 0.35);
 
-  // Boias (cordas ajustadas para a nova altura da borda)
   function buoy(x, z, mat) {
     const y = DECK_Y + 0.32 + jit(0.05);
     add(new THREE.SphereGeometry(0.15, 8, 6), mat, x, y, z);
@@ -141,19 +140,27 @@ export function buildTrawler() {
   const navStern = new THREE.PointLight(0xfff2cc, 0, 4, 2);
   navStern.position.set(0, DECK_Y + 0.52, -3.9); T.add(navStern);
 
-  const keel = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.8, 6.5), MATS.mKeel);
-  keel.position.set(0, -0.6, -0.3); T.add(keel);
-  const motorBlock = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.5, 0.8), MATS.mDark);
-  motorBlock.position.set(0, -0.3, -3.8); T.add(motorBlock);
+  // ============================================================
+  //  QUIILHA, MOTOR E HÉLICE (REBAIXADOS PARA ACOMPANHAR O NOVO CALADO)
+  // ============================================================
+  
+  // Quilha mais profunda e longa (altura aumentada de 0.8 para 1.2, Y baixado de -0.6 para -0.9)
+  const keel = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.2, 6.5), MATS.mKeel);
+  keel.position.set(0, -0.9, -0.3); T.add(keel);
+  
+  // Bloco do motor rebaixado para ficar dentro do casco estendido
+  const motorBlock = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.8), MATS.mDark);
+  motorBlock.position.set(0, -0.6, -3.8); T.add(motorBlock);
+  
+  // Hélice rebaixada para acompanhar o fundo do novo casco
   const propTrawler = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.06, 12), MATS.mMetal);
-  propTrawler.position.set(0, -0.7, -4.2);
+  propTrawler.position.set(0, -1.1, -4.2);
   propTrawler.rotation.z = Math.PI / 2; T.add(propTrawler);
 
   // ============================================================
-  //  NOVOS DETALHES (REBAIXADOS + AMPLIADOS)
+  //  DETALHES (REBAIXADOS + AMPLIADOS)
   // ============================================================
 
-  // ---- MADEIRA LATERAL (colada no casco de baixo, não mexe) ----
   for (let z = -3.75; z < 3.75; z += 0.5) {
     const zz = z + jit(0.05);
     const x = sideX(zz) * 0.985;
@@ -167,8 +174,6 @@ export function buildTrawler() {
     box(0.05, 0.12, 0.30, MATS.mWood, -x, DECK_Y - 0.04, zz, 0, -0.05, jit(0.03));
   }
 
-  // 🆕 TRILHO DE PROTEÇÃO LATERAL (rub rail) - dá continuidade
-  // visual entre o casco de baixo e a borda, matando a sensação de vão
   for (let z = -3.75; z < 3.75; z += 0.5) {
     const zz = z + jit(0.05);
     const x = sideX(zz) * 1.0;
@@ -176,10 +181,9 @@ export function buildTrawler() {
     box(0.03, 0.05, 0.45, MATS.mDark, -x, DECK_Y + 0.16, zz, 0, 0, jit(0.02));
   }
 
-  // 🆕 FAIXA DE LINHA D'ÁGUA (boot top vermelho) - clássico de pesqueiro
-  g = ringGeo(1.02, 0.99, 0.12); add(g, MATS.mRed, 0, 0.16, 0);
+  // Faixa de linha d'água levemente rebaixada para refletir o calado maior
+  g = ringGeo(1.02, 0.99, 0.12); add(g, MATS.mRed, 0, 0.05, 0);
 
-  // ---- JANELAS E PORTAS ----
   for (let s of [-1, 1]) {
     for (let z of [-0.2, 0.6, 1.4]) {
       box(0.04, 0.32, 0.40, MATS.mGlass, s * 0.84, DECK_Y + 0.58, z + 0.8);
@@ -188,7 +192,6 @@ export function buildTrawler() {
   }
   box(0.04, 0.55, 0.30, MATS.mWood, 0, DECK_Y + 0.40, 1.75);
 
-  // ---- TORRE DE COMANDO ----
   for (let s of [-1, 1]) {
     for (let t of [-1, 1]) {
       cyl(0.03, 0.03, 0.70, MATS.mDark, s * 0.65, DECK_Y + 1.20, t * 0.65 + 0.8, 6);
@@ -203,7 +206,6 @@ export function buildTrawler() {
     }
   }
 
-  // ---- CHAMINÉ E FUMAÇA ----
   cyl(0.12, 0.10, 0.90, MATS.mMetal, 0, DECK_Y + 1.80, 0.3, 12, 0.02);
   cyl(0.14, 0.12, 0.04, MATS.mDark, 0, DECK_Y + 2.25, 0.3, 12);
   const smokePuffs = [
@@ -217,19 +219,16 @@ export function buildTrawler() {
     add(new THREE.SphereGeometry(p.r, 8, 8), smokeMat, p.x, DECK_Y + p.y, p.z);
   }
 
-  // ---- MASTROS E ANTENAS ----
   cyl(0.04, 0.04, 3.20, MATS.mDark, 0, DECK_Y + 1.60, 2.0, 6, 0.04);
   cyl(0.03, 0.03, 2.00, MATS.mDark, 0, DECK_Y + 1.00, -2.5, 6, 0.02);
   cyl(0.01, 0.01, 1.00, MATS.mMetal, 0.50, DECK_Y + 2.10, 1.8, 4);
   const flagMat = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide });
   add(new THREE.PlaneGeometry(0.25, 0.15), flagMat, 0.52, DECK_Y + 2.50, 1.8).rotation.y = -0.3;
 
-  // ---- HOLOFOTES ----
   const spotMat = new THREE.MeshBasicMaterial({ color: 0xffffaa });
   add(new THREE.CylinderGeometry(0.06, 0.10, 0.12, 8), spotMat, 0.70, DECK_Y + 1.60, 2.2, 0, 0.2);
   add(new THREE.CylinderGeometry(0.06, 0.10, 0.12, 8), spotMat, -0.70, DECK_Y + 1.60, 2.2, 0, -0.2);
 
-  // ---- ÂNCORA E CORRENTE ----
   add(new THREE.CylinderGeometry(0.02, 0.02, 0.35, 6), MATS.mMetal, 0.90, DECK_Y + 0.10, -1.0, 0.1);
   add(new THREE.BoxGeometry(0.08, 0.02, 0.25), MATS.mMetal, 0.90, DECK_Y + 0.10, -1.17);
   add(new THREE.BoxGeometry(0.02, 0.15, 0.02), MATS.mMetal, 0.90, DECK_Y + 0.28, -1.17);
@@ -239,7 +238,6 @@ export function buildTrawler() {
     add(new THREE.TorusGeometry(0.03, 0.012, 4, 8), MATS.mMetal, 0.90, y, -1.0, Math.PI/2, 0, 0.3);
   }
 
-  // ---- BOTE SALVA-VIDAS + LONA ----
   const lifeboatGroup = new THREE.Group();
   const boatMat = new THREE.MeshStandardMaterial({ color: 0xff6600, roughness: 0.7 });
   const hullBoat = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.25, 0.08, 8), boatMat);
@@ -266,28 +264,23 @@ export function buildTrawler() {
   lifeboatGroup.rotation.z = 0.1;
   T.add(lifeboatGroup);
 
-  // ---- MAIS BOIAS ----
   buoy(1.30, 1.8, MATS.mYel);
   buoy(-1.20, -3.0, MATS.mRed);
 
-  // ---- PNEUS DE PROTEÇÃO ----
   for (let s of [-1, 1]) {
     add(new THREE.TorusGeometry(0.12, 0.04, 6, 10), MATS.mDark, s * 1.10, DECK_Y + 0.05, -2.0, Math.PI/2);
     add(new THREE.TorusGeometry(0.12, 0.04, 6, 10), MATS.mDark, s * 1.10, DECK_Y + 0.05,  1.5, Math.PI/2);
   }
 
-  // 🆕 BARRIS E CAIXOTE NO CONVÉS (mais vida ao pesqueiro)
   cyl(0.16, 0.16, 0.45, MATS.mWood, -0.90, DECK_Y + 0.22, 2.20, 10);
   cyl(0.16, 0.16, 0.45, MATS.mWood, -0.62, DECK_Y + 0.22, 2.45, 10);
   box(0.40, 0.30, 0.40, MATS.mWood, 0.95, DECK_Y + 0.15, 1.90, 0, 0.3);
 
-  // ---- LUZ DE MASTRO ----
   add(new THREE.SphereGeometry(0.08, 10, 8), MATS.navWhtMat, 0, DECK_Y + 1.90, 2.0);
   const navMast = new THREE.PointLight(0xffffff, 0, 8, 2);
   navMast.position.set(0, DECK_Y + 1.92, 2.0);
   T.add(navMast);
 
-  // ---- MANCHAS DE FERRUGEM NO COSTADO ----
   const rustMat = new THREE.MeshStandardMaterial({
     color: 0x3a2a1c, transparent: true, opacity: 0.35, roughness: 1, metalness: 0
   });
@@ -309,29 +302,29 @@ export function buildTrawler() {
   T.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
 
   // ============================================================
-  //  RETORNO (EXATAMENTE IGUAL AO ORIGINAL)
+  //  RETORNO (FÍSICA AJUSTADA PARA CALADO MAIOR)
   // ============================================================
   return {
     name: 'trawler',
-    mass: 7500,
-    pitchMOI: 45000,
-    rollMOI: 12000,
-    yawMOI: 80000,
+    mass: 9500,          // Aumentado (era 7500) para refletir o casco maior e mais pesado
+    pitchMOI: 55000,     // Aumentado (era 45000) para maior estabilidade longitudinal
+    rollMOI: 15000,      // Aumentado (era 12000) para maior estabilidade lateral (quilha mais funda)
+    yawMOI: 95000,       // Aumentado (era 80000)
+    
+    minTurnRadius: 14,   // Levemente maior devido ao calado profundo
+    radiusGrowth: 2.2,
+    turnResponse: 2.3,   // Levemente menor, barco mais "pesado" para virar
+    waterDragRot: 0.30,
+    rudderSpeed: 1.1,
 
-    minTurnRadius: 12,
-    radiusGrowth: 2.0,
-    turnResponse: 2.5,
-    waterDragRot: 0.25,
-    rudderSpeed: 1.2,
+    throttleResponseSpeed: 0.55, // Um pouco mais lento para acelerar (mais massa)
+    throttleDecaySpeed: 0.85,
+    engineInertia: 4.0,
 
-    throttleResponseSpeed: 0.6,
-    throttleDecaySpeed: 0.9,
-    engineInertia: 3.5,
-
-    maxThrust: 12000,
-    dragLinear: 35,
-    dragQuad: 10,
-    frictionLat: 5.5,
+    maxThrust: 14000,    // Aumentado (era 12000) para compensar o maior arrasto da água
+    dragLinear: 50,      // Aumentado (era 35) - mais casco submerso = mais resistência
+    dragQuad: 12,        // Aumentado (era 10)
+    frictionLat: 8.5,    // Aumentado (era 5.5) - quilha mais funda agarra muito mais a água lateralmente
 
     group: T,
     deckLight,
@@ -342,7 +335,7 @@ export function buildTrawler() {
     navStern,
     deckPos: new THREE.Vector3(0, DECK_Y + 2.4, 1.55),
     propeller: propTrawler,
-    motorPos: new THREE.Vector3(0, -0.7, -4.2),
+    motorPos: new THREE.Vector3(0, -1.1, -4.2), // Atualizado para a nova posição da hélice
     maxSpeed: 15
   };
 }
